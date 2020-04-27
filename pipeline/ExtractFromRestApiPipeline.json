@@ -1,0 +1,1001 @@
+{
+	"name": "ExtractFromRestApiPipeline",
+	"properties": {
+		"activities": [
+			{
+				"name": "Copy pages with broken links to blob storage",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": true
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['title']"
+								},
+								"sink": {
+									"name": "title",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['url']"
+								},
+								"sink": {
+									"name": "url",
+									"type": "String"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "PagesWithBrokenLinksRestDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "PagesWithBrokenLinksCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy site pages to blob storage",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['title']"
+								},
+								"sink": {
+									"name": "title",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['url']"
+								},
+								"sink": {
+									"name": "url",
+									"type": "String"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "PagesRestDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "PagesCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy SEO pages to blob storage",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['title']"
+								},
+								"sink": {
+									"name": "title",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['url']"
+								},
+								"sink": {
+									"name": "url",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['checking_now']"
+								},
+								"sink": {
+									"name": "checking_now",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"path": "['cms_url']"
+								},
+								"sink": {
+									"name": "cms_url",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['issues']"
+								},
+								"sink": {
+									"name": "issues",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['page_level']"
+								},
+								"sink": {
+									"name": "page_level",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['page_views']"
+								},
+								"sink": {
+									"name": "page_views",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['searchable']"
+								},
+								"sink": {
+									"name": "searchable",
+									"type": "Boolean"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SeoPagesRestDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "SeoPagesCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy quality assurance summary to blob storage",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['broken_links']"
+								},
+								"sink": {
+									"name": "broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['broken_links_delta']"
+								},
+								"sink": {
+									"name": "broken_links_delta",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['clicks_on_broken_links']"
+								},
+								"sink": {
+									"name": "clicks_on_broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['misspellings']"
+								},
+								"sink": {
+									"name": "misspellings",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['misspellings_delta']"
+								},
+								"sink": {
+									"name": "misspellings_delta",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['pages']"
+								},
+								"sink": {
+									"name": "pages",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['pages_affected_by_broken_links']"
+								},
+								"sink": {
+									"name": "pages_affected_by_broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['pages_affected_by_misspellings']"
+								},
+								"sink": {
+									"name": "pages_affected_by_misspellings",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['potential_misspellings']"
+								},
+								"sink": {
+									"name": "potential_misspellings",
+									"type": "Int32"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "QualityAssuranceSummaryRestDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "QualityAssuranceSummaryCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy analytics groups to blob storage",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['bounce_rate']"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"path": "['group_name']"
+								},
+								"sink": {
+									"name": "group_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['page_views']"
+								},
+								"sink": {
+									"name": "page_views",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['visits']"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int64"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsGroupsRestDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsGroupsCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy SEO groups to blob storage",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy QualityAssuranceGroups to blob storage",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['errors']"
+								},
+								"sink": {
+									"name": "errors",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['group_name']"
+								},
+								"sink": {
+									"name": "group_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['needs_review']"
+								},
+								"sink": {
+									"name": "needs_review",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['pages']"
+								},
+								"sink": {
+									"name": "pages",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['searchable_pages']"
+								},
+								"sink": {
+									"name": "searchable_pages",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['warnings']"
+								},
+								"sink": {
+									"name": "warnings",
+									"type": "Int32"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "SeoGroupsRestDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "SeoGroupsCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Lookup SEO groups",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "Delete SEO groups SEO pages files",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "SeoGroupsCsvDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachSeoGroup",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "Lookup SEO groups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('Lookup SEO groups').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Copy SEO groups SEO pages to blob storage",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "RestSource",
+									"additionalColumns": [
+										{
+											"name": "web_analytics_seo_group_id",
+											"value": {
+												"value": "@{item().id}",
+												"type": "Expression"
+											}
+										}
+									],
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"paginationRules": {
+										"AbsoluteUrl": "$.links.next.href"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"path": "['id']"
+											},
+											"sink": {
+												"name": "web_analytics_seo_page_id",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "$['web_analytics_seo_group_id']"
+											},
+											"sink": {
+												"name": "web_analytics_seo_group_id",
+												"type": "Int64"
+											}
+										}
+									],
+									"collectionReference": "$['items']"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "SeoGroupsSeoPagesRestDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"GroupId": "@{item().id}"
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "SeoGroupsSeoPagesCsvDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"GroupId": "@{item().id}"
+									}
+								}
+							]
+						}
+					]
+				}
+			},
+			{
+				"name": "Delete SEO groups SEO pages files",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Prevent Delete from failing when folder is empty",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "SeoGroupsSeoPagesFolderDataset",
+						"type": "DatasetReference"
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": false,
+						"wildcardFileName": "seo_group_*.csv"
+					}
+				}
+			},
+			{
+				"name": "Prevent Delete from failing when folder is empty",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Copy SEO groups to blob storage",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "SeoGroupsCsvDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "SeoGroupsSeoPagesFolderDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy QualityAssuranceGroups to blob storage",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['broken_links']"
+								},
+								"sink": {
+									"name": "broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['group_name']"
+								},
+								"sink": {
+									"name": "group_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['misspellings']"
+								},
+								"sink": {
+									"name": "misspellings",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['pages']"
+								},
+								"sink": {
+									"name": "pages",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['potential_misspellings']"
+								},
+								"sink": {
+									"name": "potential_misspellings",
+									"type": "Int32"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "QualityAssuranceGroupsRestDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "QualityAssuranceGroupsCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

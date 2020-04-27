@@ -1,0 +1,17 @@
+{
+	"name": "PagesWithBrokenLinksSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "web_analytics_broken_links"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

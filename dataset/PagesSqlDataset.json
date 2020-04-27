@@ -1,0 +1,17 @@
+{
+	"name": "PagesSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "web_analytics_pages"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

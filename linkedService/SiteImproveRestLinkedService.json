@@ -1,0 +1,29 @@
+{
+	"name": "SiteImproveRestLinkedService",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"type": "RestService",
+		"annotations": [],
+		"typeProperties": {
+			"url": "https://api.siteimprove.com/",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Basic",
+			"userName": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVaultLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "SiteImproveApiUserName"
+			},
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "AzureKeyVaultLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "SiteImproveApiPassword"
+			}
+		}
+	}
+}
