@@ -1,0 +1,17 @@
+{
+	"name": "BrokenLinksSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "broken_links"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
