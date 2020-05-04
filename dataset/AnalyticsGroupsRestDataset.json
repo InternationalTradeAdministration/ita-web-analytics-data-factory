@@ -1,0 +1,16 @@
+{
+	"name": "AnalyticsGroupsRestDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SiteImproveRestLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": "v2/sites/17536213616/analytics/overview/groups?page=1&page_size=1000"
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

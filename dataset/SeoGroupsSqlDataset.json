@@ -1,0 +1,17 @@
+{
+	"name": "SeoGroupsSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "web_analytics_seo_groups"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
