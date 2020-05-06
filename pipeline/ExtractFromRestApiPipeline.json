@@ -532,7 +532,14 @@
 			{
 				"name": "Copy SEO groups to blob storage",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Copy QualityAssuranceGroups to blob storage",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -875,6 +882,123 @@
 				"outputs": [
 					{
 						"referenceName": "SeoGroupsSeoPagesFolderDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "Copy QualityAssuranceGroups to blob storage",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['errors']"
+								},
+								"sink": {
+									"name": "errors",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['group_name']"
+								},
+								"sink": {
+									"name": "group_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['needs_review']"
+								},
+								"sink": {
+									"name": "needs_review",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['pages']"
+								},
+								"sink": {
+									"name": "pages",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['searchable_pages']"
+								},
+								"sink": {
+									"name": "searchable_pages",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['warnings']"
+								},
+								"sink": {
+									"name": "warnings",
+									"type": "Int32"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "QualityAssuranceGroupsRestDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "QualityAssuranceGroupsCsvDataset",
 						"type": "DatasetReference"
 					}
 				]
