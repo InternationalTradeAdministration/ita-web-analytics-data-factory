@@ -1,0 +1,17 @@
+{
+	"name": "QualityAssuranceGroupsSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "web_analytics_quality_assurance_groups"
+		}
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}
