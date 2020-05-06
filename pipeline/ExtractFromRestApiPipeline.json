@@ -934,10 +934,10 @@
 							},
 							{
 								"source": {
-									"path": "['errors']"
+									"path": "['broken_links']"
 								},
 								"sink": {
-									"name": "errors",
+									"name": "broken_links",
 									"type": "Int32"
 								}
 							},
@@ -952,10 +952,10 @@
 							},
 							{
 								"source": {
-									"path": "['needs_review']"
+									"path": "['misspellings']"
 								},
 								"sink": {
-									"name": "needs_review",
+									"name": "misspellings",
 									"type": "Int32"
 								}
 							},
@@ -970,19 +970,10 @@
 							},
 							{
 								"source": {
-									"path": "['searchable_pages']"
+									"path": "['potential_misspellings']"
 								},
 								"sink": {
-									"name": "searchable_pages",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"path": "['warnings']"
-								},
-								"sink": {
-									"name": "warnings",
+									"name": "potential_misspellings",
 									"type": "Int32"
 								}
 							}
