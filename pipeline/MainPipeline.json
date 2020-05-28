@@ -3,24 +3,24 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ExecuteExtractDatasets",
+				"name": "ExecuteExtractAnalyticsRelatedDatasets",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractDatasets",
+						"referenceName": "ExtractAnalyticsRelatedDatasets",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "ExecuteLoadDatasets",
+				"name": "ExecuteLoadAnalyticsRelatedDatasets",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractDatasets",
+						"activity": "ExecuteExtractAnalyticsRelatedDatasets",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -29,7 +29,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "LoadDatasets",
+						"referenceName": "LoadAnalyticsRelatedDatasets",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true

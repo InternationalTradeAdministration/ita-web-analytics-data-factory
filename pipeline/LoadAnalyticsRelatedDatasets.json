@@ -123,7 +123,10 @@
 				"inputs": [
 					{
 						"referenceName": "AnalyticsPagesCsvDataset",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+						}
 					}
 				],
 				"outputs": [
@@ -341,7 +344,7 @@
 				]
 			},
 			{
-				"name": "LoadAnalyticsFiltersAnalyticsPages",
+				"name": "LoadAnalyticsPageMetrics",
 				"type": "Copy",
 				"dependsOn": [
 					{
@@ -371,8 +374,8 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "analytics_filters_analytics_pages",
-							"wildcardFileName": "analytics_filter_*.csv",
+							"wildcardFolderPath": "@{convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')}/analytics_page_metrics",
+							"wildcardFileName": "*.csv",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -381,7 +384,10 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_filters_analytics_pages]",
+						"preCopyScript": {
+							"value": "DELETE FROM [web_analytics].[analytics_page_metrics]\nWHERE collected_on = '@{convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')}'",
+							"type": "Expression"
+						},
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
@@ -390,21 +396,71 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "analytics_filter_id",
+									"name": "id",
 									"type": "String"
 								},
 								"sink": {
-									"name": "analytics_filter_id",
+									"name": "id",
 									"type": "Int64"
 								}
 							},
 							{
 								"source": {
-									"name": "analytics_page_id",
+									"name": "filter_id",
 									"type": "String"
 								},
 								"sink": {
-									"name": "analytics_page_id",
+									"name": "filter_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "collected_on",
+									"type": "String"
+								},
+								"sink": {
+									"name": "collected_on",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "average_page_views_per_visit",
+									"type": "String"
+								},
+								"sink": {
+									"name": "average_page_views_per_visit",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "bounce_rate",
+									"type": "String"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "page_views",
+									"type": "String"
+								},
+								"sink": {
+									"name": "page_views",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "visits",
+									"type": "String"
+								},
+								"sink": {
+									"name": "visits",
 									"type": "Int64"
 								}
 							}
@@ -413,23 +469,23 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsFiltersAnalyticsPagesFolderDataset",
+						"referenceName": "AnalyticsPageMetricsFolderDataset",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsFiltersAnalyticsPagesSqlDataset",
+						"referenceName": "AnalyticsPageMetricsSqlDataset",
 						"type": "DatasetReference"
 					}
 				]
 			},
 			{
-				"name": "LoadAnalyticsMostPopularPages",
+				"name": "LoadAnalyticsPageMetricsWithDefaultFilterId",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "LoadAnalyticsPages",
+						"activity": "LoadAnalyticsPageMetrics",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -446,6 +502,16 @@
 				"typeProperties": {
 					"source": {
 						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "collected_on",
+								"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+							},
+							{
+								"name": "filter_id",
+								"value": "1"
+							}
+						],
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true
@@ -456,7 +522,6 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_most_popular_pages]",
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
@@ -472,24 +537,90 @@
 									"name": "id",
 									"type": "Int64"
 								}
+							},
+							{
+								"source": {
+									"name": "filter_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "filter_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "collected_on",
+									"type": "String"
+								},
+								"sink": {
+									"name": "collected_on",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "average_page_views_per_visit",
+									"type": "String"
+								},
+								"sink": {
+									"name": "average_page_views_per_visit",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "bounce_rate",
+									"type": "String"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "page_views",
+									"type": "String"
+								},
+								"sink": {
+									"name": "page_views",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "visits",
+									"type": "String"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int64"
+								}
 							}
 						]
 					}
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsMostPopularPagesCsvDataset",
-						"type": "DatasetReference"
+						"referenceName": "AnalyticsPagesCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+						}
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsMostPopularPagesSqlDataset",
+						"referenceName": "AnalyticsPageMetricsSqlDataset",
 						"type": "DatasetReference"
 					}
 				]
 			}
 		],
+		"folder": {
+			"name": "analytics"
+		},
 		"annotations": []
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"

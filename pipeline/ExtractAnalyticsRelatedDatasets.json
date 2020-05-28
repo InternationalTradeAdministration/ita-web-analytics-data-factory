@@ -104,7 +104,14 @@
 			{
 				"name": "ExtractAnalyticsPages",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsPageMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -208,13 +215,19 @@
 				"inputs": [
 					{
 						"referenceName": "AnalyticsPagesRestDataset",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+						}
 					}
 				],
 				"outputs": [
 					{
 						"referenceName": "AnalyticsPagesCsvDataset",
-						"type": "DatasetReference"
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+						}
 					}
 				]
 			},
@@ -297,12 +310,6 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
-					},
-					{
-						"activity": "ExtractAnalyticsPages",
-						"dependencyConditions": [
-							"Succeeded"
-						]
 					}
 				],
 				"userProperties": [],
@@ -315,11 +322,11 @@
 				}
 			},
 			{
-				"name": "ExecuteExtractAnalyticsFiltersAnalyticsPages",
+				"name": "ExecuteExtractAnalyticsPageMetrics",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExtractAnalyticsFilters",
+						"activity": "Delete Daily Folder",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -334,18 +341,24 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsFiltersAnalyticsPages",
+						"referenceName": "ExtractAnalyticsPageMetricsByPeriodFilterId",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')",
+							"type": "Expression"
+						}
+					}
 				}
 			},
 			{
-				"name": "ExtractAnalyticsMostPopularPages",
+				"name": "Prevent Delete from failing when folder is empty",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "ExtractAnalyticsPages",
+						"activity": "ExtractAnalyticsFilters",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -361,12 +374,13 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "RestSource",
-						"httpRequestTimeout": "00:01:40",
-						"requestInterval": "00.00:00:00.010",
-						"requestMethod": "GET",
-						"paginationRules": {
-							"AbsoluteUrl": "$.links.next.href"
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
 						}
 					},
 					"sink": {
@@ -380,37 +394,65 @@
 							"fileExtension": ".txt"
 						}
 					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"path": "['id']"
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int64"
-								}
-							}
-						],
-						"collectionReference": "$['items']"
-					}
+					"enableStaging": false
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsMostPopularPagesRestDataset",
+						"referenceName": "AnalyticsFiltersCsvDataset",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsMostPopularPagesCsvDataset",
-						"type": "DatasetReference"
+						"referenceName": "DailyFolderDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')",
+								"type": "Expression"
+							}
+						}
 					}
 				]
+			},
+			{
+				"name": "Delete Daily Folder",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Prevent Delete from failing when folder is empty",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "DailyFolderDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					}
+				}
 			}
 		],
+		"folder": {
+			"name": "analytics"
+		},
 		"annotations": []
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"

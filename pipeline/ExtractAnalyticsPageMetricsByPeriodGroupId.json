@@ -1,18 +1,11 @@
 {
-	"name": "ExtractAnalyticsGroupsAnalyticsPages",
+	"name": "ExtractAnalyticsPageMetricsByPeriodGroupId",
 	"properties": {
 		"activities": [
 			{
 				"name": "LookupAnalyticsGroups",
 				"type": "Lookup",
-				"dependsOn": [
-					{
-						"activity": "DeleteAnalyticsGroupsAnalyticsPages",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -40,7 +33,7 @@
 				}
 			},
 			{
-				"name": "ForEachAnalyticsGroupExtractAnalyticsPages",
+				"name": "ForEachAnalyticsGroupExtractAnalyticsPageMetrics",
 				"type": "ForEach",
 				"dependsOn": [
 					{
@@ -58,7 +51,7 @@
 					},
 					"activities": [
 						{
-							"name": "ExtractAnalyticsGroupsAnalyticsPages",
+							"name": "ExtractAnalyticsGroupsAnalyticsPageMetrics",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -74,9 +67,9 @@
 									"type": "RestSource",
 									"additionalColumns": [
 										{
-											"name": "analytics_group_id",
+											"name": "collected_on",
 											"value": {
-												"value": "@{item().id}",
+												"value": "@pipeline().parameters.Period",
 												"type": "Expression"
 											}
 										}
@@ -105,40 +98,93 @@
 									"mappings": [
 										{
 											"source": {
-												"path": "['id']"
+												"path": "$['items'][0]['id']"
 											},
 											"sink": {
-												"name": "analytics_page_id",
+												"name": "id",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"path": "$['analytics_group_id']"
+												"path": "$['items'][0]['average_page_views_per_visit']"
 											},
 											"sink": {
-												"name": "analytics_group_id",
+												"name": "average_page_views_per_visit",
+												"type": "Decimal"
+											}
+										},
+										{
+											"source": {
+												"path": "$['items'][0]['bounce_rate']"
+											},
+											"sink": {
+												"name": "bounce_rate",
+												"type": "Decimal"
+											}
+										},
+										{
+											"source": {
+												"path": "$['items'][0]['page_views']"
+											},
+											"sink": {
+												"name": "page_views",
 												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "$['items'][0]['visits']"
+											},
+											"sink": {
+												"name": "visits",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "$['collected_on']"
+											},
+											"sink": {
+												"name": "collected_on",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "$['filter_id']"
+											},
+											"sink": {
+												"name": "filter_id",
+												"type": "String"
 											}
 										}
 									],
-									"collectionReference": "$['items']"
+									"collectionReference": ""
 								}
 							},
 							"inputs": [
 								{
-									"referenceName": "AnalyticsGroupsAnalyticsPagesRestDataset",
+									"referenceName": "AnalyticsPageMetricsRestDatasetByPeriodGroupId",
 									"type": "DatasetReference",
 									"parameters": {
+										"Period": {
+											"value": "@pipeline().parameters.Period",
+											"type": "Expression"
+										},
 										"GroupId": "@{item().id}"
 									}
 								}
 							],
 							"outputs": [
 								{
-									"referenceName": "AnalyticsGroupsAnalyticsPagesCsvDataset",
+									"referenceName": "AnalyticsPageMetricsCsvDatasetByPeriodGroupId",
 									"type": "DatasetReference",
 									"parameters": {
+										"Period": {
+											"value": "@pipeline().parameters.Period",
+											"type": "Expression"
+										},
 										"GroupId": "@{item().id}"
 									}
 								}
@@ -146,92 +192,16 @@
 						}
 					]
 				}
-			},
-			{
-				"name": "DeleteAnalyticsGroupsAnalyticsPages",
-				"type": "Delete",
-				"dependsOn": [
-					{
-						"activity": "Prevent Delete from failing when folder is empty",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "AnalyticsGroupsAnalyticsPagesFolderDataset",
-						"type": "DatasetReference"
-					},
-					"enableLogging": false,
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": false
-					}
-				}
-			},
-			{
-				"name": "Prevent Delete from failing when folder is empty",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsGroupsCsvDataset",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsGroupsAnalyticsPagesFolderDataset",
-						"type": "DatasetReference"
-					}
-				]
 			}
 		],
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "analytics"
 		},
 		"annotations": []
-	},
-	"type": "Microsoft.DataFactory/factories/pipelines"
+	}
 }

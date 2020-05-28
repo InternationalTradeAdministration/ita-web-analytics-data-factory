@@ -1,5 +1,5 @@
 {
-	"name": "AnalyticsPagesRestDataset",
+	"name": "AnalyticsPageMetricsRestDatasetByPeriodFilterId",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "SiteImproveRestLinkedService",
@@ -7,6 +7,9 @@
 		},
 		"parameters": {
 			"Period": {
+				"type": "string"
+			},
+			"FilterId": {
 				"type": "string"
 			}
 		},
@@ -17,7 +20,7 @@
 		"type": "RestResource",
 		"typeProperties": {
 			"relativeUrl": {
-				"value": "v2/sites/17536213616/analytics/content/all_pages?page=1&page_size=1000&period=@{dataset().Period}",
+				"value": "v2/sites/17536213616/analytics/content/all_pages?page=1&page_size=1000&period=@{dataset().Period}&filter_id=@{dataset().FilterId}",
 				"type": "Expression"
 			}
 		},

@@ -1,5 +1,5 @@
 {
-	"name": "AnalyticsPagesCsvDataset",
+	"name": "DailyFolderDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
@@ -18,7 +18,6 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "analytics_pages.csv",
 				"folderPath": {
 					"value": "@dataset().Period",
 					"type": "Expression"
