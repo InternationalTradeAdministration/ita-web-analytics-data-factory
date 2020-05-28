@@ -9,8 +9,8 @@
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "dbo",
-			"table": "web_analytics_broken_links"
+			"schema": "web_analytics",
+			"table": "pages_with_broken_links"
 		}
 	},
 	"type": "Microsoft.DataFactory/factories/datasets"

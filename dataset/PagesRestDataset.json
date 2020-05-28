@@ -11,6 +11,5 @@
 			"relativeUrl": "v2/sites/17536213616/content/pages?page=1&page_size=1000"
 		},
 		"schema": []
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

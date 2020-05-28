@@ -1,24 +1,26 @@
 {
-	"name": "SeoGroupsSeoPagesRestDataset",
+	"name": "AnalyticsFiltersAnalyticsPagesRestDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "SiteImproveRestLinkedService",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"GroupId": {
+			"FilterId": {
 				"type": "string"
 			}
+		},
+		"folder": {
+			"name": "analytics"
 		},
 		"annotations": [],
 		"type": "RestResource",
 		"typeProperties": {
 			"relativeUrl": {
-				"value": "v2/sites/17536213616/seo/pages?group_id=@{dataset().GroupId}&page=1&page_size=1000",
+				"value": "v2/sites/17536213616/analytics/content/all_pages?filter_id=@{dataset().FilterId}&page=1&page_size=1000",
 				"type": "Expression"
 			}
 		},
 		"schema": []
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

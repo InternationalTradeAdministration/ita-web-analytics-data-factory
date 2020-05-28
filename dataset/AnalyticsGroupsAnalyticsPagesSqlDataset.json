@@ -1,17 +1,19 @@
 {
-	"name": "SeoGroupsSeoPagesSqlDataset",
+	"name": "AnalyticsGroupsAnalyticsPagesSqlDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureSqlDatabaseLinkedService",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "analytics"
+		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "dbo",
-			"table": "web_analytics_seo_groups_seo_pages"
+			"schema": "web_analytics",
+			"table": "analytics_groups_analytics_pages"
 		}
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

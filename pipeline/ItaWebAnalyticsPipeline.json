@@ -1243,7 +1243,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "SeoGroupsSeoPagesRestDataset",
+									"referenceName": "AnalyticsGroupsAnalyticsPagesRestDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"GroupId": "@{item().id}"
@@ -1252,7 +1252,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "SeoGroupsSeoPagesCsvDataset",
+									"referenceName": "AnalyticsGroupsAnalyticsPagesCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"GroupId": "@{item().id}"
@@ -1330,13 +1330,13 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SeoGroupsSeoPagesFolderDataset",
+						"referenceName": "AnalyticsGroupsAnalyticsPagesFolderDataset",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "SeoGroupsSeoPagesSqlDataset",
+						"referenceName": "AnalyticsGroupsAnalyticsPagesSqlDataset",
 						"type": "DatasetReference"
 					}
 				]

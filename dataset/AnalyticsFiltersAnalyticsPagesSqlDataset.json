@@ -1,16 +1,19 @@
 {
-	"name": "SeoPagesSqlDataset",
+	"name": "AnalyticsFiltersAnalyticsPagesSqlDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureSqlDatabaseLinkedService",
 			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "analytics"
 		},
 		"annotations": [],
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
 			"schema": "web_analytics",
-			"table": "pages"
+			"table": "analytics_filters_analytics_pages"
 		}
 	}
 }

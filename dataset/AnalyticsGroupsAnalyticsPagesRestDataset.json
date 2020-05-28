@@ -1,0 +1,26 @@
+{
+	"name": "AnalyticsGroupsAnalyticsPagesRestDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SiteImproveRestLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"GroupId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "v2/sites/17536213616/analytics/content/all_pages?group_id=@{dataset().GroupId}&page=1&page_size=1000",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}

@@ -1,35 +1,28 @@
 {
-	"name": "MainPipeline",
+	"name": "LoadDatasets",
 	"properties": {
 		"activities": [
 			{
-				"name": "ExecuteExtractDatasets",
+				"name": "ExecuteLoadContentGroupsRelatedDatasets",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractDatasets",
+						"referenceName": "LoadContentGroupsRelatedDatasets",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "ExecuteLoadDatasets",
+				"name": "ExecuteLoadAnalyticsRelatedDatasets",
 				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractDatasets",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "LoadDatasets",
+						"referenceName": "LoadAnalyticsRelatedDatasets",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true

@@ -1,14 +1,17 @@
 {
-	"name": "SeoGroupsSeoPagesCsvDataset",
+	"name": "AnalyticsFiltersAnalyticsPagesCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"GroupId": {
+			"FilterId": {
 				"type": "string"
 			}
+		},
+		"folder": {
+			"name": "analytics"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
@@ -16,10 +19,10 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "seo_group_@{dataset().GroupId}_seo_page_ids.csv",
+					"value": "analytics_filter_@{dataset().FilterId}_analytics_page_ids.csv",
 					"type": "Expression"
 				},
-				"folderPath": "seo_groups_seo_pages",
+				"folderPath": "analytics_filters_analytics_pages",
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",
@@ -28,6 +31,5 @@
 			"quoteChar": "\""
 		},
 		"schema": []
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

@@ -12,6 +12,5 @@
 			"schema": "dbo",
 			"table": "web_analytics_pages"
 		}
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

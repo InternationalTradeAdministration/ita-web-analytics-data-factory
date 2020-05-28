@@ -1,5 +1,5 @@
 {
-	"name": "SeoGroupsSeoPagesFolderDataset",
+	"name": "ContentGroupsPagesFolderDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
@@ -10,7 +10,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "seo_groups_seo_pages",
+				"folderPath": "content_groups_pages",
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",
@@ -18,16 +18,6 @@
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
-		"schema": [
-			{
-				"name": "web_analytics_seo_page_id",
-				"type": "String"
-			},
-			{
-				"name": "web_analytics_seo_group_id",
-				"type": "String"
-			}
-		]
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+		"schema": []
+	}
 }

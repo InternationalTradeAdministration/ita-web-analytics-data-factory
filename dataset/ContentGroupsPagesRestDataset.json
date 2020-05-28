@@ -1,0 +1,23 @@
+{
+	"name": "ContentGroupsPagesRestDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SiteImproveRestLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"GroupId": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "v2/sites/17536213616/seo/pages?group_id=@{dataset().GroupId}&page=1&page_size=1000",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}

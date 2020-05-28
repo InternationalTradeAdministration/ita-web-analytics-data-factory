@@ -1,5 +1,5 @@
 {
-	"name": "QualityAssuranceGroupsSqlDataset",
+	"name": "ContentGroupsPagesSqlDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureSqlDatabaseLinkedService",
@@ -9,9 +9,8 @@
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "dbo",
-			"table": "web_analytics_quality_assurance_groups"
+			"schema": "web_analytics",
+			"table": "content_groups_pages"
 		}
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

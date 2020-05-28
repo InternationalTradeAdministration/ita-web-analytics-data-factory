@@ -1,5 +1,5 @@
 {
-	"name": "BrokenLinksSqlDataset",
+	"name": "ContentGroupsSqlDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureSqlDatabaseLinkedService",
@@ -9,9 +9,8 @@
 		"type": "AzureSqlTable",
 		"schema": [],
 		"typeProperties": {
-			"schema": "dbo",
-			"table": "broken_links"
+			"schema": "web_analytics",
+			"table": "content_groups"
 		}
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

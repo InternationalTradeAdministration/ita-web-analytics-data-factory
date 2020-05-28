@@ -1,16 +1,18 @@
 {
-	"name": "QualityAssuranceGroupsRestDataset",
+	"name": "AnalyticsMostPopularPagesRestDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "SiteImproveRestLinkedService",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "analytics"
+		},
 		"annotations": [],
 		"type": "RestResource",
 		"typeProperties": {
-			"relativeUrl": "v2/sites/17536213616/quality_assurance/overview/groups?page=1&page_size=1000"
+			"relativeUrl": "v2/sites/17536213616/analytics/content/most_popular_pages?page=1&page_size=1000"
 		},
 		"schema": []
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

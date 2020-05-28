@@ -1,89 +1,24 @@
 {
-	"name": "LoadToDbPipeline",
+	"name": "LoadAnalyticsRelatedDatasets",
 	"properties": {
 		"activities": [
 			{
-				"name": "Load pages to DB",
+				"name": "LoadAnalyticsPages",
 				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
+				"dependsOn": [
+					{
+						"activity": "LoadAnalyticsGroupsAnalyticsPages",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					},
-					"sink": {
-						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [dbo].[web_analytics_pages]",
-						"disableMetricsCollection": false
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "title",
-									"type": "String"
-								},
-								"sink": {
-									"name": "title",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "url",
-									"type": "String"
-								},
-								"sink": {
-									"name": "url",
-									"type": "String"
-								}
-							}
+					{
+						"activity": "LoadAnalyticsGroups",
+						"dependencyConditions": [
+							"Succeeded"
 						]
 					}
-				},
-				"inputs": [
-					{
-						"referenceName": "PagesCsvDataset",
-						"type": "DatasetReference"
-					}
 				],
-				"outputs": [
-					{
-						"referenceName": "PagesSqlDataset",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
-				"name": "Load seo pages to DB",
-				"type": "Copy",
-				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -105,7 +40,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [dbo].[web_analytics_seo_pages]",
+						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_pages]",
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
@@ -144,130 +79,12 @@
 							},
 							{
 								"source": {
-									"name": "checking_now",
+									"name": "average_page_views_per_visit",
 									"type": "String"
 								},
 								"sink": {
-									"name": "checking_now",
-									"type": "Boolean"
-								}
-							},
-							{
-								"source": {
-									"name": "cms_url",
-									"type": "String"
-								},
-								"sink": {
-									"name": "cms_url",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "issues",
-									"type": "String"
-								},
-								"sink": {
-									"name": "issues",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"name": "page_level",
-									"type": "String"
-								},
-								"sink": {
-									"name": "page_level",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"name": "page_views",
-									"type": "String"
-								},
-								"sink": {
-									"name": "page_views",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "searchable",
-									"type": "String"
-								},
-								"sink": {
-									"name": "searchable",
-									"type": "Boolean"
-								}
-							}
-						]
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "SeoPagesCsvDataset",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "SeoPagesSqlDataset",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
-				"name": "Load analytics groups to DB",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"sink": {
-						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [dbo].[web_analytics_analytics_groups]",
-						"disableMetricsCollection": false
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "group_name",
-									"type": "String"
-								},
-								"sink": {
-									"name": "group_name",
-									"type": "String"
+									"name": "average_page_views_per_visit",
+									"type": "Decimal"
 								}
 							},
 							{
@@ -305,19 +122,19 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsGroupsCsvDataset",
+						"referenceName": "AnalyticsPagesCsvDataset",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsGroupsSqlDataset",
+						"referenceName": "AnalyticsPagesSqlDataset",
 						"type": "DatasetReference"
 					}
 				]
 			},
 			{
-				"name": "Load SEO groups to DB",
+				"name": "LoadAnalyticsGroups",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -341,7 +158,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [dbo].[web_analytics_seo_groups]",
+						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_groups]",
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
@@ -364,38 +181,8 @@
 									"type": "String"
 								},
 								"sink": {
-									"name": "group_name",
+									"name": "name",
 									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "needs_review",
-									"type": "String"
-								},
-								"sink": {
-									"name": "needs_review",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"name": "searchable_pages",
-									"type": "String"
-								},
-								"sink": {
-									"name": "searchable_pages",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"name": "warnings",
-									"type": "String"
-								},
-								"sink": {
-									"name": "warnings",
-									"type": "Int32"
 								}
 							}
 						]
@@ -403,29 +190,168 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SeoGroupsCsvDataset",
+						"referenceName": "AnalyticsGroupsCsvDataset",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "SeoGroupsSqlDataset",
+						"referenceName": "AnalyticsGroupsSqlDataset",
 						"type": "DatasetReference"
 					}
 				]
 			},
 			{
-				"name": "Load SEO groups SEO pages to DB",
+				"name": "LoadAnalyticsGroupsAnalyticsPages",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "analytics_groups_analytics_pages",
+							"wildcardFileName": "analytics_group_*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_groups_analytics_pages]",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "analytics_group_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "analytics_page_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_page_id",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsGroupsAnalyticsPagesFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsGroupsAnalyticsPagesSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "LoadAnalyticsFilters",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_filters]",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "name",
+									"type": "String"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsFiltersCsvDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsFiltersSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "LoadAnalyticsFiltersAnalyticsPages",
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Load SEO groups to DB",
+						"activity": "LoadAnalyticsFilters",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					},
 					{
-						"activity": "Load seo pages to DB",
+						"activity": "LoadAnalyticsPages",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -445,8 +371,8 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "seo_groups_seo_pages",
-							"wildcardFileName": "seo_group_*.csv",
+							"wildcardFolderPath": "analytics_filters_analytics_pages",
+							"wildcardFileName": "analytics_filter_*.csv",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -455,7 +381,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [dbo].[web_analytics_seo_groups_seo_pages]",
+						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_filters_analytics_pages]",
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
@@ -464,21 +390,21 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "web_analytics_seo_group_id",
+									"name": "analytics_filter_id",
 									"type": "String"
 								},
 								"sink": {
-									"name": "web_analytics_seo_group_id",
+									"name": "analytics_filter_id",
 									"type": "Int64"
 								}
 							},
 							{
 								"source": {
-									"name": "web_analytics_seo_page_id",
+									"name": "analytics_page_id",
 									"type": "String"
 								},
 								"sink": {
-									"name": "web_analytics_seo_page_id",
+									"name": "analytics_page_id",
 									"type": "Int64"
 								}
 							}
@@ -487,21 +413,28 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "SeoGroupsSeoPagesFolderDataset",
+						"referenceName": "AnalyticsFiltersAnalyticsPagesFolderDataset",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "SeoGroupsSeoPagesSqlDataset",
+						"referenceName": "AnalyticsFiltersAnalyticsPagesSqlDataset",
 						"type": "DatasetReference"
 					}
 				]
 			},
 			{
-				"name": "Load QualityAssuranceGroups to DB",
+				"name": "LoadAnalyticsMostPopularPages",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "LoadAnalyticsPages",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -523,7 +456,7 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [dbo].[web_analytics_quality_assurance_groups]",
+						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_most_popular_pages]",
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
@@ -539,69 +472,19 @@
 									"name": "id",
 									"type": "Int64"
 								}
-							},
-							{
-								"source": {
-									"name": "group_name",
-									"type": "String"
-								},
-								"sink": {
-									"name": "group_name",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "broken_links",
-									"type": "String"
-								},
-								"sink": {
-									"name": "broken_links",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"name": "misspellings",
-									"type": "String"
-								},
-								"sink": {
-									"name": "misspellings",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"name": "pages",
-									"type": "String"
-								},
-								"sink": {
-									"name": "pages",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"name": "potential_misspellings",
-									"type": "String"
-								},
-								"sink": {
-									"name": "potential_misspellings",
-									"type": "Int32"
-								}
 							}
 						]
 					}
 				},
 				"inputs": [
 					{
-						"referenceName": "QualityAssuranceGroupsCsvDataset",
+						"referenceName": "AnalyticsMostPopularPagesCsvDataset",
 						"type": "DatasetReference"
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "QualityAssuranceGroupsSqlDataset",
+						"referenceName": "AnalyticsMostPopularPagesSqlDataset",
 						"type": "DatasetReference"
 					}
 				]

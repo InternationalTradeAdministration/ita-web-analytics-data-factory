@@ -11,6 +11,5 @@
 			"relativeUrl": "v2/sites/17536213616/quality_assurance/overview/summary"
 		},
 		"schema": []
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

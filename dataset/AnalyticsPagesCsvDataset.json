@@ -1,5 +1,5 @@
 {
-	"name": "AnalyticsGroupsCsvDataset",
+	"name": "AnalyticsPagesCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
@@ -13,7 +13,7 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "analytics_groups.csv",
+				"fileName": "analytics_pages.csv",
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",

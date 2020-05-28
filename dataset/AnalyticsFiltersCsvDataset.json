@@ -1,16 +1,19 @@
 {
-	"name": "QualityAssuranceGroupsCsvDataset",
+	"name": "AnalyticsFiltersCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "analytics"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "quality_assurance_groups.csv",
+				"fileName": "analytics_filters.csv",
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",
@@ -19,6 +22,5 @@
 			"quoteChar": "\""
 		},
 		"schema": []
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }

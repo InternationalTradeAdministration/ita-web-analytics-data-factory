@@ -1,14 +1,17 @@
 {
-	"name": "SeoPagesRestDataset",
+	"name": "AnalyticsPagesRestDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "SiteImproveRestLinkedService",
 			"type": "LinkedServiceReference"
 		},
+		"folder": {
+			"name": "analytics"
+		},
 		"annotations": [],
 		"type": "RestResource",
 		"typeProperties": {
-			"relativeUrl": "v2/sites/17536213616/seo/pages?page=1&page_size=1000"
+			"relativeUrl": "v2/sites/17536213616/analytics/content/all_pages?page=1&page_size=1000"
 		},
 		"schema": []
 	}

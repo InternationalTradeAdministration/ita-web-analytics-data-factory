@@ -1,0 +1,18 @@
+{
+  "name": "AnalyticsFiltersRestDataset",
+  "properties": {
+    "linkedServiceName": {
+      "referenceName": "SiteImproveRestLinkedService",
+      "type": "LinkedServiceReference"
+    },
+    "folder": {
+      "name": "analytics"
+    },
+    "annotations": [],
+    "type": "RestResource",
+    "typeProperties": {
+      "relativeUrl": "v2/settings/analytics/segments?page=1&page_size=1000"
+    },
+    "schema": []
+  }
+}

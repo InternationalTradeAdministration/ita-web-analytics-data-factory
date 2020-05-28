@@ -1,16 +1,19 @@
 {
-	"name": "BrokenLinksCsvDataset",
+	"name": "AnalyticsMostPopularPagesCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "analytics"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "broken_links.csv",
+				"fileName": "analytics_most_popular_pages.csv",
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",
@@ -19,6 +22,5 @@
 			"quoteChar": "\""
 		},
 		"schema": []
-	},
-	"type": "Microsoft.DataFactory/factories/datasets"
+	}
 }
