@@ -1,8 +1,8 @@
 {
-	"name": "DailyPull",
+	"name": "Every10Minutes",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
