@@ -3205,7 +3205,7 @@
 						"frequency": "Minute",
 						"interval": 10,
 						"startTime": "2020-05-28T18:20:00.000Z",
-						"endTime": "2020-05-28T20:00:00.000Z",
+						"endTime": "2020-05-28T21:00:00.000Z",
 						"timeZone": "UTC"
 					}
 				}
