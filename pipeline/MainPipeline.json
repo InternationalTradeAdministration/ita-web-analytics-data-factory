@@ -36,6 +36,7 @@
 				}
 			}
 		],
+		"concurrency": 1,
 		"annotations": []
 	}
 }
