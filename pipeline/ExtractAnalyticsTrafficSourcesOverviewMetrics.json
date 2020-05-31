@@ -1,0 +1,206 @@
+{
+	"name": "ExtractAnalyticsTrafficSourcesOverviewMetrics",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExtractByPeriod",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"additionalColumns": [
+							{
+								"name": "analytics_group_id",
+								"value": "1"
+							},
+							{
+								"name": "analytics_filter_id",
+								"value": "1"
+							},
+							{
+								"name": "collected_on",
+								"value": {
+									"value": "@{pipeline().parameters.Period}",
+									"type": "Expression"
+								}
+							}
+						],
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['bounce_rate']"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"path": "['type']"
+								},
+								"sink": {
+									"name": "type",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['visits']"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_group_id']"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_filter_id']"
+								},
+								"sink": {
+									"name": "analytics_filter_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['collected_on']"
+								},
+								"sink": {
+									"name": "collected_on",
+									"type": "String"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsTrafficSourcesOverviewMetricsRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"QueryString": {
+								"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@{pipeline().parameters.Period}",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@{pipeline().parameters.Period}.csv",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "ExtractByPeriodGroupId",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExtractByPeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsTrafficSourcesOverviewMetricsByGroupId",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@{pipeline().parameters.Period}",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ExtractByPeriodFilterId",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExtractByPeriodGroupId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsTrafficSourcesOverviewMetricsByFilterId",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@{pipeline().parameters.Period}",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}

@@ -139,7 +139,14 @@
 			{
 				"name": "LoadAnalyticsGroups",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "LoadAnalyticsTrafficSourcesOverviewMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -207,7 +214,14 @@
 			{
 				"name": "LoadAnalyticsGroupsAnalyticsPages",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "LoadAnalyticsTrafficSourcesOverviewMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -278,7 +292,14 @@
 			{
 				"name": "LoadAnalyticsFilters",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "LoadAnalyticsTrafficSourcesOverviewMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -374,7 +395,10 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "@{convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')}/analytics_page_metrics",
+							"wildcardFolderPath": {
+								"value": "@{pipeline().parameters.Period}/analytics_page_metrics",
+								"type": "Expression"
+							},
 							"wildcardFileName": "*.csv",
 							"enablePartitionDiscovery": false
 						},
@@ -385,7 +409,7 @@
 					"sink": {
 						"type": "AzureSqlSink",
 						"preCopyScript": {
-							"value": "DELETE FROM [web_analytics].[analytics_page_metrics]\nWHERE collected_on = '@{convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')}'",
+							"value": "DELETE FROM [web_analytics].[analytics_page_metrics]\nWHERE collected_on = '@{pipeline().parameters.Period}'",
 							"type": "Expression"
 						},
 						"disableMetricsCollection": false
@@ -505,7 +529,10 @@
 						"additionalColumns": [
 							{
 								"name": "collected_on",
-								"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+								"value": {
+									"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')",
+									"type": "Expression"
+								}
 							},
 							{
 								"name": "filter_id",
@@ -606,7 +633,10 @@
 						"referenceName": "AnalyticsPagesCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
-							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
+							}
 						}
 					}
 				],
@@ -616,8 +646,136 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "LoadAnalyticsTrafficSourcesOverviewMetrics",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": {
+								"value": "@{pipeline().parameters.Period}/analytics_traffic_sources_overview_metrics",
+								"type": "Expression"
+							},
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": {
+							"value": "DELETE FROM [web_analytics].[analytics_traffic_sources_overview_metrics]\nWHERE collected_on = '@{pipeline().parameters.Period}'",
+							"type": "Expression"
+						},
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "analytics_group_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "analytics_filter_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_filter_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "collected_on",
+									"type": "String"
+								},
+								"sink": {
+									"name": "collected_on",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "type",
+									"type": "String"
+								},
+								"sink": {
+									"name": "type",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "bounce_rate",
+									"type": "String"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "visits",
+									"type": "String"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodFolderDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@{pipeline().parameters.Period}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsTrafficSourcesOverviewMetricsSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "analytics"
 		},

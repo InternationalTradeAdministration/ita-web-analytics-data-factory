@@ -217,7 +217,10 @@
 						"referenceName": "AnalyticsPagesRestDataset",
 						"type": "DatasetReference",
 						"parameters": {
-							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
+							}
 						}
 					}
 				],
@@ -226,7 +229,10 @@
 						"referenceName": "AnalyticsPagesCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
-							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
+							}
 						}
 					}
 				]
@@ -347,7 +353,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"Period": {
-							"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')",
+							"value": "@pipeline().parameters.Period",
 							"type": "Expression"
 						}
 					}
@@ -408,7 +414,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {
-								"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')",
+								"value": "@pipeline().parameters.Period",
 								"type": "Expression"
 							}
 						}
@@ -439,7 +445,10 @@
 						"referenceName": "DailyFolderDataset",
 						"type": "DatasetReference",
 						"parameters": {
-							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
+							}
 						}
 					},
 					"enableLogging": false,
@@ -448,8 +457,39 @@
 						"recursive": true
 					}
 				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsTrafficSourcesOverviewMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExtractAnalyticsPages",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsTrafficSourcesOverviewMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@pipeline().parameters.Period",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "analytics"
 		},
