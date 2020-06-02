@@ -125,7 +125,10 @@
 						"referenceName": "AnalyticsPagesCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
-							"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
+							}
 						}
 					}
 				],
@@ -530,7 +533,7 @@
 							{
 								"name": "collected_on",
 								"value": {
-									"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')",
+									"value": "@{pipeline().parameters.Period}",
 									"type": "Expression"
 								}
 							},
