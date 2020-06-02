@@ -3418,7 +3418,7 @@
 											"type": "String"
 										},
 										"sink": {
-											"name": "filter_id",
+											"name": "analytics_filter_id",
 											"type": "Int64"
 										}
 									},
@@ -3557,7 +3557,7 @@
 											"type": "String"
 										},
 										"sink": {
-											"name": "filter_id",
+											"name": "analytics_filter_id",
 											"type": "Int64"
 										}
 									},
@@ -5895,6 +5895,26 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/DailyPull')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Minute",
+						"interval": 1,
+						"startTime": "2020-06-01T14:36:00.000Z",
+						"timeZone": "UTC"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Every10Minutes')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -5924,26 +5944,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/MainPipeline')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/DailyPull')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Minute",
-						"interval": 1,
-						"startTime": "2020-06-01T14:36:00.000Z",
-						"timeZone": "UTC"
-					}
-				}
-			},
-			"dependsOn": []
 		}
 	]
 }

@@ -2042,7 +2042,7 @@
 											"type": "String"
 										},
 										"sink": {
-											"name": "filter_id",
+											"name": "analytics_filter_id",
 											"type": "Int64"
 										}
 									},
@@ -2181,7 +2181,7 @@
 											"type": "String"
 										},
 										"sink": {
-											"name": "filter_id",
+											"name": "analytics_filter_id",
 											"type": "Int64"
 										}
 									},
