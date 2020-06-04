@@ -44,11 +44,15 @@
 											}
 										},
 										{
-											"name": "collected_on",
+											"name": "date",
 											"value": {
 												"value": "@{pipeline().parameters.Period}",
 												"type": "Expression"
 											}
+										},
+										{
+											"name": "analytics_group_id",
+											"value": "1"
 										}
 									],
 									"httpRequestTimeout": "00:01:40",
@@ -111,11 +115,20 @@
 										},
 										{
 											"source": {
-												"path": "$['collected_on']"
+												"path": "$['date']"
 											},
 											"sink": {
-												"name": "collected_on",
+												"name": "date",
 												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "$['analytics_group_id']"
+											},
+											"sink": {
+												"name": "analytics_group_id",
+												"type": "Int64"
 											}
 										}
 									],
@@ -136,11 +149,15 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodFolderDataset",
+									"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"Period": {
 											"value": "@{pipeline().parameters.Period}",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "analytics_group_1_analytics_filter_@{item().id}.csv",
 											"type": "Expression"
 										}
 									}

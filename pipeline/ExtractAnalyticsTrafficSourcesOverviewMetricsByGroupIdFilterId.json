@@ -51,7 +51,7 @@
 											}
 										},
 										{
-											"name": "collected_on",
+											"name": "date",
 											"value": {
 												"value": "@{pipeline().parameters.Period}",
 												"type": "Expression"
@@ -127,10 +127,10 @@
 										},
 										{
 											"source": {
-												"path": "$['collected_on']"
+												"path": "$['date']"
 											},
 											"sink": {
-												"name": "collected_on",
+												"name": "date",
 												"type": "String"
 											}
 										}
