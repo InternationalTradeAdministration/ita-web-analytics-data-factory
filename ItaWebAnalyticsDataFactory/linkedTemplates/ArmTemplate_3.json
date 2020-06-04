@@ -572,7 +572,7 @@
 											"type": "RestSource",
 											"additionalColumns": [
 												{
-													"name": "collected_on",
+													"name": "date",
 													"value": {
 														"value": "@{pipeline().parameters.Period}",
 														"type": "Expression"
@@ -655,10 +655,10 @@
 												},
 												{
 													"source": {
-														"path": "$['collected_on']"
+														"path": "$['date']"
 													},
 													"sink": {
-														"name": "collected_on",
+														"name": "date",
 														"type": "String"
 													}
 												},
@@ -795,7 +795,7 @@
 											"type": "RestSource",
 											"additionalColumns": [
 												{
-													"name": "collected_on",
+													"name": "date",
 													"value": {
 														"value": "@pipeline().parameters.Period",
 														"type": "Expression"
@@ -871,10 +871,10 @@
 												},
 												{
 													"source": {
-														"path": "$['collected_on']"
+														"path": "$['date']"
 													},
 													"sink": {
-														"name": "collected_on",
+														"name": "date",
 														"type": "String"
 													}
 												},
@@ -982,11 +982,15 @@
 													}
 												},
 												{
-													"name": "collected_on",
+													"name": "date",
 													"value": {
 														"value": "@{pipeline().parameters.Period}",
 														"type": "Expression"
 													}
+												},
+												{
+													"name": "analytics_group_id",
+													"value": "1"
 												}
 											],
 											"httpRequestTimeout": "00:01:40",
@@ -1049,11 +1053,20 @@
 												},
 												{
 													"source": {
-														"path": "$['collected_on']"
+														"path": "$['date']"
 													},
 													"sink": {
-														"name": "collected_on",
+														"name": "date",
 														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"path": "$['analytics_group_id']"
+													},
+													"sink": {
+														"name": "analytics_group_id",
+														"type": "Int64"
 													}
 												}
 											],
@@ -1074,11 +1087,15 @@
 									],
 									"outputs": [
 										{
-											"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodFolderDataset",
+											"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodCsvDataset",
 											"type": "DatasetReference",
 											"parameters": {
 												"Period": {
 													"value": "@{pipeline().parameters.Period}",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "analytics_group_1_analytics_filter_@{item().id}.csv",
 													"type": "Expression"
 												}
 											}
@@ -1187,7 +1204,7 @@
 													}
 												},
 												{
-													"name": "collected_on",
+													"name": "date",
 													"value": {
 														"value": "@{pipeline().parameters.Period}",
 														"type": "Expression"
@@ -1263,10 +1280,10 @@
 												},
 												{
 													"source": {
-														"path": "$['collected_on']"
+														"path": "$['date']"
 													},
 													"sink": {
-														"name": "collected_on",
+														"name": "date",
 														"type": "String"
 													}
 												}
@@ -1608,13 +1625,13 @@
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "LoadAnalyticsGroupsAnalyticsPages",
+								"activity": "LoadAnalyticsGroups",
 								"dependencyConditions": [
 									"Succeeded"
 								]
 							},
 							{
-								"activity": "LoadAnalyticsGroups",
+								"activity": "LoadAnalyticsGroupsAnalyticsPagesForNotSelectedGroup",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1677,46 +1694,6 @@
 											"name": "url",
 											"type": "String"
 										}
-									},
-									{
-										"source": {
-											"name": "average_page_views_per_visit",
-											"type": "String"
-										},
-										"sink": {
-											"name": "average_page_views_per_visit",
-											"type": "Decimal"
-										}
-									},
-									{
-										"source": {
-											"name": "bounce_rate",
-											"type": "String"
-										},
-										"sink": {
-											"name": "bounce_rate",
-											"type": "Decimal"
-										}
-									},
-									{
-										"source": {
-											"name": "page_views",
-											"type": "String"
-										},
-										"sink": {
-											"name": "page_views",
-											"type": "Int64"
-										}
-									},
-									{
-										"source": {
-											"name": "visits",
-											"type": "String"
-										},
-										"sink": {
-											"name": "visits",
-											"type": "Int64"
-										}
 									}
 								]
 							}
@@ -1726,7 +1703,10 @@
 								"referenceName": "AnalyticsPagesCsvDataset",
 								"type": "DatasetReference",
 								"parameters": {
-									"Period": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')"
+									"Period": {
+										"value": "@pipeline().parameters.Period",
+										"type": "Expression"
+									}
 								}
 							}
 						],
@@ -2017,7 +1997,7 @@
 							"sink": {
 								"type": "AzureSqlSink",
 								"preCopyScript": {
-									"value": "DELETE FROM [web_analytics].[analytics_page_metrics]\nWHERE collected_on = '@{pipeline().parameters.Period}'",
+									"value": "DELETE FROM [web_analytics].[analytics_page_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
 									"type": "Expression"
 								},
 								"disableMetricsCollection": false
@@ -2048,11 +2028,11 @@
 									},
 									{
 										"source": {
-											"name": "collected_on",
+											"name": "date",
 											"type": "String"
 										},
 										"sink": {
-											"name": "collected_on",
+											"name": "date",
 											"type": "String"
 										}
 									},
@@ -2138,9 +2118,9 @@
 								"type": "DelimitedTextSource",
 								"additionalColumns": [
 									{
-										"name": "collected_on",
+										"name": "date",
 										"value": {
-											"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')",
+											"value": "@{pipeline().parameters.Period}",
 											"type": "Expression"
 										}
 									},
@@ -2187,11 +2167,11 @@
 									},
 									{
 										"source": {
-											"name": "collected_on",
+											"name": "date",
 											"type": "String"
 										},
 										"sink": {
-											"name": "collected_on",
+											"name": "date",
 											"type": "String"
 										}
 									},
@@ -2290,7 +2270,7 @@
 							"sink": {
 								"type": "AzureSqlSink",
 								"preCopyScript": {
-									"value": "DELETE FROM [web_analytics].[analytics_traffic_sources_overview_metrics]\nWHERE collected_on = '@{pipeline().parameters.Period}'",
+									"value": "DELETE FROM [web_analytics].[analytics_traffic_sources_overview_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
 									"type": "Expression"
 								},
 								"disableMetricsCollection": false
@@ -2321,11 +2301,11 @@
 									},
 									{
 										"source": {
-											"name": "collected_on",
+											"name": "date",
 											"type": "String"
 										},
 										"sink": {
-											"name": "collected_on",
+											"name": "date",
 											"type": "String"
 										}
 									},
@@ -2377,6 +2357,93 @@
 						"outputs": [
 							{
 								"referenceName": "AnalyticsTrafficSourcesOverviewMetricsSqlDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "LoadAnalyticsGroupsAnalyticsPagesForNotSelectedGroup",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "LoadAnalyticsGroupsAnalyticsPages",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"additionalColumns": [
+									{
+										"name": "analytics_group_id",
+										"value": "1"
+									}
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "analytics_group_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "analytics_group_id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "analytics_page_id",
+											"type": "Int64"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AnalyticsPagesCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@pipeline().parameters.Period",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AnalyticsGroupsAnalyticsPagesSqlDataset",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -2746,7 +2813,7 @@
 													"value": "1"
 												},
 												{
-													"name": "collected_on",
+													"name": "date",
 													"value": {
 														"value": "@{pipeline().parameters.Period}",
 														"type": "Expression"
@@ -2822,10 +2889,10 @@
 												},
 												{
 													"source": {
-														"path": "$['collected_on']"
+														"path": "$['date']"
 													},
 													"sink": {
-														"name": "collected_on",
+														"name": "date",
 														"type": "String"
 													}
 												}
@@ -3270,7 +3337,7 @@
 										"value": "1"
 									},
 									{
-										"name": "collected_on",
+										"name": "date",
 										"value": {
 											"value": "@{pipeline().parameters.Period}",
 											"type": "Expression"
@@ -3343,10 +3410,10 @@
 									},
 									{
 										"source": {
-											"path": "$['collected_on']"
+											"path": "$['date']"
 										},
 										"sink": {
-											"name": "collected_on",
+											"name": "date",
 											"type": "String"
 										}
 									}
