@@ -551,13 +551,21 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsMostPopularPagesCsvDataset')]",
+			"name": "[concat(parameters('factoryName'), '/AnalyticsHistoricalMetricsByPeriodCsvDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"linkedServiceName": {
 					"referenceName": "AzureBlobStorageLinkedService",
 					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Period": {
+						"type": "string"
+					},
+					"FileName": {
+						"type": "string"
+					}
 				},
 				"folder": {
 					"name": "analytics"
@@ -567,7 +575,14 @@
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": "analytics_most_popular_pages.csv",
+						"fileName": {
+							"value": "@{dataset().FileName}",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "@{dataset().Period}/analytics_historical_metrics",
+							"type": "Expression"
+						},
 						"container": "ita-web-analytics"
 					},
 					"columnDelimiter": ",",
