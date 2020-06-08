@@ -3,113 +3,9 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "LoadAnalyticsPages",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "LoadAnalyticsGroups",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "LoadAnalyticsGroupsAnalyticsPagesForNotSelectedGroup",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"sink": {
-						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_pages]",
-						"disableMetricsCollection": false
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "title",
-									"type": "String"
-								},
-								"sink": {
-									"name": "title",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "url",
-									"type": "String"
-								},
-								"sink": {
-									"name": "url",
-									"type": "String"
-								}
-							}
-						]
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsPagesCsvDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@pipeline().parameters.Period",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsPagesSqlDataset",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
 				"name": "LoadAnalyticsGroups",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "LoadAnalyticsTrafficSourcesOverviewMetrics",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -175,94 +71,9 @@
 				]
 			},
 			{
-				"name": "LoadAnalyticsGroupsAnalyticsPages",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "LoadAnalyticsTrafficSourcesOverviewMetrics",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true,
-							"wildcardFolderPath": "analytics_groups_analytics_pages",
-							"wildcardFileName": "analytics_group_*.csv",
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"sink": {
-						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE [web_analytics].[analytics_groups_analytics_pages]",
-						"disableMetricsCollection": false
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "analytics_group_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_group_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "analytics_page_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_page_id",
-									"type": "Int64"
-								}
-							}
-						]
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsGroupsAnalyticsPagesFolderDataset",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsGroupsAnalyticsPagesSqlDataset",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
 				"name": "LoadAnalyticsFilters",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "LoadAnalyticsTrafficSourcesOverviewMetrics",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -328,290 +139,7 @@
 				]
 			},
 			{
-				"name": "LoadAnalyticsPageMetrics",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "LoadAnalyticsFilters",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "LoadAnalyticsPages",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true,
-							"wildcardFolderPath": {
-								"value": "@{pipeline().parameters.Period}/analytics_page_metrics",
-								"type": "Expression"
-							},
-							"wildcardFileName": "*.csv",
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"sink": {
-						"type": "AzureSqlSink",
-						"preCopyScript": {
-							"value": "DELETE FROM [web_analytics].[analytics_page_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
-							"type": "Expression"
-						},
-						"disableMetricsCollection": false
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "filter_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_filter_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "date",
-									"type": "String"
-								},
-								"sink": {
-									"name": "date",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "average_page_views_per_visit",
-									"type": "String"
-								},
-								"sink": {
-									"name": "average_page_views_per_visit",
-									"type": "Decimal"
-								}
-							},
-							{
-								"source": {
-									"name": "bounce_rate",
-									"type": "String"
-								},
-								"sink": {
-									"name": "bounce_rate",
-									"type": "Decimal"
-								}
-							},
-							{
-								"source": {
-									"name": "page_views",
-									"type": "String"
-								},
-								"sink": {
-									"name": "page_views",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "visits",
-									"type": "String"
-								},
-								"sink": {
-									"name": "visits",
-									"type": "Int64"
-								}
-							}
-						]
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsPageMetricsFolderDataset",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsPageMetricsSqlDataset",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
-				"name": "LoadAnalyticsPageMetricsWithDefaultFilterId",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "LoadAnalyticsPageMetrics",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"additionalColumns": [
-							{
-								"name": "date",
-								"value": {
-									"value": "@{pipeline().parameters.Period}",
-									"type": "Expression"
-								}
-							},
-							{
-								"name": "filter_id",
-								"value": "1"
-							}
-						],
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"sink": {
-						"type": "AzureSqlSink",
-						"disableMetricsCollection": false
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"name": "id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "filter_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_filter_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "date",
-									"type": "String"
-								},
-								"sink": {
-									"name": "date",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "average_page_views_per_visit",
-									"type": "String"
-								},
-								"sink": {
-									"name": "average_page_views_per_visit",
-									"type": "Decimal"
-								}
-							},
-							{
-								"source": {
-									"name": "bounce_rate",
-									"type": "String"
-								},
-								"sink": {
-									"name": "bounce_rate",
-									"type": "Decimal"
-								}
-							},
-							{
-								"source": {
-									"name": "page_views",
-									"type": "String"
-								},
-								"sink": {
-									"name": "page_views",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "visits",
-									"type": "String"
-								},
-								"sink": {
-									"name": "visits",
-									"type": "Int64"
-								}
-							}
-						]
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsPagesCsvDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@pipeline().parameters.Period",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsPageMetricsSqlDataset",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
-				"name": "LoadAnalyticsTrafficSourcesOverviewMetrics",
+				"name": "LoadAnalyticsTrafficSourcesMetrics",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -629,7 +157,7 @@
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"wildcardFolderPath": {
-								"value": "@{pipeline().parameters.Period}/analytics_traffic_sources_overview_metrics",
+								"value": "@{pipeline().parameters.Period}/analytics_traffic_sources_metrics",
 								"type": "Expression"
 							},
 							"wildcardFileName": "*.csv",
@@ -642,7 +170,7 @@
 					"sink": {
 						"type": "AzureSqlSink",
 						"preCopyScript": {
-							"value": "DELETE FROM [web_analytics].[analytics_traffic_sources_overview_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
+							"value": "DELETE FROM [web_analytics].[analytics_traffic_sources_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
 							"type": "Expression"
 						},
 						"disableMetricsCollection": false
@@ -716,7 +244,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodFolderDataset",
+						"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodFolderDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {
@@ -728,22 +256,15 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsTrafficSourcesOverviewMetricsSqlDataset",
+						"referenceName": "AnalyticsTrafficSourcesMetricsSqlDataset",
 						"type": "DatasetReference"
 					}
 				]
 			},
 			{
-				"name": "LoadAnalyticsGroupsAnalyticsPagesForNotSelectedGroup",
+				"name": "LoadAnalyticsHistoricalMetrics",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "LoadAnalyticsGroupsAnalyticsPages",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -755,15 +276,15 @@
 				"typeProperties": {
 					"source": {
 						"type": "DelimitedTextSource",
-						"additionalColumns": [
-							{
-								"name": "analytics_group_id",
-								"value": "1"
-							}
-						],
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
+							"recursive": true,
+							"wildcardFolderPath": {
+								"value": "@{pipeline().parameters.Period}/analytics_historical_metrics",
+								"type": "Expression"
+							},
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
 							"type": "DelimitedTextReadSettings"
@@ -771,12 +292,66 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
+						"preCopyScript": {
+							"value": "DELETE FROM [web_analytics].[analytics_historical_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
+							"type": "Expression"
+						},
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
 					"translator": {
 						"type": "TabularTranslator",
 						"mappings": [
+							{
+								"source": {
+									"name": "visits",
+									"type": "String"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "page_views",
+									"type": "String"
+								},
+								"sink": {
+									"name": "page_views",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "new_visitors",
+									"type": "String"
+								},
+								"sink": {
+									"name": "new_visitors",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "returning_visitors",
+									"type": "String"
+								},
+								"sink": {
+									"name": "returning_visitors",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "unique_visitors",
+									"type": "String"
+								},
+								"sink": {
+									"name": "unique_visitors",
+									"type": "Int64"
+								}
+							},
 							{
 								"source": {
 									"name": "analytics_group_id",
@@ -789,12 +364,32 @@
 							},
 							{
 								"source": {
-									"name": "id",
+									"name": "analytics_filter_id",
 									"type": "String"
 								},
 								"sink": {
-									"name": "analytics_page_id",
+									"name": "analytics_filter_id",
 									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "date",
+									"type": "String"
+								},
+								"sink": {
+									"name": "date",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "timestamp",
+									"type": "String"
+								},
+								"sink": {
+									"name": "timestamp",
+									"type": "String"
 								}
 							}
 						]
@@ -802,11 +397,11 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsPagesCsvDataset",
+						"referenceName": "AnalyticsHistoricalMetricsByPeriodFolderDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {
-								"value": "@pipeline().parameters.Period",
+								"value": "@{pipeline().parameters.Period}",
 								"type": "Expression"
 							}
 						}
@@ -814,7 +409,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsGroupsAnalyticsPagesSqlDataset",
+						"referenceName": "AnalyticsHistoricalMetricsSqlDataset",
 						"type": "DatasetReference"
 					}
 				]

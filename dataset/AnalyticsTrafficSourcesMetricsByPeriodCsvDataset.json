@@ -1,5 +1,5 @@
 {
-	"name": "AnalyticsTrafficSourcesOverviewMetricsByPeriodCsvDataset",
+	"name": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
@@ -26,7 +26,7 @@
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "@{dataset().Period}/analytics_traffic_sources_overview_metrics",
+					"value": "@{dataset().Period}/analytics_traffic_sources_metrics",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"

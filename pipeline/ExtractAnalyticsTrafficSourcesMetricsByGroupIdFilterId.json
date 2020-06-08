@@ -1,5 +1,5 @@
 {
-	"name": "ExtractAnalyticsTrafficSourcesOverviewMetricsByGroupIdFilterId",
+	"name": "ExtractAnalyticsTrafficSourcesMetricsByGroupIdFilterId",
 	"properties": {
 		"activities": [
 			{
@@ -21,7 +21,7 @@
 					},
 					"activities": [
 						{
-							"name": "ExtractAnalyticsTrafficSourcesOverviewMetrics",
+							"name": "ExtractAnalyticsTrafficSourcesMetrics",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -140,7 +140,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "AnalyticsTrafficSourcesOverviewMetricsRestDataset",
+									"referenceName": "AnalyticsTrafficSourcesMetricsRestDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"QueryString": {
@@ -152,7 +152,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodCsvDataset",
+									"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"Period": {

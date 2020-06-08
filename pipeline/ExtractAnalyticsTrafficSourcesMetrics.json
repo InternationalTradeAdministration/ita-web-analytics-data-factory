@@ -1,5 +1,5 @@
 {
-	"name": "ExtractAnalyticsTrafficSourcesOverviewMetrics",
+	"name": "ExtractAnalyticsTrafficSourcesMetrics",
 	"properties": {
 		"activities": [
 			{
@@ -113,7 +113,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsTrafficSourcesOverviewMetricsRestDataset",
+						"referenceName": "AnalyticsTrafficSourcesMetricsRestDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"QueryString": {
@@ -125,7 +125,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodCsvDataset",
+						"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {
@@ -154,7 +154,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsTrafficSourcesOverviewMetricsByGroupId",
+						"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByGroupId",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -180,7 +180,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsTrafficSourcesOverviewMetricsByFilterId",
+						"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByFilterId",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,

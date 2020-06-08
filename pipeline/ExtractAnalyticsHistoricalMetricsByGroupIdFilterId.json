@@ -1,43 +1,13 @@
 {
-	"name": "ExtractAnalyticsTrafficSourcesOverviewMetricsByGroupId",
+	"name": "ExtractAnalyticsHistoricalMetricsByGroupIdFilterId",
 	"properties": {
 		"activities": [
 			{
-				"name": "LookupAnalyticsGroups",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"dataset": {
-						"referenceName": "AnalyticsGroupsCsvDataset",
-						"type": "DatasetReference"
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
-				"name": "AnalyticsGroup",
+				"name": "AnalyticsFilter",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "LookupAnalyticsGroups",
+						"activity": "LookupAnalyticsFilters",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -46,13 +16,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('LookupAnalyticsGroups').output.value",
+						"value": "@activity('LookupAnalyticsFilters').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 4,
 					"activities": [
 						{
-							"name": "ExtractAnalyticsTrafficSourcesOverviewMetrics",
+							"name": "ExtractAnalyticsHistoricalMetrics",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -70,13 +39,16 @@
 										{
 											"name": "analytics_group_id",
 											"value": {
-												"value": "@{item().id}",
+												"value": "@{pipeline().parameters.GroupId}",
 												"type": "Expression"
 											}
 										},
 										{
 											"name": "analytics_filter_id",
-											"value": "1"
+											"value": {
+												"value": "@{item().id}",
+												"type": "Expression"
+											}
 										},
 										{
 											"name": "date",
@@ -110,20 +82,47 @@
 									"mappings": [
 										{
 											"source": {
-												"path": "['bounce_rate']"
+												"path": "['new_visitors']"
 											},
 											"sink": {
-												"name": "bounce_rate",
-												"type": "Decimal"
+												"name": "new_visitors",
+												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"path": "['type']"
+												"path": "['page_views']"
 											},
 											"sink": {
-												"name": "type",
+												"name": "page_views",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "['returning_visitors']"
+											},
+											"sink": {
+												"name": "returning_visitors",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "['timestamp']"
+											},
+											"sink": {
+												"name": "timestamp",
 												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "['unique_visitors']"
+											},
+											"sink": {
+												"name": "unique_visitors",
+												"type": "Int64"
 											}
 										},
 										{
@@ -168,11 +167,11 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "AnalyticsTrafficSourcesOverviewMetricsRestDataset",
+									"referenceName": "AnalyticsHistoricalMetricsRestDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"QueryString": {
-											"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&group_id=@{item().id}",
+											"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&group_id=@{pipeline().parameters.GroupId}&filter_id=@{item().id}",
 											"type": "Expression"
 										}
 									}
@@ -180,7 +179,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "AnalyticsTrafficSourcesOverviewMetricsByPeriodCsvDataset",
+									"referenceName": "AnalyticsHistoricalMetricsByPeriodCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"Period": {
@@ -188,49 +187,52 @@
 											"type": "Expression"
 										},
 										"FileName": {
-											"value": "analytics_group_@{item().id}.csv",
+											"value": "analytics_group_@{pipeline().parameters.GroupId}_analytics_filter_@{item().id}.csv",
 											"type": "Expression"
 										}
 									}
 								}
 							]
-						},
-						{
-							"name": "ExecuteExtractByGroupIdFilterId",
-							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "ExtractAnalyticsTrafficSourcesOverviewMetrics",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "ExtractAnalyticsTrafficSourcesOverviewMetricsByGroupIdFilterId",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"Period": {
-										"value": "@{pipeline().parameters.Period}",
-										"type": "Expression"
-									},
-									"GroupId": {
-										"value": "@{item().id}",
-										"type": "Expression"
-									}
-								}
-							}
 						}
 					]
+				}
+			},
+			{
+				"name": "LookupAnalyticsFilters",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "AnalyticsFiltersCsvDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
 				}
 			}
 		],
 		"parameters": {
 			"Period": {
+				"type": "string"
+			},
+			"GroupId": {
 				"type": "string"
 			}
 		},
