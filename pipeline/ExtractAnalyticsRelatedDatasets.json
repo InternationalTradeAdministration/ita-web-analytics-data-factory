@@ -172,111 +172,6 @@
 				]
 			},
 			{
-				"name": "Prevent Delete from failing when folder is empty",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "ExtractAnalyticsFilters",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "ExtractAnalyticsGroups",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsFiltersCsvDataset",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "DailyFolderDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@pipeline().parameters.Period",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "Delete Daily Folder",
-				"type": "Delete",
-				"dependsOn": [
-					{
-						"activity": "Prevent Delete from failing when folder is empty",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "DailyFolderDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@pipeline().parameters.Period",
-								"type": "Expression"
-							}
-						}
-					},
-					"enableLogging": false,
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true
-					}
-				}
-			},
-			{
 				"name": "ExecuteExtractAnalyticsTrafficSourcesMetrics",
 				"type": "ExecutePipeline",
 				"dependsOn": [
@@ -307,7 +202,13 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "Delete Daily Folder",
+						"activity": "ExtractAnalyticsGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "ExtractAnalyticsFilters",
 						"dependencyConditions": [
 							"Succeeded"
 						]

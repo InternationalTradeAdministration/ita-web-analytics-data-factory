@@ -49,13 +49,6 @@
 												"value": "@{item().id}",
 												"type": "Expression"
 											}
-										},
-										{
-											"name": "date",
-											"value": {
-												"value": "@{pipeline().parameters.Period}",
-												"type": "Expression"
-											}
 										}
 									],
 									"httpRequestTimeout": "00:01:40",
@@ -82,29 +75,47 @@
 									"mappings": [
 										{
 											"source": {
-												"path": "['bounce_rate']"
+												"path": "['direct_traffic']"
 											},
 											"sink": {
-												"name": "bounce_rate",
-												"type": "Decimal"
-											}
-										},
-										{
-											"source": {
-												"path": "['type']"
-											},
-											"sink": {
-												"name": "type",
-												"type": "String"
-											}
-										},
-										{
-											"source": {
-												"path": "['visits']"
-											},
-											"sink": {
-												"name": "visits",
+												"name": "direct_traffic",
 												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "['external_referrer']"
+											},
+											"sink": {
+												"name": "external_referrer",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "['search_domain']"
+											},
+											"sink": {
+												"name": "search_domain",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "['social_media']"
+											},
+											"sink": {
+												"name": "social_media",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "['timestamp']"
+											},
+											"sink": {
+												"name": "timestamp",
+												"type": "String"
 											}
 										},
 										{
@@ -123,15 +134,6 @@
 											"sink": {
 												"name": "analytics_filter_id",
 												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"path": "$['date']"
-											},
-											"sink": {
-												"name": "date",
-												"type": "String"
 											}
 										}
 									],

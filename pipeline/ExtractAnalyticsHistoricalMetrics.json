@@ -5,7 +5,14 @@
 			{
 				"name": "ExtractByPeriod",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "Delete Period Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -25,13 +32,6 @@
 							{
 								"name": "analytics_filter_id",
 								"value": "1"
-							},
-							{
-								"name": "date",
-								"value": {
-									"value": "@{pipeline().parameters.Period}",
-									"type": "Expression"
-								}
 							}
 						],
 						"httpRequestTimeout": "00:01:40",
@@ -53,6 +53,15 @@
 					"translator": {
 						"type": "TabularTranslator",
 						"mappings": [
+							{
+								"source": {
+									"path": "['bounce_rate']"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
 							{
 								"source": {
 									"path": "['new_visitors']"
@@ -104,7 +113,7 @@
 								},
 								"sink": {
 									"name": "visits",
-									"type": "String"
+									"type": "Int64"
 								}
 							},
 							{
@@ -113,7 +122,7 @@
 								},
 								"sink": {
 									"name": "analytics_group_id",
-									"type": "String"
+									"type": "Int64"
 								}
 							},
 							{
@@ -122,16 +131,7 @@
 								},
 								"sink": {
 									"name": "analytics_filter_id",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "$['date']"
-								},
-								"sink": {
-									"name": "date",
-									"type": "String"
+									"type": "Int64"
 								}
 							}
 						],
@@ -218,6 +218,99 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "Delete Period Folder",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Prevent Delete from failing when folder is empty",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "AnalyticsHistoricalMetricsByPeriodFolderDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@{pipeline().parameters.Period}",
+								"type": "Expression"
+							}
+						}
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					}
+				}
+			},
+			{
+				"name": "Prevent Delete from failing when folder is empty",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsGroupsCsvDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsHistoricalMetricsByPeriodCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@{pipeline().parameters.Period}",
+								"type": "Expression"
+							},
+							"FileName": "filler.csv"
+						}
+					}
+				]
 			}
 		],
 		"parameters": {

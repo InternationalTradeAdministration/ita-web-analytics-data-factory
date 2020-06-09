@@ -157,7 +157,7 @@
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"wildcardFolderPath": {
-								"value": "@{pipeline().parameters.Period}/analytics_traffic_sources_metrics",
+								"value": "analytics_traffic_sources_metrics",
 								"type": "Expression"
 							},
 							"wildcardFileName": "*.csv",
@@ -170,7 +170,7 @@
 					"sink": {
 						"type": "AzureSqlSink",
 						"preCopyScript": {
-							"value": "DELETE FROM [web_analytics].[analytics_traffic_sources_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
+							"value": "TRUNCATE TABLE [web_analytics].[analytics_traffic_sources_metrics]",
 							"type": "Expression"
 						},
 						"disableMetricsCollection": false
@@ -201,41 +201,51 @@
 							},
 							{
 								"source": {
-									"name": "date",
+									"name": "timestamp",
 									"type": "String"
 								},
 								"sink": {
-									"name": "date",
+									"name": "timestamp",
 									"type": "String"
 								}
 							},
 							{
 								"source": {
-									"name": "type",
+									"name": "direct_traffic",
 									"type": "String"
 								},
 								"sink": {
-									"name": "type",
-									"type": "String"
+									"name": "direct_traffic",
+									"type": "Int64"
 								}
 							},
 							{
 								"source": {
-									"name": "bounce_rate",
+									"name": "external_referrer",
 									"type": "String"
 								},
 								"sink": {
-									"name": "bounce_rate",
-									"type": "Decimal"
+									"name": "external_referrer",
+									"type": "Int64"
 								}
 							},
 							{
 								"source": {
-									"name": "visits",
+									"name": "search_domain",
 									"type": "String"
 								},
 								"sink": {
-									"name": "visits",
+									"name": "search_domain",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "social_media",
+									"type": "String"
+								},
+								"sink": {
+									"name": "social_media",
 									"type": "Int64"
 								}
 							}
@@ -280,7 +290,7 @@
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"wildcardFolderPath": {
-								"value": "@{pipeline().parameters.Period}/analytics_historical_metrics",
+								"value": "analytics_historical_metrics",
 								"type": "Expression"
 							},
 							"wildcardFileName": "*.csv",
@@ -293,7 +303,7 @@
 					"sink": {
 						"type": "AzureSqlSink",
 						"preCopyScript": {
-							"value": "DELETE FROM [web_analytics].[analytics_historical_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
+							"value": "TRUNCATE TABLE [web_analytics].[analytics_historical_metrics]",
 							"type": "Expression"
 						},
 						"disableMetricsCollection": false
@@ -304,12 +314,42 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "visits",
+									"name": "analytics_group_id",
 									"type": "String"
 								},
 								"sink": {
-									"name": "visits",
+									"name": "analytics_group_id",
 									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "analytics_filter_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_filter_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "timestamp",
+									"type": "String"
+								},
+								"sink": {
+									"name": "timestamp",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "bounce_rate",
+									"type": "String"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
 								}
 							},
 							{
@@ -319,6 +359,16 @@
 								},
 								"sink": {
 									"name": "page_views",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "visits",
+									"type": "String"
+								},
+								"sink": {
+									"name": "visits",
 									"type": "Int64"
 								}
 							},
@@ -350,46 +400,6 @@
 								"sink": {
 									"name": "unique_visitors",
 									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "analytics_group_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_group_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "analytics_filter_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_filter_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "date",
-									"type": "String"
-								},
-								"sink": {
-									"name": "date",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "timestamp",
-									"type": "String"
-								},
-								"sink": {
-									"name": "timestamp",
-									"type": "String"
 								}
 							}
 						]

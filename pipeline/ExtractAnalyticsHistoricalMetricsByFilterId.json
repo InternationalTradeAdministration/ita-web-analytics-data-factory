@@ -44,13 +44,6 @@
 											}
 										},
 										{
-											"name": "date",
-											"value": {
-												"value": "@{pipeline().parameters.Period}",
-												"type": "Expression"
-											}
-										},
-										{
 											"name": "analytics_group_id",
 											"value": "1"
 										}
@@ -138,15 +131,6 @@
 											"sink": {
 												"name": "analytics_filter_id",
 												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"path": "$['date']"
-											},
-											"sink": {
-												"name": "date",
-												"type": "String"
 											}
 										},
 										{

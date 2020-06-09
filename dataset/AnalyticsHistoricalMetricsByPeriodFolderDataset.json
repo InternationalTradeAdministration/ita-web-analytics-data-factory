@@ -18,7 +18,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "@{dataset().Period}/analytics_historical_metrics",
+				"folderPath": {
+					"value": "analytics_historical_metrics/@{dataset().Period}",
+					"type": "Expression"
+				},
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",

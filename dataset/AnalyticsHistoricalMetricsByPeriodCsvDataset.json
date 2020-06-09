@@ -26,7 +26,7 @@
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "@{dataset().Period}/analytics_historical_metrics",
+					"value": "analytics_historical_metrics/@{dataset().Period}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"
