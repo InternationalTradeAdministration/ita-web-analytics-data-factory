@@ -35,7 +35,7 @@
 					"location": {
 						"type": "AzureBlobStorageLocation",
 						"folderPath": {
-							"value": "@{dataset().Period}/analytics_historical_metrics",
+							"value": "analytics_historical_metrics/@{dataset().Period}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
@@ -592,7 +592,7 @@
 							"type": "Expression"
 						},
 						"folderPath": {
-							"value": "@{dataset().Period}/analytics_traffic_sources_metrics",
+							"value": "analytics_traffic_sources_metrics/@{dataset().Period}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
@@ -629,7 +629,7 @@
 					"location": {
 						"type": "AzureBlobStorageLocation",
 						"folderPath": {
-							"value": "@{dataset().Period}/analytics_traffic_sources_metrics",
+							"value": "analytics_traffic_sources_metrics/@{dataset().Period}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"

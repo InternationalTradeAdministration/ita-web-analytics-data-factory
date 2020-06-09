@@ -629,13 +629,6 @@
 													}
 												},
 												{
-													"name": "date",
-													"value": {
-														"value": "@{pipeline().parameters.Period}",
-														"type": "Expression"
-													}
-												},
-												{
 													"name": "analytics_group_id",
 													"value": "1"
 												}
@@ -723,15 +716,6 @@
 													"sink": {
 														"name": "analytics_filter_id",
 														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "$['date']"
-													},
-													"sink": {
-														"name": "date",
-														"type": "String"
 													}
 												},
 												{
@@ -876,13 +860,6 @@
 														"value": "@{item().id}",
 														"type": "Expression"
 													}
-												},
-												{
-													"name": "date",
-													"value": {
-														"value": "@{pipeline().parameters.Period}",
-														"type": "Expression"
-													}
 												}
 											],
 											"httpRequestTimeout": "00:01:40",
@@ -907,6 +884,15 @@
 										"translator": {
 											"type": "TabularTranslator",
 											"mappings": [
+												{
+													"source": {
+														"path": "[['bounce_rate']"
+													},
+													"sink": {
+														"name": "bounce_rate",
+														"type": "Decimal"
+													}
+												},
 												{
 													"source": {
 														"path": "[['new_visitors']"
@@ -977,15 +963,6 @@
 													"sink": {
 														"name": "analytics_filter_id",
 														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "$['date']"
-													},
-													"sink": {
-														"name": "date",
-														"type": "String"
 													}
 												}
 											],
@@ -1554,13 +1531,6 @@
 													}
 												},
 												{
-													"name": "date",
-													"value": {
-														"value": "@{pipeline().parameters.Period}",
-														"type": "Expression"
-													}
-												},
-												{
 													"name": "analytics_group_id",
 													"value": "1"
 												}
@@ -1589,29 +1559,47 @@
 											"mappings": [
 												{
 													"source": {
-														"path": "[['bounce_rate']"
+														"path": "[['direct_traffic']"
 													},
 													"sink": {
-														"name": "bounce_rate",
-														"type": "Decimal"
-													}
-												},
-												{
-													"source": {
-														"path": "[['type']"
-													},
-													"sink": {
-														"name": "type",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"path": "[['visits']"
-													},
-													"sink": {
-														"name": "visits",
+														"name": "direct_traffic",
 														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['external_referrer']"
+													},
+													"sink": {
+														"name": "external_referrer",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['search_domain']"
+													},
+													"sink": {
+														"name": "search_domain",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['social_media']"
+													},
+													"sink": {
+														"name": "social_media",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['timestamp']"
+													},
+													"sink": {
+														"name": "timestamp",
+														"type": "String"
 													}
 												},
 												{
@@ -1621,15 +1609,6 @@
 													"sink": {
 														"name": "analytics_filter_id",
 														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "$['date']"
-													},
-													"sink": {
-														"name": "date",
-														"type": "String"
 													}
 												},
 												{
@@ -1774,13 +1753,6 @@
 														"value": "@{item().id}",
 														"type": "Expression"
 													}
-												},
-												{
-													"name": "date",
-													"value": {
-														"value": "@{pipeline().parameters.Period}",
-														"type": "Expression"
-													}
 												}
 											],
 											"httpRequestTimeout": "00:01:40",
@@ -1807,29 +1779,47 @@
 											"mappings": [
 												{
 													"source": {
-														"path": "[['bounce_rate']"
+														"path": "[['direct_traffic']"
 													},
 													"sink": {
-														"name": "bounce_rate",
-														"type": "Decimal"
-													}
-												},
-												{
-													"source": {
-														"path": "[['type']"
-													},
-													"sink": {
-														"name": "type",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"path": "[['visits']"
-													},
-													"sink": {
-														"name": "visits",
+														"name": "direct_traffic",
 														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['external_referrer']"
+													},
+													"sink": {
+														"name": "external_referrer",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['search_domain']"
+													},
+													"sink": {
+														"name": "search_domain",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['social_media']"
+													},
+													"sink": {
+														"name": "social_media",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['timestamp']"
+													},
+													"sink": {
+														"name": "timestamp",
+														"type": "String"
 													}
 												},
 												{
@@ -1848,15 +1838,6 @@
 													"sink": {
 														"name": "analytics_filter_id",
 														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "$['date']"
-													},
-													"sink": {
-														"name": "date",
-														"type": "String"
 													}
 												}
 											],
@@ -2436,7 +2417,7 @@
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
 									"wildcardFolderPath": {
-										"value": "@{pipeline().parameters.Period}/analytics_traffic_sources_metrics",
+										"value": "analytics_traffic_sources_metrics",
 										"type": "Expression"
 									},
 									"wildcardFileName": "*.csv",
@@ -2449,7 +2430,7 @@
 							"sink": {
 								"type": "AzureSqlSink",
 								"preCopyScript": {
-									"value": "DELETE FROM [web_analytics].[analytics_traffic_sources_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
+									"value": "TRUNCATE TABLE [web_analytics].[analytics_traffic_sources_metrics]",
 									"type": "Expression"
 								},
 								"disableMetricsCollection": false
@@ -2480,41 +2461,51 @@
 									},
 									{
 										"source": {
-											"name": "date",
+											"name": "timestamp",
 											"type": "String"
 										},
 										"sink": {
-											"name": "date",
+											"name": "timestamp",
 											"type": "String"
 										}
 									},
 									{
 										"source": {
-											"name": "type",
+											"name": "direct_traffic",
 											"type": "String"
 										},
 										"sink": {
-											"name": "type",
-											"type": "String"
+											"name": "direct_traffic",
+											"type": "Int64"
 										}
 									},
 									{
 										"source": {
-											"name": "bounce_rate",
+											"name": "external_referrer",
 											"type": "String"
 										},
 										"sink": {
-											"name": "bounce_rate",
-											"type": "Decimal"
+											"name": "external_referrer",
+											"type": "Int64"
 										}
 									},
 									{
 										"source": {
-											"name": "visits",
+											"name": "search_domain",
 											"type": "String"
 										},
 										"sink": {
-											"name": "visits",
+											"name": "search_domain",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "social_media",
+											"type": "String"
+										},
+										"sink": {
+											"name": "social_media",
 											"type": "Int64"
 										}
 									}
@@ -2560,7 +2551,7 @@
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
 									"wildcardFolderPath": {
-										"value": "@{pipeline().parameters.Period}/analytics_historical_metrics",
+										"value": "analytics_historical_metrics",
 										"type": "Expression"
 									},
 									"wildcardFileName": "*.csv",
@@ -2573,7 +2564,7 @@
 							"sink": {
 								"type": "AzureSqlSink",
 								"preCopyScript": {
-									"value": "DELETE FROM [web_analytics].[analytics_historical_metrics]\nWHERE date = '@{pipeline().parameters.Period}'",
+									"value": "TRUNCATE TABLE [web_analytics].[analytics_historical_metrics]",
 									"type": "Expression"
 								},
 								"disableMetricsCollection": false
@@ -2584,12 +2575,42 @@
 								"mappings": [
 									{
 										"source": {
-											"name": "visits",
+											"name": "analytics_group_id",
 											"type": "String"
 										},
 										"sink": {
-											"name": "visits",
+											"name": "analytics_group_id",
 											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "analytics_filter_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "analytics_filter_id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "timestamp",
+											"type": "String"
+										},
+										"sink": {
+											"name": "timestamp",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "bounce_rate",
+											"type": "String"
+										},
+										"sink": {
+											"name": "bounce_rate",
+											"type": "Decimal"
 										}
 									},
 									{
@@ -2599,6 +2620,16 @@
 										},
 										"sink": {
 											"name": "page_views",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "visits",
+											"type": "String"
+										},
+										"sink": {
+											"name": "visits",
 											"type": "Int64"
 										}
 									},
@@ -2630,46 +2661,6 @@
 										"sink": {
 											"name": "unique_visitors",
 											"type": "Int64"
-										}
-									},
-									{
-										"source": {
-											"name": "analytics_group_id",
-											"type": "String"
-										},
-										"sink": {
-											"name": "analytics_group_id",
-											"type": "Int64"
-										}
-									},
-									{
-										"source": {
-											"name": "analytics_filter_id",
-											"type": "String"
-										},
-										"sink": {
-											"name": "analytics_filter_id",
-											"type": "Int64"
-										}
-									},
-									{
-										"source": {
-											"name": "date",
-											"type": "String"
-										},
-										"sink": {
-											"name": "date",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "timestamp",
-											"type": "String"
-										},
-										"sink": {
-											"name": "timestamp",
-											"type": "String"
 										}
 									}
 								]
@@ -2871,13 +2862,6 @@
 												{
 													"name": "analytics_filter_id",
 													"value": "1"
-												},
-												{
-													"name": "date",
-													"value": {
-														"value": "@{pipeline().parameters.Period}",
-														"type": "Expression"
-													}
 												}
 											],
 											"httpRequestTimeout": "00:01:40",
@@ -2902,6 +2886,15 @@
 										"translator": {
 											"type": "TabularTranslator",
 											"mappings": [
+												{
+													"source": {
+														"path": "[['bounce_rate']"
+													},
+													"sink": {
+														"name": "bounce_rate",
+														"type": "Decimal"
+													}
+												},
 												{
 													"source": {
 														"path": "[['new_visitors']"
@@ -2972,15 +2965,6 @@
 													"sink": {
 														"name": "analytics_filter_id",
 														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "$['date']"
-													},
-													"sink": {
-														"name": "date",
-														"type": "String"
 													}
 												}
 											],
@@ -3146,13 +3130,6 @@
 												{
 													"name": "analytics_filter_id",
 													"value": "1"
-												},
-												{
-													"name": "date",
-													"value": {
-														"value": "@{pipeline().parameters.Period}",
-														"type": "Expression"
-													}
 												}
 											],
 											"httpRequestTimeout": "00:01:40",
@@ -3179,29 +3156,47 @@
 											"mappings": [
 												{
 													"source": {
-														"path": "[['bounce_rate']"
+														"path": "[['direct_traffic']"
 													},
 													"sink": {
-														"name": "bounce_rate",
-														"type": "Decimal"
-													}
-												},
-												{
-													"source": {
-														"path": "[['type']"
-													},
-													"sink": {
-														"name": "type",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"path": "[['visits']"
-													},
-													"sink": {
-														"name": "visits",
+														"name": "direct_traffic",
 														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['external_referrer']"
+													},
+													"sink": {
+														"name": "external_referrer",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['search_domain']"
+													},
+													"sink": {
+														"name": "search_domain",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['social_media']"
+													},
+													"sink": {
+														"name": "social_media",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "[['timestamp']"
+													},
+													"sink": {
+														"name": "timestamp",
+														"type": "String"
 													}
 												},
 												{
@@ -3220,15 +3215,6 @@
 													"sink": {
 														"name": "analytics_filter_id",
 														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "$['date']"
-													},
-													"sink": {
-														"name": "date",
-														"type": "String"
 													}
 												}
 											],
@@ -3363,7 +3349,14 @@
 					{
 						"name": "ExtractByPeriod",
 						"type": "Copy",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "Delete Period Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
@@ -3383,13 +3376,6 @@
 									{
 										"name": "analytics_filter_id",
 										"value": "1"
-									},
-									{
-										"name": "date",
-										"value": {
-											"value": "@{pipeline().parameters.Period}",
-											"type": "Expression"
-										}
 									}
 								],
 								"httpRequestTimeout": "00:01:40",
@@ -3411,6 +3397,15 @@
 							"translator": {
 								"type": "TabularTranslator",
 								"mappings": [
+									{
+										"source": {
+											"path": "[['bounce_rate']"
+										},
+										"sink": {
+											"name": "bounce_rate",
+											"type": "Decimal"
+										}
+									},
 									{
 										"source": {
 											"path": "[['new_visitors']"
@@ -3462,7 +3457,7 @@
 										},
 										"sink": {
 											"name": "visits",
-											"type": "String"
+											"type": "Int64"
 										}
 									},
 									{
@@ -3471,7 +3466,7 @@
 										},
 										"sink": {
 											"name": "analytics_group_id",
-											"type": "String"
+											"type": "Int64"
 										}
 									},
 									{
@@ -3480,16 +3475,7 @@
 										},
 										"sink": {
 											"name": "analytics_filter_id",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"path": "$['date']"
-										},
-										"sink": {
-											"name": "date",
-											"type": "String"
+											"type": "Int64"
 										}
 									}
 								],
@@ -3576,6 +3562,100 @@
 								}
 							}
 						}
+					},
+					{
+						"name": "Delete Period Folder",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Prevent Delete from failing when folder is empty",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "AnalyticsHistoricalMetricsByPeriodFolderDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									}
+								}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							}
+						}
+					},
+					{
+						"name": "Prevent Delete from failing when folder is empty",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "AnalyticsGroupsCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AnalyticsHistoricalMetricsByPeriodCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									},
+									"FileName": "filler.csv"
+								}
+							}
+						]
 					}
 				],
 				"parameters": {

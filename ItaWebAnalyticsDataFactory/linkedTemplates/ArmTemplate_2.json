@@ -33,7 +33,7 @@
 				"type": "RestResource",
 				"typeProperties": {
 					"relativeUrl": {
-						"value": "v2/sites/17536213616/analytics/traffic_sources/summary?@{dataset().QueryString}",
+						"value": "v2/sites/17536213616/analytics/traffic_sources/summary/history?@{dataset().QueryString}",
 						"type": "Expression"
 					}
 				},
