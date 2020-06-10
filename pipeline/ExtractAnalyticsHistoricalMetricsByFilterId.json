@@ -72,6 +72,15 @@
 									"mappings": [
 										{
 											"source": {
+												"path": "['bounce_rate']"
+											},
+											"sink": {
+												"name": "bounce_rate",
+												"type": "Decimal"
+											}
+										},
+										{
+											"source": {
 												"path": "['new_visitors']"
 											},
 											"sink": {
