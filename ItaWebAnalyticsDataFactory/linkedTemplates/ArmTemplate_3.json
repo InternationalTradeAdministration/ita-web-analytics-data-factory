@@ -657,6 +657,15 @@
 											"mappings": [
 												{
 													"source": {
+														"path": "[['bounce_rate']"
+													},
+													"sink": {
+														"name": "bounce_rate",
+														"type": "Decimal"
+													}
+												},
+												{
+													"source": {
 														"path": "[['new_visitors']"
 													},
 													"sink": {
@@ -3504,7 +3513,7 @@
 										"type": "Expression"
 									},
 									"FileName": {
-										"value": "@{pipeline().parameters.Period}.csv",
+										"value": "analytics_group_1_analytics_filter_1.csv",
 										"type": "Expression"
 									}
 								}
