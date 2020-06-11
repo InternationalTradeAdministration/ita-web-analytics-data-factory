@@ -1,0 +1,26 @@
+{
+	"name": "AnalyticsBrowsersMetricsRestDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SiteImproveRestLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"QueryString": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "v2/sites/17536213616/analytics/visitors/browsers/history?@{dataset().QueryString}",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}

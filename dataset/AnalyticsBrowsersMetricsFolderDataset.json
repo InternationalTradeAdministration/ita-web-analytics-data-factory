@@ -1,0 +1,29 @@
+{
+	"name": "AnalyticsBrowsersMetricsFolderDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "analytics_browsers_metrics",
+					"type": "Expression"
+				},
+				"container": "ita-web-analytics"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}
