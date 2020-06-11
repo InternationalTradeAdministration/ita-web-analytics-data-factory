@@ -5587,12 +5587,7 @@
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"AnalyticsBrowsersMetrics": {
-										"Period": {
-											"value": "@{pipeline().parameters.Period}",
-											"type": "Expression"
-										}
-									},
+									"AnalyticsBrowsersMetrics": {},
 									"SinkUnpivotedAnalyticsBrowsersMetrics": {}
 								}
 							},
@@ -5947,6 +5942,40 @@
 						"type": "AzureBlobStorageLocation",
 						"folderPath": {
 							"value": "analytics_browsers_metrics/@{dataset().Period}",
+							"type": "Expression"
+						},
+						"container": "ita-web-analytics"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorageLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AnalyticsBrowsersMetricsFolderDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "analytics_browsers_metrics",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
@@ -7887,7 +7916,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "AnalyticsBrowsersMetricsByPeriodFolderDataset",
+								"referenceName": "AnalyticsBrowsersMetricsFolderDataset",
 								"type": "DatasetReference"
 							},
 							"name": "AnalyticsBrowsersMetrics"
@@ -7910,11 +7939,11 @@
 							"name": "Filter1"
 						}
 					],
-					"script": "source(output(\n\t\tChrome as integer,\n\t\t{Chrome Mobile} as integer,\n\t\tEdge as integer,\n\t\tSafari as integer,\n\t\t{Mobile Safari} as integer,\n\t\tIE as integer,\n\t\t{IE Mobile} as integer,\n\t\tFirefox as integer,\n\t\t{Android Browser} as integer,\n\t\t{Samsung Browser} as integer,\n\t\tOpera as integer,\n\t\t{Opera Mini} as integer,\n\t\t{Opera Mobile} as integer,\n\t\tUnknown as integer,\n\t\ttimestamp as string,\n\t\tanalytics_group_id as long,\n\t\tanalytics_filter_id as long\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tlimit: 100) ~> AnalyticsBrowsersMetrics\nAnalyticsBrowsersMetrics unpivot(output(\n\t\tbrowser_name as string,\n\t\tvisits as integer\n\t),\n\tungroupBy(analytics_group_id,\n\t\tanalytics_filter_id,\n\t\ttimestamp),\n\tlateral: false,\n\tignoreNullPivots: false) ~> UnpivotedAnalyticsBrowsersMetrics\nUnpivotedAnalyticsBrowsersMetrics filter(visits > 0) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tpreSQLs:['TRUNCATE TABLE [web_analytics].[analytics_browsers_metrics]'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkUnpivotedAnalyticsBrowsersMetrics"
+					"script": "source(output(\n\t\tChrome as integer,\n\t\t{Chrome Mobile} as integer,\n\t\tEdge as integer,\n\t\tSafari as integer,\n\t\t{Mobile Safari} as integer,\n\t\tIE as integer,\n\t\t{IE Mobile} as integer,\n\t\tFirefox as integer,\n\t\t{Android Browser} as integer,\n\t\t{Samsung Browser} as integer,\n\t\tOpera as integer,\n\t\t{Opera Mini} as integer,\n\t\t{Opera Mobile} as integer,\n\t\tUnknown as integer,\n\t\ttimestamp as string,\n\t\tanalytics_group_id as long,\n\t\tanalytics_filter_id as long\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['analytics_browsers_metrics/**/*.csv']) ~> AnalyticsBrowsersMetrics\nAnalyticsBrowsersMetrics unpivot(output(\n\t\tbrowser_name as string,\n\t\tvisits as integer\n\t),\n\tungroupBy(analytics_group_id,\n\t\tanalytics_filter_id,\n\t\ttimestamp),\n\tlateral: false,\n\tignoreNullPivots: false) ~> UnpivotedAnalyticsBrowsersMetrics\nUnpivotedAnalyticsBrowsersMetrics filter(visits > 0) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tpreSQLs:['TRUNCATE TABLE [web_analytics].[analytics_browsers_metrics]'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkUnpivotedAnalyticsBrowsersMetrics"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodFolderDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsFolderDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsSqlDataset')]"
 			]
 		}

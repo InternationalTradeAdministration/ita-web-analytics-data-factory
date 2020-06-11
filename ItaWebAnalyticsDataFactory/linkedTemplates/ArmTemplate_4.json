@@ -13,6 +13,91 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/ExtractContentGroupsRelatedDatasets')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExtractContentGroups",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"AbsoluteUrl": "$.links.next.href"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "[['id']"
+										},
+										"sink": {
+											"name": "id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "[['group_name']"
+										},
+										"sink": {
+											"name": "group_name",
+											"type": "String"
+										}
+									}
+								],
+								"collectionReference": "$['items']"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "ContentGroupsRestDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "ContentGroupsCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/LoadContentGroupsRelatedDatasets')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -103,7 +188,7 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "AnalyticsBrowsersMetricsByPeriodFolderDataset",
+								"referenceName": "AnalyticsBrowsersMetricsFolderDataset",
 								"type": "DatasetReference"
 							},
 							"name": "AnalyticsBrowsersMetrics"
@@ -126,7 +211,7 @@
 							"name": "Filter1"
 						}
 					],
-					"script": "source(output(\n\t\tChrome as integer,\n\t\t{Chrome Mobile} as integer,\n\t\tEdge as integer,\n\t\tSafari as integer,\n\t\t{Mobile Safari} as integer,\n\t\tIE as integer,\n\t\t{IE Mobile} as integer,\n\t\tFirefox as integer,\n\t\t{Android Browser} as integer,\n\t\t{Samsung Browser} as integer,\n\t\tOpera as integer,\n\t\t{Opera Mini} as integer,\n\t\t{Opera Mobile} as integer,\n\t\tUnknown as integer,\n\t\ttimestamp as string,\n\t\tanalytics_group_id as long,\n\t\tanalytics_filter_id as long\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tlimit: 100) ~> AnalyticsBrowsersMetrics\nAnalyticsBrowsersMetrics unpivot(output(\n\t\tbrowser_name as string,\n\t\tvisits as integer\n\t),\n\tungroupBy(analytics_group_id,\n\t\tanalytics_filter_id,\n\t\ttimestamp),\n\tlateral: false,\n\tignoreNullPivots: false) ~> UnpivotedAnalyticsBrowsersMetrics\nUnpivotedAnalyticsBrowsersMetrics filter(visits > 0) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tpreSQLs:['TRUNCATE TABLE [web_analytics].[analytics_browsers_metrics]'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkUnpivotedAnalyticsBrowsersMetrics"
+					"script": "source(output(\n\t\tChrome as integer,\n\t\t{Chrome Mobile} as integer,\n\t\tEdge as integer,\n\t\tSafari as integer,\n\t\t{Mobile Safari} as integer,\n\t\tIE as integer,\n\t\t{IE Mobile} as integer,\n\t\tFirefox as integer,\n\t\t{Android Browser} as integer,\n\t\t{Samsung Browser} as integer,\n\t\tOpera as integer,\n\t\t{Opera Mini} as integer,\n\t\t{Opera Mobile} as integer,\n\t\tUnknown as integer,\n\t\ttimestamp as string,\n\t\tanalytics_group_id as long,\n\t\tanalytics_filter_id as long\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['analytics_browsers_metrics/**/*.csv']) ~> AnalyticsBrowsersMetrics\nAnalyticsBrowsersMetrics unpivot(output(\n\t\tbrowser_name as string,\n\t\tvisits as integer\n\t),\n\tungroupBy(analytics_group_id,\n\t\tanalytics_filter_id,\n\t\ttimestamp),\n\tlateral: false,\n\tignoreNullPivots: false) ~> UnpivotedAnalyticsBrowsersMetrics\nUnpivotedAnalyticsBrowsersMetrics filter(visits > 0) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tpreSQLs:['TRUNCATE TABLE [web_analytics].[analytics_browsers_metrics]'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkUnpivotedAnalyticsBrowsersMetrics"
 				}
 			},
 			"dependsOn": []
@@ -1435,12 +1520,7 @@
 								"type": "DataFlowReference",
 								"parameters": {},
 								"datasetParameters": {
-									"AnalyticsBrowsersMetrics": {
-										"Period": {
-											"value": "@{pipeline().parameters.Period}",
-											"type": "Expression"
-										}
-									},
+									"AnalyticsBrowsersMetrics": {},
 									"SinkUnpivotedAnalyticsBrowsersMetrics": {}
 								}
 							},
@@ -2877,6 +2957,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/ExtractContentGroupsRelatedDatasets')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsRelatedDatasets')]"
 			]
 		},
