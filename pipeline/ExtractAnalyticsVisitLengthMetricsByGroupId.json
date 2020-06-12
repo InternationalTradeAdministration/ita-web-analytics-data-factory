@@ -1,5 +1,5 @@
 {
-	"name": "ExtractAnalyticsHistoricalMetricsByGroupId",
+	"name": "ExtractAnalyticsVisitLengthMetricsByGroupId",
 	"properties": {
 		"activities": [
 			{
@@ -49,10 +49,11 @@
 						"value": "@activity('LookupAnalyticsGroups').output.value",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"batchCount": 3,
 					"activities": [
 						{
-							"name": "ExtractAnalyticsHistoricalMetrics",
+							"name": "ExtractAnalyticsVisitLengthMetrics",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -103,42 +104,6 @@
 									"mappings": [
 										{
 											"source": {
-												"path": "['bounce_rate']"
-											},
-											"sink": {
-												"name": "bounce_rate",
-												"type": "Decimal"
-											}
-										},
-										{
-											"source": {
-												"path": "['new_visitors']"
-											},
-											"sink": {
-												"name": "new_visitors",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"path": "['page_views']"
-											},
-											"sink": {
-												"name": "page_views",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"path": "['returning_visitors']"
-											},
-											"sink": {
-												"name": "returning_visitors",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
 												"path": "['timestamp']"
 											},
 											"sink": {
@@ -148,20 +113,11 @@
 										},
 										{
 											"source": {
-												"path": "['unique_visitors']"
+												"path": "['visit_duration_average_in_minutes']"
 											},
 											"sink": {
-												"name": "unique_visitors",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"path": "['visits']"
-											},
-											"sink": {
-												"name": "visits",
-												"type": "Int64"
+												"name": "visit_duration_average_in_minutes",
+												"type": "Decimal"
 											}
 										},
 										{
@@ -188,7 +144,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "AnalyticsHistoricalMetricsRestDataset",
+									"referenceName": "AnalyticsVisitLengthMetricsRestDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"QueryString": {
@@ -200,7 +156,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "AnalyticsHistoricalMetricsByPeriodCsvDataset",
+									"referenceName": "AnalyticsVisitLengthMetricsByPeriodCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"Period": {
@@ -220,7 +176,7 @@
 							"type": "ExecutePipeline",
 							"dependsOn": [
 								{
-									"activity": "ExtractAnalyticsHistoricalMetrics",
+									"activity": "ExtractAnalyticsVisitLengthMetrics",
 									"dependencyConditions": [
 										"Succeeded"
 									]
@@ -229,7 +185,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "ExtractAnalyticsHistoricalMetricsByGroupIdFilterId",
+									"referenceName": "ExtractAnalyticsVisitLengthMetricsByGroupIdFilterId",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,

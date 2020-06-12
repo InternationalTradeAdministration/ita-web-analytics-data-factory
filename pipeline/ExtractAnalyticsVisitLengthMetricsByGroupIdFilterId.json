@@ -1,5 +1,5 @@
 {
-	"name": "ExtractAnalyticsTrafficSourcesMetricsByGroupIdFilterId",
+	"name": "ExtractAnalyticsVisitLengthMetricsByGroupIdFilterId",
 	"properties": {
 		"activities": [
 			{
@@ -22,7 +22,7 @@
 					"batchCount": 15,
 					"activities": [
 						{
-							"name": "ExtractAnalyticsTrafficSourcesMetrics",
+							"name": "ExtractAnalyticsVisitLengthMetrics",
 							"type": "Copy",
 							"dependsOn": [],
 							"policy": {
@@ -76,47 +76,20 @@
 									"mappings": [
 										{
 											"source": {
-												"path": "['direct_traffic']"
-											},
-											"sink": {
-												"name": "direct_traffic",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"path": "['external_referrer']"
-											},
-											"sink": {
-												"name": "external_referrer",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"path": "['search_domain']"
-											},
-											"sink": {
-												"name": "search_domain",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
-												"path": "['social_media']"
-											},
-											"sink": {
-												"name": "social_media",
-												"type": "Int64"
-											}
-										},
-										{
-											"source": {
 												"path": "['timestamp']"
 											},
 											"sink": {
 												"name": "timestamp",
 												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "['visit_duration_average_in_minutes']"
+											},
+											"sink": {
+												"name": "visit_duration_average_in_minutes",
+												"type": "Decimal"
 											}
 										},
 										{
@@ -143,7 +116,7 @@
 							},
 							"inputs": [
 								{
-									"referenceName": "AnalyticsTrafficSourcesMetricsRestDataset",
+									"referenceName": "AnalyticsVisitLengthMetricsRestDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"QueryString": {
@@ -155,7 +128,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
+									"referenceName": "AnalyticsVisitLengthMetricsByPeriodCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"Period": {

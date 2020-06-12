@@ -1,0 +1,19 @@
+{
+	"name": "AnalyticsVisitLengthMetricsSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "web_analytics",
+			"table": "analytics_visit_length_metrics"
+		}
+	}
+}

@@ -446,6 +446,109 @@
 						"computeType": "General"
 					}
 				}
+			},
+			{
+				"name": "LoadAnalyticsVisitLengthMetrics",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": {
+								"value": "analytics_visit_length_metrics",
+								"type": "Expression"
+							},
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": {
+							"value": "TRUNCATE TABLE [web_analytics].[analytics_visit_length_metrics]",
+							"type": "Expression"
+						},
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "analytics_group_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "analytics_filter_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_filter_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "timestamp",
+									"type": "String"
+								},
+								"sink": {
+									"name": "timestamp",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "visit_duration_average_in_minutes",
+									"type": "String"
+								},
+								"sink": {
+									"name": "visit_duration_average_in_minutes",
+									"type": "Decimal"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsVisitLengthMetricsByPeriodFolderDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@{pipeline().parameters.Period}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsVisitLengthMetricsSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"parameters": {

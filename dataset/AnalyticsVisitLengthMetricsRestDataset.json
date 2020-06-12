@@ -1,0 +1,26 @@
+{
+	"name": "AnalyticsVisitLengthMetricsRestDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SiteImproveRestLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"QueryString": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "v2/sites/17536213616/analytics/behavior/visit_length/history?@{dataset().QueryString}",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}
