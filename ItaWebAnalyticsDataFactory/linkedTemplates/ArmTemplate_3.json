@@ -335,7 +335,7 @@
 												}
 											],
 											"httpRequestTimeout": "00:01:40",
-											"requestInterval": "00.00:00:01.000",
+											"requestInterval": "00.00:00:00.010",
 											"requestMethod": "GET",
 											"paginationRules": {
 												"AbsoluteUrl": "$.links.next.href"
@@ -612,6 +612,7 @@
 								"value": "@activity('LookupAnalyticsFilters').output.value",
 								"type": "Expression"
 							},
+							"batchCount": 15,
 							"activities": [
 								{
 									"name": "ExtractAnalyticsBrowsersMetrics",
@@ -645,7 +646,7 @@
 												}
 											],
 											"httpRequestTimeout": "00:01:40",
-											"requestInterval": "00.00:00:01.000",
+											"requestInterval": "00.00:00:00.010",
 											"requestMethod": "GET",
 											"paginationRules": {
 												"AbsoluteUrl": "$.links.next.href"
@@ -1442,7 +1443,7 @@
 												}
 											],
 											"httpRequestTimeout": "00:01:40",
-											"requestInterval": "00.00:00:01.000",
+											"requestInterval": "00.00:00:00.010",
 											"requestMethod": "GET",
 											"paginationRules": {
 												"AbsoluteUrl": "$.links.next.href"
@@ -1647,6 +1648,7 @@
 								"value": "@activity('LookupAnalyticsFilters').output.value",
 								"type": "Expression"
 							},
+							"batchCount": 15,
 							"activities": [
 								{
 									"name": "ExtractAnalyticsHistoricalMetrics",
@@ -1680,7 +1682,7 @@
 												}
 											],
 											"httpRequestTimeout": "00:01:40",
-											"requestInterval": "00.00:00:01.000",
+											"requestInterval": "00.00:00:00.010",
 											"requestMethod": "GET",
 											"paginationRules": {
 												"AbsoluteUrl": "$.links.next.href"
@@ -1953,7 +1955,7 @@
 												}
 											],
 											"httpRequestTimeout": "00:03:00",
-											"requestInterval": "00.00:00:01.000",
+											"requestInterval": "00.00:00:00.010",
 											"requestMethod": "GET",
 											"paginationRules": {
 												"AbsoluteUrl": "$.links.next.href"
