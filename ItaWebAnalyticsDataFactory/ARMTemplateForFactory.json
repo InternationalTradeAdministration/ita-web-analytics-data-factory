@@ -267,7 +267,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "AnalyticsBrowsersMetricsByPeriodCsvDataset",
+								"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
 								"type": "DatasetReference",
 								"parameters": {
 									"Period": {
@@ -355,7 +355,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"dataset": {
-								"referenceName": "AnalyticsBrowsersMetricsByPeriodFolderDataset",
+								"referenceName": "AnalyticsBrowsersMetricsByPeriodRawFolderDataset",
 								"type": "DatasetReference",
 								"parameters": {
 									"Period": {
@@ -416,7 +416,7 @@
 						],
 						"outputs": [
 							{
-								"referenceName": "AnalyticsBrowsersMetricsByPeriodCsvDataset",
+								"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
 								"type": "DatasetReference",
 								"parameters": {
 									"Period": {
@@ -442,10 +442,10 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsRestDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodCsvDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodRawCsvDataset')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsBrowsersMetricsByGroupId')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsBrowsersMetricsByFilterId')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodFolderDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodRawFolderDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsCsvDataset')]"
 			]
 		},
@@ -694,7 +694,7 @@
 									],
 									"outputs": [
 										{
-											"referenceName": "AnalyticsBrowsersMetricsByPeriodCsvDataset",
+											"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
 											"type": "DatasetReference",
 											"parameters": {
 												"Period": {
@@ -757,7 +757,7 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/AnalyticsFiltersCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsRestDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodCsvDataset')]"
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodRawCsvDataset')]"
 			]
 		},
 		{
@@ -1037,7 +1037,7 @@
 									],
 									"outputs": [
 										{
-											"referenceName": "AnalyticsBrowsersMetricsByPeriodCsvDataset",
+											"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
 											"type": "DatasetReference",
 											"parameters": {
 												"Period": {
@@ -1099,7 +1099,7 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsRestDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodCsvDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodRawCsvDataset')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsBrowsersMetricsByGroupIdFilterId')]"
 			]
 		},
@@ -1352,7 +1352,7 @@
 									],
 									"outputs": [
 										{
-											"referenceName": "AnalyticsBrowsersMetricsByPeriodCsvDataset",
+											"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
 											"type": "DatasetReference",
 											"parameters": {
 												"Period": {
@@ -1418,7 +1418,7 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/AnalyticsFiltersCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsRestDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodCsvDataset')]"
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodRawCsvDataset')]"
 			]
 		},
 		{
@@ -6488,35 +6488,6 @@
 						]
 					},
 					{
-						"name": "UnpivotAndLoadAnalyticsBrowsersMetrics",
-						"type": "ExecuteDataFlow",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"dataflow": {
-								"referenceName": "UnpivotAndLoadAnalyticsBrowsersMetrics",
-								"type": "DataFlowReference",
-								"parameters": {},
-								"datasetParameters": {
-									"AnalyticsBrowsersMetrics": {},
-									"SinkUnpivotedAnalyticsBrowsersMetrics": {}
-								}
-							},
-							"staging": {},
-							"compute": {
-								"coreCount": 8,
-								"computeType": "General"
-							}
-						}
-					},
-					{
 						"name": "LoadAnalyticsVisitLengthMetrics",
 						"type": "Copy",
 						"dependsOn": [],
@@ -6619,6 +6590,120 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "LoadTransformedAnalyticsBrowsersMetrics",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": {
+										"value": "analytics_browsers_metrics/transformed",
+										"type": "Expression"
+									},
+									"wildcardFileName": "*.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": {
+									"value": "TRUNCATE TABLE [web_analytics].[analytics_browsers_metrics]",
+									"type": "Expression"
+								},
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "analytics_group_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "analytics_group_id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "analytics_filter_id",
+											"type": "String"
+										},
+										"sink": {
+											"name": "analytics_filter_id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"name": "timestamp",
+											"type": "String"
+										},
+										"sink": {
+											"name": "timestamp",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "browser_name",
+											"type": "String"
+										},
+										"sink": {
+											"name": "browser_name",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "visits",
+											"type": "String"
+										},
+										"sink": {
+											"name": "visits",
+											"type": "Int32"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AnalyticsBrowsersMetricsByPeriodTransformedFolderDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AnalyticsBrowsersMetricsSqlDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"parameters": {
@@ -6640,9 +6725,10 @@
 				"[concat(variables('factoryId'), '/datasets/AnalyticsTrafficSourcesMetricsSqlDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsHistoricalMetricsByPeriodFolderDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsHistoricalMetricsSqlDataset')]",
-				"[concat(variables('factoryId'), '/dataflows/UnpivotAndLoadAnalyticsBrowsersMetrics')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsVisitLengthMetricsByPeriodFolderDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsVisitLengthMetricsSqlDataset')]"
+				"[concat(variables('factoryId'), '/datasets/AnalyticsVisitLengthMetricsSqlDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodTransformedFolderDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsSqlDataset')]"
 			]
 		},
 		{
@@ -6861,7 +6947,7 @@
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "ExecuteExtractAnalyticsRelatedDatasets",
+								"activity": "ExecuteTransformAnalyticsRelatedDatasets",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -6871,6 +6957,32 @@
 						"typeProperties": {
 							"pipeline": {
 								"referenceName": "LoadAnalyticsRelatedDatasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.Period",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ExecuteTransformAnalyticsRelatedDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsRelatedDatasets",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TransformAnalyticsRelatedDatasets",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
@@ -6893,11 +7005,72 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsRelatedDatasets')]",
-				"[concat(variables('factoryId'), '/pipelines/LoadAnalyticsRelatedDatasets')]"
+				"[concat(variables('factoryId'), '/pipelines/LoadAnalyticsRelatedDatasets')]",
+				"[concat(variables('factoryId'), '/pipelines/TransformAnalyticsRelatedDatasets')]"
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsBrowsersMetricsByPeriodCsvDataset')]",
+			"name": "[concat(parameters('factoryName'), '/TransformAnalyticsRelatedDatasets')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "UnpivotRawAnalyticsBrowsersMetrics",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "UnpivotRawAnalyticsBrowsersMetrics",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"RawAnalyticsBrowsersMetrics": {
+										"Period": {
+											"value": "@{pipeline().parameters.Period}",
+											"type": "Expression"
+										}
+									},
+									"SinkUnpivotedAnalyticsBrowsersMetrics": {
+										"Period": {
+											"value": "@{pipeline().parameters.Period}",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"Period": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/dataflows/UnpivotRawAnalyticsBrowsersMetrics')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AnalyticsBrowsersMetricsByPeriodRawCsvDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -6926,7 +7099,7 @@
 							"type": "Expression"
 						},
 						"folderPath": {
-							"value": "analytics_browsers_metrics/@{dataset().Period}",
+							"value": "analytics_browsers_metrics/raw/@{dataset().Period}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
@@ -6943,7 +7116,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsBrowsersMetricsByPeriodFolderDataset')]",
+			"name": "[concat(parameters('factoryName'), '/AnalyticsBrowsersMetricsByPeriodRawFolderDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -6965,7 +7138,46 @@
 					"location": {
 						"type": "AzureBlobStorageLocation",
 						"folderPath": {
-							"value": "analytics_browsers_metrics/@{dataset().Period}",
+							"value": "analytics_browsers_metrics/raw/@{dataset().Period}",
+							"type": "Expression"
+						},
+						"container": "ita-web-analytics"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorageLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AnalyticsBrowsersMetricsByPeriodTransformedFolderDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Period": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "analytics_browsers_metrics/transformed/@{dataset().Period}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
@@ -9071,7 +9283,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/UnpivotAndLoadAnalyticsBrowsersMetrics')]",
+			"name": "[concat(parameters('factoryName'), '/UnpivotRawAnalyticsBrowsersMetrics')]",
 			"type": "Microsoft.DataFactory/factories/dataflows",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -9080,16 +9292,16 @@
 					"sources": [
 						{
 							"dataset": {
-								"referenceName": "AnalyticsBrowsersMetricsFolderDataset",
+								"referenceName": "AnalyticsBrowsersMetricsByPeriodRawFolderDataset",
 								"type": "DatasetReference"
 							},
-							"name": "AnalyticsBrowsersMetrics"
+							"name": "RawAnalyticsBrowsersMetrics"
 						}
 					],
 					"sinks": [
 						{
 							"dataset": {
-								"referenceName": "AnalyticsBrowsersMetricsSqlDataset",
+								"referenceName": "AnalyticsBrowsersMetricsByPeriodTransformedFolderDataset",
 								"type": "DatasetReference"
 							},
 							"name": "SinkUnpivotedAnalyticsBrowsersMetrics"
@@ -9101,14 +9313,17 @@
 						},
 						{
 							"name": "Filter1"
+						},
+						{
+							"name": "FilePathColumn"
 						}
 					],
-					"script": "source(output(\n\t\tChrome as integer,\n\t\t{Chrome Mobile} as integer,\n\t\tEdge as integer,\n\t\tSafari as integer,\n\t\t{Mobile Safari} as integer,\n\t\tIE as integer,\n\t\t{IE Mobile} as integer,\n\t\tFirefox as integer,\n\t\t{Android Browser} as integer,\n\t\t{Samsung Browser} as integer,\n\t\tOpera as integer,\n\t\t{Opera Mini} as integer,\n\t\t{Opera Mobile} as integer,\n\t\tUnknown as integer,\n\t\ttimestamp as string,\n\t\tanalytics_group_id as long,\n\t\tanalytics_filter_id as long\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\twildcardPaths:['analytics_browsers_metrics/**/*.csv']) ~> AnalyticsBrowsersMetrics\nAnalyticsBrowsersMetrics unpivot(output(\n\t\tbrowser_name as string,\n\t\tvisits as integer\n\t),\n\tungroupBy(analytics_group_id,\n\t\tanalytics_filter_id,\n\t\ttimestamp),\n\tlateral: false,\n\tignoreNullPivots: false) ~> UnpivotedAnalyticsBrowsersMetrics\nUnpivotedAnalyticsBrowsersMetrics filter(visits > 0) ~> Filter1\nFilter1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tdeletable:false,\n\tinsertable:true,\n\tupdateable:false,\n\tupsertable:false,\n\tformat: 'table',\n\tpreSQLs:['TRUNCATE TABLE [web_analytics].[analytics_browsers_metrics]'],\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkUnpivotedAnalyticsBrowsersMetrics"
+					"script": "source(output(\n\t\tChrome as integer,\n\t\t{Chrome Mobile} as integer,\n\t\tEdge as integer,\n\t\tSafari as integer,\n\t\t{Mobile Safari} as integer,\n\t\tIE as integer,\n\t\t{IE Mobile} as integer,\n\t\tFirefox as integer,\n\t\t{Android Browser} as integer,\n\t\t{Samsung Browser} as integer,\n\t\tOpera as integer,\n\t\t{Opera Mini} as integer,\n\t\t{Opera Mobile} as integer,\n\t\tUnknown as integer,\n\t\ttimestamp as string,\n\t\tanalytics_group_id as long,\n\t\tanalytics_filter_id as long\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn: 'raw_file_path') ~> RawAnalyticsBrowsersMetrics\nRawAnalyticsBrowsersMetrics unpivot(output(\n\t\tbrowser_name as string,\n\t\tvisits as integer\n\t),\n\tungroupBy(analytics_group_id,\n\t\tanalytics_filter_id,\n\t\ttimestamp,\n\t\traw_file_path),\n\tlateral: false,\n\tignoreNullPivots: true) ~> UnpivotedAnalyticsBrowsersMetrics\nUnpivotedAnalyticsBrowsersMetrics filter(visits > 0) ~> Filter1\nFilter1 derive(file_path = replace(raw_file_path, 'raw', 'transformed')) ~> FilePathColumn\nFilePathColumn sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'file_path',\n\ttruncate: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkUnpivotedAnalyticsBrowsersMetrics"
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsFolderDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsSqlDataset')]"
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodRawFolderDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsBrowsersMetricsByPeriodTransformedFolderDataset')]"
 			]
 		}
 	]
