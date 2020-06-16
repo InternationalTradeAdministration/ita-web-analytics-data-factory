@@ -519,19 +519,19 @@
 												},
 												{
 													"source": {
-														"path": "$['analytics_filter_id']"
+														"path": "$['analytics_group_id']"
 													},
 													"sink": {
-														"name": "analytics_filter_id",
+														"name": "analytics_group_id",
 														"type": "Int64"
 													}
 												},
 												{
 													"source": {
-														"path": "$['analytics_group_id']"
+														"path": "$['analytics_filter_id']"
 													},
 													"sink": {
-														"name": "analytics_group_id",
+														"name": "analytics_filter_id",
 														"type": "Int64"
 													}
 												}
