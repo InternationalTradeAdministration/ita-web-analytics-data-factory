@@ -1,0 +1,38 @@
+{
+	"name": "UnpivotRawAnalyticsBrowsersMetrics",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "AnalyticsBrowsersMetricsByPeriodRawFolderDataset",
+						"type": "DatasetReference"
+					},
+					"name": "RawAnalyticsBrowsersMetrics"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "AnalyticsBrowsersMetricsByPeriodTransformedFolderDataset",
+						"type": "DatasetReference"
+					},
+					"name": "SinkUnpivotedAnalyticsBrowsersMetrics"
+				}
+			],
+			"transformations": [
+				{
+					"name": "UnpivotedAnalyticsBrowsersMetrics"
+				},
+				{
+					"name": "Filter1"
+				},
+				{
+					"name": "FilePathColumn"
+				}
+			],
+			"script": "source(output(\n\t\tChrome as integer,\n\t\t{Chrome Mobile} as integer,\n\t\tEdge as integer,\n\t\tSafari as integer,\n\t\t{Mobile Safari} as integer,\n\t\tIE as integer,\n\t\t{IE Mobile} as integer,\n\t\tFirefox as integer,\n\t\t{Android Browser} as integer,\n\t\t{Samsung Browser} as integer,\n\t\tOpera as integer,\n\t\t{Opera Mini} as integer,\n\t\t{Opera Mobile} as integer,\n\t\tUnknown as integer,\n\t\ttimestamp as string,\n\t\tanalytics_group_id as long,\n\t\tanalytics_filter_id as long\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn: 'raw_file_path') ~> RawAnalyticsBrowsersMetrics\nRawAnalyticsBrowsersMetrics unpivot(output(\n\t\tbrowser_name as string,\n\t\tvisits as integer\n\t),\n\tungroupBy(analytics_group_id,\n\t\tanalytics_filter_id,\n\t\ttimestamp,\n\t\traw_file_path),\n\tlateral: false,\n\tignoreNullPivots: true) ~> UnpivotedAnalyticsBrowsersMetrics\nUnpivotedAnalyticsBrowsersMetrics filter(visits > 0) ~> Filter1\nFilter1 derive(file_path = replace(raw_file_path, 'raw', 'transformed')) ~> FilePathColumn\nFilePathColumn sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'file_path',\n\ttruncate: true,\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> SinkUnpivotedAnalyticsBrowsersMetrics"
+		}
+	}
+}

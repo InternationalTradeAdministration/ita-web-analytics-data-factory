@@ -1,5 +1,5 @@
 {
-	"name": "AnalyticsBrowsersMetricsByPeriodFolderDataset",
+	"name": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
@@ -7,6 +7,9 @@
 		},
 		"parameters": {
 			"Period": {
+				"type": "string"
+			},
+			"FileName": {
 				"type": "string"
 			}
 		},
@@ -18,8 +21,12 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@{dataset().FileName}",
+					"type": "Expression"
+				},
 				"folderPath": {
-					"value": "analytics_browsers_metrics/@{dataset().Period}",
+					"value": "analytics_browsers_metrics/raw/@{dataset().Period}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"

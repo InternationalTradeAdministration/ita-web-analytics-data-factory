@@ -272,7 +272,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "AnalyticsBrowsersMetricsByPeriodCsvDataset",
+									"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"Period": {

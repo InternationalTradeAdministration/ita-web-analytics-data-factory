@@ -224,7 +224,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsBrowsersMetricsByPeriodCsvDataset",
+						"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {
@@ -312,7 +312,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "AnalyticsBrowsersMetricsByPeriodFolderDataset",
+						"referenceName": "AnalyticsBrowsersMetricsByPeriodRawFolderDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {
@@ -372,7 +372,7 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsBrowsersMetricsByPeriodCsvDataset",
+						"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {

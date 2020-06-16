@@ -425,29 +425,6 @@
 				]
 			},
 			{
-				"name": "UnpivotAndLoadAnalyticsBrowsersMetrics",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "UnpivotAndLoadAnalyticsBrowsersMetrics",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					}
-				}
-			},
-			{
 				"name": "LoadAnalyticsVisitLengthMetrics",
 				"type": "Copy",
 				"dependsOn": [],
@@ -546,6 +523,119 @@
 				"outputs": [
 					{
 						"referenceName": "AnalyticsVisitLengthMetricsSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "LoadTransformedAnalyticsBrowsersMetrics",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": {
+								"value": "analytics_browsers_metrics/transformed",
+								"type": "Expression"
+							},
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": {
+							"value": "TRUNCATE TABLE [web_analytics].[analytics_browsers_metrics]",
+							"type": "Expression"
+						},
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "analytics_group_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "analytics_filter_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_filter_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "timestamp",
+									"type": "String"
+								},
+								"sink": {
+									"name": "timestamp",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "browser_name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "browser_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "visits",
+									"type": "String"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int32"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsBrowsersMetricsByPeriodTransformedFolderDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@{pipeline().parameters.Period}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsBrowsersMetricsSqlDataset",
 						"type": "DatasetReference"
 					}
 				]

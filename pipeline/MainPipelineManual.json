@@ -26,7 +26,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractAnalyticsRelatedDatasets",
+						"activity": "ExecuteTransformAnalyticsRelatedDatasets",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -36,6 +36,32 @@
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "LoadAnalyticsRelatedDatasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@pipeline().parameters.Period",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ExecuteTransformAnalyticsRelatedDatasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsRelatedDatasets",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TransformAnalyticsRelatedDatasets",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
