@@ -1,0 +1,245 @@
+{
+	"name": "ExtractAnalyticsCountryMetricsByGroupId",
+	"properties": {
+		"activities": [
+			{
+				"name": "LookupAnalyticsGroups",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "AnalyticsGroupsCsvDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "AnalyticsGroup",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookupAnalyticsGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupAnalyticsGroups').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExtractAnalyticsCountryMetrics",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "RestSource",
+									"additionalColumns": [
+										{
+											"name": "analytics_group_id",
+											"value": {
+												"value": "@{item().id}",
+												"type": "Expression"
+											}
+										},
+										{
+											"name": "date",
+											"value": {
+												"value": "@{pipeline().parameters.Period}",
+												"type": "Expression"
+											}
+										}
+									],
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"paginationRules": {
+										"AbsoluteUrl": "$.links.next.href"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"path": "['id']"
+											},
+											"sink": {
+												"name": "country_id",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "['bounce_rate']"
+											},
+											"sink": {
+												"name": "bounce_rate",
+												"type": "Decimal"
+											}
+										},
+										{
+											"source": {
+												"path": "['country_code']"
+											},
+											"sink": {
+												"name": "country_code",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "['country_name']"
+											},
+											"sink": {
+												"name": "country_name",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "['is_region']"
+											},
+											"sink": {
+												"name": "is_region",
+												"type": "Boolean"
+											}
+										},
+										{
+											"source": {
+												"path": "['is_unknown']"
+											},
+											"sink": {
+												"name": "is_unknown",
+												"type": "Boolean"
+											}
+										},
+										{
+											"source": {
+												"path": "['regions']"
+											},
+											"sink": {
+												"name": "regions",
+												"type": "Int32"
+											}
+										},
+										{
+											"source": {
+												"path": "['visits']"
+											},
+											"sink": {
+												"name": "visits",
+												"type": "Int32"
+											}
+										},
+										{
+											"source": {
+												"path": "$['analytics_group_id']"
+											},
+											"sink": {
+												"name": "analytics_group_id",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "$['date']"
+											},
+											"sink": {
+												"name": "date",
+												"type": "String"
+											}
+										}
+									],
+									"collectionReference": "$['items']"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "AnalyticsCountryMetricsRestDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"QueryString": {
+											"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&group_id=@{item().id}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "AnalyticsCountryMetricsByPeriodCsvDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"Period": {
+											"value": "@{pipeline().parameters.Period}",
+											"type": "Expression"
+										},
+										"FileName": {
+											"value": "analytics_group_@{item().id}.csv",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
