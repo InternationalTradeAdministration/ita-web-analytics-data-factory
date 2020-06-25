@@ -1,5 +1,5 @@
 {
-	"name": "ExtractContentGroupsRelatedDatasets",
+	"name": "ExtractQualityAssuranceDatasets",
 	"properties": {
 		"activities": [
 			{
@@ -73,8 +73,51 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "ExecuteExtractQualityAssuranceInventoryMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExtractContentGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractQualityAssuranceInventoryMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExecuteTransformQualityAssuranceInventoryMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractQualityAssuranceInventoryMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "TransformQualityAssuranceInventoryMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
+		"folder": {
+			"name": "quality_assurance"
+		},
 		"annotations": []
 	},
 	"type": "Microsoft.DataFactory/factories/pipelines"

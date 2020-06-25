@@ -1,0 +1,30 @@
+{
+	"name": "QualityAssuranceInventoryMetricsRawJsonDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "quality_assurance"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@{dataset().FileName}",
+					"type": "Expression"
+				},
+				"folderPath": "quality_assurance_inventory_metrics/raw",
+				"container": "ita-web-analytics"
+			}
+		}
+	}
+}

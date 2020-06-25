@@ -9,7 +9,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsRelatedDatasets",
+						"referenceName": "ExtractAnalyticsDatasetsByDateRangePeriod",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -61,7 +61,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TransformAnalyticsRelatedDatasets",
+						"referenceName": "TransformAnalyticsDatasets",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,

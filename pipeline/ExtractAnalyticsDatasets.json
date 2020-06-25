@@ -1,7 +1,93 @@
 {
-	"name": "ExtractAnalyticsRelatedDatasetsByDate",
+	"name": "ExtractAnalyticsDatasets",
 	"properties": {
 		"activities": [
+			{
+				"name": "LookupDateRangePeriods",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "ExtractAnalyticsGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "ExtractAnalyticsFilters",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": false,
+							"wildcardFileName": "date_range_periods.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "RootFolderDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "DateRangePeriod",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookupDateRangePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupDateRangePeriods').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExecuteExtractAnalyticsDatasetsByDateRange",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsDatasetsByDateRangePeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@{item().date_range_period}",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
 			{
 				"name": "ExtractAnalyticsGroups",
 				"type": "Copy",
@@ -174,7 +260,14 @@
 			{
 				"name": "LookupDatePeriods",
 				"type": "Lookup",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "DateRangePeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -212,18 +305,6 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
-					},
-					{
-						"activity": "ExtractAnalyticsGroups",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "ExtractAnalyticsFilters",
-						"dependencyConditions": [
-							"Succeeded"
-						]
 					}
 				],
 				"userProperties": [],
@@ -235,39 +316,13 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "ExecuteExtractAnalyticsCountryMetrics",
+							"name": "ExecuteExtractAnalyticsDatasetsByDatePeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "ExtractAnalyticsCountryMetrics",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"Period": {
-										"value": "@{item().date_period}",
-										"type": "Expression"
-									}
-								}
-							}
-						},
-						{
-							"name": "ExecuteExtractAnalyticsRegionMetrics",
-							"type": "ExecutePipeline",
-							"dependsOn": [
-								{
-									"activity": "ExecuteExtractAnalyticsCountryMetrics",
-									"dependencyConditions": [
-										"Succeeded"
-									]
-								}
-							],
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "ExtractAnalyticsRegionMetrics",
+									"referenceName": "ExtractAnalyticsDatasetsByDatePeriod",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,

@@ -1,5 +1,5 @@
 {
-	"name": "TransformAnalyticsRelatedDatasets",
+	"name": "TransformAnalyticsDatasets",
 	"properties": {
 		"activities": [
 			{

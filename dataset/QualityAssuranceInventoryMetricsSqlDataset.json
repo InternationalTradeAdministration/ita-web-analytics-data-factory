@@ -1,0 +1,19 @@
+{
+	"name": "QualityAssuranceInventoryMetricsSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "quality_assurance"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "web_analytics",
+			"table": "quality_assurance_inventory_metrics"
+		}
+	}
+}

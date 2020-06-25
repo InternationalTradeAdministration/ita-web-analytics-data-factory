@@ -1,0 +1,199 @@
+{
+	"name": "ExtractQualityAssuranceInventoryMetrics",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExtractWithoutGroup",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Delete Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"additionalColumns": [
+							{
+								"name": "content_group_id",
+								"value": "1"
+							}
+						],
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET"
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings",
+							"quoteAllText": true
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['items']"
+								},
+								"sink": {
+									"path": "items"
+								}
+							},
+							{
+								"source": {
+									"path": "$['content_group_id']"
+								},
+								"sink": {
+									"path": "content_group_id"
+								}
+							}
+						],
+						"collectionReference": ""
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "QualityAssuranceInventoryMetricsRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"QueryString": {
+								"value": "page=1&page_size=1000",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "QualityAssuranceInventoryMetricsRawJsonDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": "content_group_1.json"
+						}
+					}
+				]
+			},
+			{
+				"name": "ExtractByPeriodGroupId",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExtractWithoutGroup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractQualityAssuranceInventoryMetricsByGroupId",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Delete Folder",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Prevent Delete from failing when folder is empty",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "QualityAssuranceInventoryMetricsRawJsonFolderDataset",
+						"type": "DatasetReference"
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					}
+				}
+			},
+			{
+				"name": "Prevent Delete from failing when folder is empty",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings",
+							"quoteAllText": true
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "ContentGroupsCsvDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "QualityAssuranceInventoryMetricsRawJsonFolderDataset",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"concurrency": 1,
+		"folder": {
+			"name": "quality_assurance"
+		},
+		"annotations": []
+	}
+}

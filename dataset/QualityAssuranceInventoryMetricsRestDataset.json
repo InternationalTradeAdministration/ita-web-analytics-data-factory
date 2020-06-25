@@ -1,15 +1,23 @@
 {
-	"name": "ContentGroupsRestDataset",
+	"name": "QualityAssuranceInventoryMetricsRestDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "SiteImproveRestLinkedService",
 			"type": "LinkedServiceReference"
 		},
+		"parameters": {
+			"QueryString": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "quality_assurance"
+		},
 		"annotations": [],
 		"type": "RestResource",
 		"typeProperties": {
 			"relativeUrl": {
-				"value": "v2/sites/17536213616/quality_assurance/overview/groups?page=1&page_size=1000",
+				"value": "v2/sites/17536213616/quality_assurance/inventory/history?@{dataset().QueryString}",
 				"type": "Expression"
 			}
 		},

@@ -1,32 +1,32 @@
 {
-	"name": "MainPipeline",
+	"name": "ExtractAnalyticsDatasetsByDatePeriod",
 	"properties": {
 		"activities": [
 			{
-				"name": "ExecuteExtractAnalyticsRelatedDatasets",
+				"name": "ExecuteExtractAnalyticsCountryMetrics",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsDatasetsByDateRangePeriod",
+						"referenceName": "ExtractAnalyticsCountryMetrics",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
 					"parameters": {
 						"Period": {
-							"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')",
+							"value": "@{pipeline().parameters.Period}",
 							"type": "Expression"
 						}
 					}
 				}
 			},
 			{
-				"name": "ExecuteLoadAnalyticsRelatedDatasets",
+				"name": "ExecuteExtractAnalyticsRegionMetrics",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractAnalyticsRelatedDatasets",
+						"activity": "ExecuteExtractAnalyticsCountryMetrics",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -35,13 +35,13 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "LoadAnalyticsRelatedDatasets",
+						"referenceName": "ExtractAnalyticsRegionMetrics",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
 					"parameters": {
 						"Period": {
-							"value": "@convertFromUtc(utcnow(), 'Eastern Standard Time', 'yyyyMMdd')",
+							"value": "@{pipeline().parameters.Period}",
 							"type": "Expression"
 						}
 					}
@@ -49,6 +49,15 @@
 			}
 		],
 		"concurrency": 1,
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
 		"annotations": []
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }
