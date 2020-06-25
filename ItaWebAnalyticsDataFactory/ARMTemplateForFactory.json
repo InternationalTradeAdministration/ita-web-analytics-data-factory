@@ -1745,6 +1745,97 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsCountryMetricsByDatePeriod')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupDatePeriods",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"wildcardFileName": "date_periods.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "RootFolderDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "DatePeriod",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupDatePeriods",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupDatePeriods').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "ExecuteExtractAnalyticsCountryMetrics",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExtractAnalyticsCountryMetrics",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"Period": {
+												"value": "@{item().date_period}",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/RootFolderDataset')]",
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsCountryMetrics')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsCountryMetricsByGroupId')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -2263,8 +2354,8 @@
 						]
 					},
 					{
-						"name": "LookupDatePeriods",
-						"type": "Lookup",
+						"name": "ExecuteExtractAnalyticsCountryMetricsByDatePeriod",
+						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
 								"activity": "DateRangePeriod",
@@ -2273,41 +2364,22 @@
 								]
 							}
 						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": false,
-									"wildcardFileName": "date_periods.csv",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsCountryMetricsByDatePeriod",
+								"type": "PipelineReference"
 							},
-							"dataset": {
-								"referenceName": "RootFolderDataset",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
+							"waitOnCompletion": true,
+							"parameters": {}
 						}
 					},
 					{
-						"name": "DatePeriod",
-						"type": "ForEach",
+						"name": "ExecuteExtractAnalyticsRegionMetricsByDatePeriod",
+						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "LookupDatePeriods",
+								"activity": "ExecuteExtractAnalyticsCountryMetricsByDatePeriod",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -2315,32 +2387,12 @@
 						],
 						"userProperties": [],
 						"typeProperties": {
-							"items": {
-								"value": "@activity('LookupDatePeriods').output.value",
-								"type": "Expression"
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsRegionMetricsByDatePeriod",
+								"type": "PipelineReference"
 							},
-							"isSequential": false,
-							"activities": [
-								{
-									"name": "ExecuteExtractAnalyticsDatasetsByDatePeriod",
-									"type": "ExecutePipeline",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"pipeline": {
-											"referenceName": "ExtractAnalyticsDatasetsByDatePeriod",
-											"type": "PipelineReference"
-										},
-										"waitOnCompletion": true,
-										"parameters": {
-											"Period": {
-												"value": "@{item().date_period}",
-												"type": "Expression"
-											}
-										}
-									}
-								}
-							]
+							"waitOnCompletion": true,
+							"parameters": {}
 						}
 					}
 				],
@@ -2355,76 +2407,9 @@
 				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsFiltersRestDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsFiltersCsvDataset')]",
-				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsDatasetsByDateRangePeriod')]",
-				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsDatasetsByDatePeriod')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsDatasetsByDatePeriod')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "ExecuteExtractAnalyticsCountryMetrics",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "ExtractAnalyticsCountryMetrics",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"Period": {
-									"value": "@{pipeline().parameters.Period}",
-									"type": "Expression"
-								}
-							}
-						}
-					},
-					{
-						"name": "ExecuteExtractAnalyticsRegionMetrics",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractAnalyticsCountryMetrics",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "ExtractAnalyticsRegionMetrics",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {
-								"Period": {
-									"value": "@{pipeline().parameters.Period}",
-									"type": "Expression"
-								}
-							}
-						}
-					}
-				],
-				"concurrency": 1,
-				"parameters": {
-					"Period": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "analytics"
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsCountryMetrics')]",
-				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsRegionMetrics')]"
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsCountryMetricsByDatePeriod')]",
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsRegionMetricsByDatePeriod')]",
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsDatasetsByDateRangePeriod')]"
 			]
 		},
 		{
@@ -4931,6 +4916,97 @@
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsRegionMetricsByGroupId')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsRegionMetricsByPeriodFolderDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsCsvDataset')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsRegionMetricsByDatePeriod')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupDatePeriods",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"wildcardFileName": "date_periods.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "RootFolderDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "DatePeriod",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupDatePeriods",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupDatePeriods').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "ExecuteExtractAnalyticsRegionMetrics",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExtractAnalyticsRegionMetrics",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"Period": {
+												"value": "@{item().date_period}",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/RootFolderDataset')]",
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsRegionMetrics')]"
 			]
 		},
 		{
