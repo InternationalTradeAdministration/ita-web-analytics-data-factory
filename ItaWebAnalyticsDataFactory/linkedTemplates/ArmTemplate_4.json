@@ -13,7 +13,36 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/QualityAssuranceSummaryRestDataset')]",
+			"name": "[concat(parameters('factoryName'), '/QualityAssuranceSummaryMetricsFolderDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "quality_assurance"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "quality_assurance_summary_metrics",
+						"container": "ita-web-analytics"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/QualityAssuranceSummaryMetricsRestDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -21,12 +50,45 @@
 					"referenceName": "SiteImproveRestLinkedService",
 					"type": "LinkedServiceReference"
 				},
+				"parameters": {
+					"QueryString": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "quality_assurance"
+				},
 				"annotations": [],
 				"type": "RestResource",
 				"typeProperties": {
-					"relativeUrl": "v2/sites/17536213616/quality_assurance/overview/summary"
+					"relativeUrl": {
+						"value": "v2/sites/17536213616/quality_assurance/overview/summary?@{dataset().QueryString}",
+						"type": "Expression"
+					}
 				},
 				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/QualityAssuranceSummaryMetricsSqlDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabaseLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "quality_assurance"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "web_analytics",
+					"table": "quality_assurance_summary_metrics"
+				}
 			},
 			"dependsOn": []
 		},
@@ -178,6 +240,44 @@
 					"schema": "web_analytics",
 					"table": "pages"
 				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/QualityAssuranceSummaryCsvDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"FileName": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "quality_assurance"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@{dataset().FileName}",
+							"type": "Expression"
+						},
+						"folderPath": "quality_assurance_summary_metrics",
+						"container": "ita-web-analytics"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
 			},
 			"dependsOn": []
 		},
@@ -2439,691 +2539,6 @@
 				],
 				"parameters": {
 					"Period": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "analytics"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsRegionMetricsByGroupId')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "LookupAnalyticsGroups",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"dataset": {
-								"referenceName": "AnalyticsGroupsCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
-					{
-						"name": "AnalyticsGroup",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "LookupAnalyticsGroups",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('LookupAnalyticsGroups').output.value",
-								"type": "Expression"
-							},
-							"isSequential": false,
-							"activities": [
-								{
-									"name": "ExtractAnalyticsRegionMetrics",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 1,
-										"retryIntervalInSeconds": 60,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "RestSource",
-											"additionalColumns": [
-												{
-													"name": "analytics_group_id",
-													"value": {
-														"value": "@{item().id}",
-														"type": "Expression"
-													}
-												},
-												{
-													"name": "date",
-													"value": {
-														"value": "@{pipeline().parameters.Period}",
-														"type": "Expression"
-													}
-												},
-												{
-													"name": "country_id",
-													"value": {
-														"value": "@pipeline().parameters.CountryId",
-														"type": "Expression"
-													}
-												}
-											],
-											"httpRequestTimeout": "00:01:40",
-											"requestInterval": "00.00:00:00.010",
-											"requestMethod": "GET",
-											"paginationRules": {
-												"AbsoluteUrl": "$.links.next.href"
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"path": "[['id']"
-													},
-													"sink": {
-														"name": "region_id",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "[['bounce_rate']"
-													},
-													"sink": {
-														"name": "bounce_rate",
-														"type": "Decimal"
-													}
-												},
-												{
-													"source": {
-														"path": "[['is_unknown']"
-													},
-													"sink": {
-														"name": "is_unknown",
-														"type": "Boolean"
-													}
-												},
-												{
-													"source": {
-														"path": "[['region']"
-													},
-													"sink": {
-														"name": "region",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"path": "[['visits_of_parent']"
-													},
-													"sink": {
-														"name": "visits",
-														"type": "Int32"
-													}
-												},
-												{
-													"source": {
-														"path": "$['analytics_group_id']"
-													},
-													"sink": {
-														"name": "analytics_group_id",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "$['date']"
-													},
-													"sink": {
-														"name": "date",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"path": "$['country_id']"
-													},
-													"sink": {
-														"name": "country_id",
-														"type": "Int64"
-													}
-												}
-											],
-											"collectionReference": "$['items']"
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "AnalyticsRegionMetricsRestDataset",
-											"type": "DatasetReference",
-											"parameters": {
-												"QueryString": {
-													"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&group_id=@{item().id}",
-													"type": "Expression"
-												},
-												"CountryId": {
-													"value": "@{pipeline().parameters.CountryId}",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "AnalyticsRegionMetricsByPeriodCsvDataset",
-											"type": "DatasetReference",
-											"parameters": {
-												"Period": {
-													"value": "@{pipeline().parameters.Period}",
-													"type": "Expression"
-												},
-												"FileName": {
-													"value": "analytics_group_@{item().id}.csv",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								}
-							]
-						}
-					}
-				],
-				"parameters": {
-					"Period": {
-						"type": "string"
-					},
-					"CountryId": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "analytics"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsTrafficSourcesMetricsByFilterId')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "AnalyticsFilter",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "LookupAnalyticsFilters",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('LookupAnalyticsFilters').output.value",
-								"type": "Expression"
-							},
-							"activities": [
-								{
-									"name": "ExtractAnalyticsTrafficSourcesMetrics",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 1,
-										"retryIntervalInSeconds": 60,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "RestSource",
-											"additionalColumns": [
-												{
-													"name": "analytics_filter_id",
-													"value": {
-														"value": "@{item().id}",
-														"type": "Expression"
-													}
-												},
-												{
-													"name": "analytics_group_id",
-													"value": "1"
-												}
-											],
-											"httpRequestTimeout": "00:01:40",
-											"requestInterval": "00.00:00:00.010",
-											"requestMethod": "GET",
-											"paginationRules": {
-												"AbsoluteUrl": "$.links.next.href"
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"path": "[['direct_traffic']"
-													},
-													"sink": {
-														"name": "direct_traffic",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "[['external_referrer']"
-													},
-													"sink": {
-														"name": "external_referrer",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "[['search_domain']"
-													},
-													"sink": {
-														"name": "search_domain",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "[['social_media']"
-													},
-													"sink": {
-														"name": "social_media",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "[['timestamp']"
-													},
-													"sink": {
-														"name": "timestamp",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"path": "$['analytics_filter_id']"
-													},
-													"sink": {
-														"name": "analytics_filter_id",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "$['analytics_group_id']"
-													},
-													"sink": {
-														"name": "analytics_group_id",
-														"type": "Int64"
-													}
-												}
-											],
-											"collectionReference": "$['items']"
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "AnalyticsTrafficSourcesMetricsRestDataset",
-											"type": "DatasetReference",
-											"parameters": {
-												"QueryString": {
-													"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&filter_id=@{item().id}",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
-											"type": "DatasetReference",
-											"parameters": {
-												"Period": {
-													"value": "@{pipeline().parameters.Period}",
-													"type": "Expression"
-												},
-												"FileName": {
-													"value": "analytics_group_1_analytics_filter_@{item().id}.csv",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "LookupAnalyticsFilters",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"dataset": {
-								"referenceName": "AnalyticsFiltersCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					}
-				],
-				"parameters": {
-					"Period": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "analytics"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsTrafficSourcesMetricsByGroupIdFilterId')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "AnalyticsFilter",
-						"type": "ForEach",
-						"dependsOn": [
-							{
-								"activity": "LookupAnalyticsFilters",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"items": {
-								"value": "@activity('LookupAnalyticsFilters').output.value",
-								"type": "Expression"
-							},
-							"batchCount": 15,
-							"activities": [
-								{
-									"name": "ExtractAnalyticsTrafficSourcesMetrics",
-									"type": "Copy",
-									"dependsOn": [],
-									"policy": {
-										"timeout": "7.00:00:00",
-										"retry": 1,
-										"retryIntervalInSeconds": 60,
-										"secureOutput": false,
-										"secureInput": false
-									},
-									"userProperties": [],
-									"typeProperties": {
-										"source": {
-											"type": "RestSource",
-											"additionalColumns": [
-												{
-													"name": "analytics_group_id",
-													"value": {
-														"value": "@{pipeline().parameters.GroupId}",
-														"type": "Expression"
-													}
-												},
-												{
-													"name": "analytics_filter_id",
-													"value": {
-														"value": "@{item().id}",
-														"type": "Expression"
-													}
-												}
-											],
-											"httpRequestTimeout": "00:01:40",
-											"requestInterval": "00.00:00:00.010",
-											"requestMethod": "GET",
-											"paginationRules": {
-												"AbsoluteUrl": "$.links.next.href"
-											}
-										},
-										"sink": {
-											"type": "DelimitedTextSink",
-											"storeSettings": {
-												"type": "AzureBlobStorageWriteSettings"
-											},
-											"formatSettings": {
-												"type": "DelimitedTextWriteSettings",
-												"quoteAllText": true,
-												"fileExtension": ".txt"
-											}
-										},
-										"enableStaging": false,
-										"translator": {
-											"type": "TabularTranslator",
-											"mappings": [
-												{
-													"source": {
-														"path": "[['direct_traffic']"
-													},
-													"sink": {
-														"name": "direct_traffic",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "[['external_referrer']"
-													},
-													"sink": {
-														"name": "external_referrer",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "[['search_domain']"
-													},
-													"sink": {
-														"name": "search_domain",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "[['social_media']"
-													},
-													"sink": {
-														"name": "social_media",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "[['timestamp']"
-													},
-													"sink": {
-														"name": "timestamp",
-														"type": "String"
-													}
-												},
-												{
-													"source": {
-														"path": "$['analytics_group_id']"
-													},
-													"sink": {
-														"name": "analytics_group_id",
-														"type": "Int64"
-													}
-												},
-												{
-													"source": {
-														"path": "$['analytics_filter_id']"
-													},
-													"sink": {
-														"name": "analytics_filter_id",
-														"type": "Int64"
-													}
-												}
-											],
-											"collectionReference": "$['items']"
-										}
-									},
-									"inputs": [
-										{
-											"referenceName": "AnalyticsTrafficSourcesMetricsRestDataset",
-											"type": "DatasetReference",
-											"parameters": {
-												"QueryString": {
-													"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&group_id=@{pipeline().parameters.GroupId}&filter_id=@{item().id}",
-													"type": "Expression"
-												}
-											}
-										}
-									],
-									"outputs": [
-										{
-											"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
-											"type": "DatasetReference",
-											"parameters": {
-												"Period": {
-													"value": "@{pipeline().parameters.Period}",
-													"type": "Expression"
-												},
-												"FileName": {
-													"value": "analytics_group_@{pipeline().parameters.GroupId}_analytics_filter_@{item().id}.csv",
-													"type": "Expression"
-												}
-											}
-										}
-									]
-								}
-							]
-						}
-					},
-					{
-						"name": "LookupAnalyticsFilters",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"dataset": {
-								"referenceName": "AnalyticsFiltersCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					}
-				],
-				"parameters": {
-					"Period": {
-						"type": "string"
-					},
-					"GroupId": {
 						"type": "string"
 					}
 				},

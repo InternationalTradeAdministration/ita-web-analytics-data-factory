@@ -13,6 +13,637 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/LoadDatasets')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecuteLoadContentGroupsRelatedDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "LoadQualityAssuranceDatasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteLoadAnalyticsRelatedDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "LoadAnalyticsRelatedDatasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TransformAnalyticsDatasets')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "UnpivotRawAnalyticsBrowsersMetrics",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "UnpivotRawAnalyticsBrowsersMetrics",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"RawAnalyticsBrowsersMetrics": {
+										"Period": {
+											"value": "@{pipeline().parameters.Period}",
+											"type": "Expression"
+										}
+									},
+									"SinkUnpivotedAnalyticsBrowsersMetrics": {
+										"Period": {
+											"value": "@{pipeline().parameters.Period}",
+											"type": "Expression"
+										}
+									}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"parameters": {
+					"Period": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/TransformQualityAssuranceInventoryMetrics')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "UnpivotQualityAssuranceInventoryMetrics",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "UnpivotQualityAssuranceInventoryMetrics",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"JsonSource": {},
+									"sink1": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							}
+						}
+					}
+				],
+				"folder": {
+					"name": "quality_assurance"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsBrowsersMetrics')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExtractByPeriod",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Delete Period Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"additionalColumns": [
+									{
+										"name": "analytics_group_id",
+										"value": "1"
+									},
+									{
+										"name": "analytics_filter_id",
+										"value": "1"
+									}
+								],
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET"
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "[['data']['Chrome']"
+										},
+										"sink": {
+											"name": "Chrome",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Chrome Mobile']"
+										},
+										"sink": {
+											"name": "Chrome Mobile",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Edge']"
+										},
+										"sink": {
+											"name": "Edge",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Safari']"
+										},
+										"sink": {
+											"name": "Safari",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Mobile Safari']"
+										},
+										"sink": {
+											"name": "Mobile Safari",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['IE']"
+										},
+										"sink": {
+											"name": "IE",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['IE Mobile']"
+										},
+										"sink": {
+											"name": "IE Mobile",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Firefox']"
+										},
+										"sink": {
+											"name": "Firefox",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Android Browser']"
+										},
+										"sink": {
+											"name": "Android Browser",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Samsung Browser']"
+										},
+										"sink": {
+											"name": "Samsung Browser",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Opera']"
+										},
+										"sink": {
+											"name": "Opera",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Opera Mini']"
+										},
+										"sink": {
+											"name": "Opera Mini",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Opera Mobile']"
+										},
+										"sink": {
+											"name": "Opera Mobile",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['data']['Unknown  ']"
+										},
+										"sink": {
+											"name": "Unknown",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['timestamp']"
+										},
+										"sink": {
+											"name": "timestamp",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['analytics_group_id']"
+										},
+										"sink": {
+											"name": "analytics_group_id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "$['analytics_filter_id']"
+										},
+										"sink": {
+											"name": "analytics_filter_id",
+											"type": "Int64"
+										}
+									}
+								],
+								"collectionReference": "$['items']"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AnalyticsBrowsersMetricsRestDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"QueryString": {
+										"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "analytics_group_1_analytics_filter_1.csv",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					},
+					{
+						"name": "ExtractByPeriodGroupId",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExtractByPeriod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsBrowsersMetricsByGroupId",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@{pipeline().parameters.Period}",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ExtractByPeriodFilterId",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExtractByPeriodGroupId",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsBrowsersMetricsByFilterId",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@{pipeline().parameters.Period}",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "Delete Period Folder",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Prevent Delete from failing when folder is empty",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "AnalyticsBrowsersMetricsByPeriodRawFolderDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									}
+								}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							}
+						}
+					},
+					{
+						"name": "Prevent Delete from failing when folder is empty",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "AnalyticsGroupsCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AnalyticsBrowsersMetricsByPeriodRawCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									},
+									"FileName": "filler.csv"
+								}
+							}
+						]
+					}
+				],
+				"concurrency": 1,
+				"parameters": {
+					"Period": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsCountryMetricsByDatePeriod')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupDatePeriods",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"wildcardFileName": "date_periods.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "RootFolderDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "DatePeriod",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupDatePeriods",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupDatePeriods').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "ExecuteExtractAnalyticsCountryMetrics",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExtractAnalyticsCountryMetrics",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"Period": {
+												"value": "@{item().date_period}",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsHistoricalMetrics')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1156,7 +1787,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/TransformQualityAssuranceInventoryMetrics')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsDatasetsByDateRangePeriod')]",
@@ -1302,7 +1935,9 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsTrafficSourcesMetrics')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsHistoricalMetrics')]",
-				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsVisitLengthMetrics')]"
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsBrowsersMetrics')]",
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsVisitLengthMetrics')]",
+				"[concat(variables('factoryId'), '/pipelines/TransformAnalyticsDatasets')]"
 			]
 		},
 		{
@@ -1620,6 +2255,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsCountryMetricsByDatePeriod')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsRegionMetricsByDatePeriod')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsDatasetsByDateRangePeriod')]"
 			]
@@ -1812,7 +2448,99 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsDatasetsByDateRangePeriod')]"
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsDatasetsByDateRangePeriod')]",
+				"[concat(variables('factoryId'), '/pipelines/TransformAnalyticsDatasets')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExtractFromRestApiPipeline')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecuteExtractAnalyticsRelatedDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsDatasetsByDateRangePeriod",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.Period",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ExecuteLoadAnalyticsRelatedDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteTransformAnalyticsRelatedDatasets",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "LoadAnalyticsRelatedDatasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.Period",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ExecuteTransformAnalyticsRelatedDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsRelatedDatasets",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "TransformAnalyticsDatasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.Period",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"concurrency": 1,
+				"parameters": {
+					"Period": {
+						"type": "string"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsDatasetsByDateRangePeriod')]",
+				"[concat(variables('factoryId'), '/pipelines/TransformAnalyticsDatasets')]"
 			]
 		},
 		{
