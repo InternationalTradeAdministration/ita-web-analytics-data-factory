@@ -1,16 +1,28 @@
 {
-	"name": "QualityAssuranceSummaryCsvDataset",
+	"name": "QualityAssuranceSummaryMetricsCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "quality_assurance"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "quality_assurance_summary.csv",
+				"fileName": {
+					"value": "@{dataset().FileName}",
+					"type": "Expression"
+				},
+				"folderPath": "quality_assurance_summary_metrics",
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",

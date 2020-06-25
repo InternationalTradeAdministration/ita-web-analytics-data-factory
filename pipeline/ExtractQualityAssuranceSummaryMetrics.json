@@ -1,0 +1,274 @@
+{
+	"name": "ExtractQualityAssuranceSummaryMetrics",
+	"properties": {
+		"activities": [
+			{
+				"name": "Prevent Delete from failing when folder is empty",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "ContentGroupsCsvDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "QualityAssuranceSummaryMetricsCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": "filler.csv"
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete Folder",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Prevent Delete from failing when folder is empty",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "QualityAssuranceSummaryMetricsFolderDataset",
+						"type": "DatasetReference"
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					}
+				}
+			},
+			{
+				"name": "ExtractWithoutGroupId",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "Delete Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"additionalColumns": [
+							{
+								"name": "content_group_id",
+								"value": "1"
+							}
+						],
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['broken_links']"
+								},
+								"sink": {
+									"name": "broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['broken_links_delta']"
+								},
+								"sink": {
+									"name": "broken_links_delta",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['clicks_on_broken_links']"
+								},
+								"sink": {
+									"name": "clicks_on_broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['misspellings']"
+								},
+								"sink": {
+									"name": "misspellings",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['misspellings_delta']"
+								},
+								"sink": {
+									"name": "misspellings_delta",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['pages']"
+								},
+								"sink": {
+									"name": "pages",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['pages_affected_by_broken_links']"
+								},
+								"sink": {
+									"name": "pages_affected_by_broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['pages_affected_by_misspellings']"
+								},
+								"sink": {
+									"name": "pages_affected_by_misspellings",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['potential_misspellings']"
+								},
+								"sink": {
+									"name": "potential_misspellings",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['content_group_id']"
+								},
+								"sink": {
+									"name": "content_group_id",
+									"type": "Int64"
+								}
+							}
+						],
+						"collectionReference": ""
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "QualityAssuranceSummaryMetricsRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"QueryString": "page=1&page_size=1000"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "QualityAssuranceSummaryMetricsCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": "content_group_1.csv"
+						}
+					}
+				]
+			},
+			{
+				"name": "ExtractByGroupId",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExtractWithoutGroupId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractQualityAssuranceSummaryMetricsByGroupId",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "quality_assurance"
+		},
+		"annotations": []
+	}
+}

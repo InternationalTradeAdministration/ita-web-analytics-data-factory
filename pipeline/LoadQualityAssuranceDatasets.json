@@ -73,14 +73,7 @@
 			{
 				"name": "LoadQualityAssuranceInventoryMetrics",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "LoadContentGroups",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -164,6 +157,157 @@
 				"outputs": [
 					{
 						"referenceName": "QualityAssuranceInventoryMetricsSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "LoadQualityAssuranceSummaryMetrics",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "quality_assurance_summary_metrics",
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE [web_analytics].[quality_assurance_summary_metrics]",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "content_group_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "content_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "broken_links",
+									"type": "String"
+								},
+								"sink": {
+									"name": "broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "broken_links_delta",
+									"type": "String"
+								},
+								"sink": {
+									"name": "broken_links_delta",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "clicks_on_broken_links",
+									"type": "String"
+								},
+								"sink": {
+									"name": "clicks_on_broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "misspellings",
+									"type": "String"
+								},
+								"sink": {
+									"name": "misspellings",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "misspellings_delta",
+									"type": "String"
+								},
+								"sink": {
+									"name": "misspellings_delta",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "pages",
+									"type": "String"
+								},
+								"sink": {
+									"name": "pages",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "pages_affected_by_broken_links",
+									"type": "String"
+								},
+								"sink": {
+									"name": "pages_affected_by_broken_links",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "pages_affected_by_misspellings",
+									"type": "String"
+								},
+								"sink": {
+									"name": "pages_affected_by_misspellings",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"name": "potential_misspellings",
+									"type": "String"
+								},
+								"sink": {
+									"name": "potential_misspellings",
+									"type": "Int32"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "RootFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "QualityAssuranceSummaryMetricsSqlDataset",
 						"type": "DatasetReference"
 					}
 				]
