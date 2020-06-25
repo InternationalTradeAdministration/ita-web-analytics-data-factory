@@ -258,8 +258,8 @@
 				]
 			},
 			{
-				"name": "LookupDatePeriods",
-				"type": "Lookup",
+				"name": "ExecuteExtractAnalyticsCountryMetricsByDatePeriod",
+				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
 						"activity": "DateRangePeriod",
@@ -268,40 +268,21 @@
 						]
 					}
 				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
 				"userProperties": [],
 				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": false,
-							"wildcardFileName": "date_periods.csv",
-							"enablePartitionDiscovery": false
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsCountryMetricsByDatePeriod",
+						"type": "PipelineReference"
 					},
-					"dataset": {
-						"referenceName": "RootFolderDataset",
-						"type": "DatasetReference"
-					},
-					"firstRowOnly": false
+					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "DatePeriod",
-				"type": "ForEach",
+				"name": "ExecuteExtractAnalyticsRegionMetricsByDatePeriod",
+				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "LookupDatePeriods",
+						"activity": "ExecuteExtractAnalyticsCountryMetricsByDatePeriod",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -309,32 +290,11 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"items": {
-						"value": "@activity('LookupDatePeriods').output.value",
-						"type": "Expression"
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsRegionMetricsByDatePeriod",
+						"type": "PipelineReference"
 					},
-					"isSequential": false,
-					"activities": [
-						{
-							"name": "ExecuteExtractAnalyticsDatasetsByDatePeriod",
-							"type": "ExecutePipeline",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "ExtractAnalyticsDatasetsByDatePeriod",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"Period": {
-										"value": "@{item().date_period}",
-										"type": "Expression"
-									}
-								}
-							}
-						}
-					]
+					"waitOnCompletion": true
 				}
 			}
 		],
