@@ -1,0 +1,26 @@
+{
+	"name": "ContentPagesFolderDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "content"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "content_pages",
+				"container": "ita-web-analytics"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

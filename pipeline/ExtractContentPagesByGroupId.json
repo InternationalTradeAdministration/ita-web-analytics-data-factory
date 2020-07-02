@@ -1,0 +1,175 @@
+{
+	"name": "ExtractContentPagesByGroupId",
+	"properties": {
+		"activities": [
+			{
+				"name": "LookupContentGroups",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "ContentGroupsCsvDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ContentGroup",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookupContentGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupContentGroups').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExtractContentPages",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 1,
+								"retryIntervalInSeconds": 60,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "RestSource",
+									"additionalColumns": [
+										{
+											"name": "content_group_id",
+											"value": {
+												"value": "@{item().id}",
+												"type": "Expression"
+											}
+										}
+									],
+									"httpRequestTimeout": "00:01:40",
+									"requestInterval": "00.00:00:00.010",
+									"requestMethod": "GET",
+									"paginationRules": {
+										"AbsoluteUrl": "$.links.next.href"
+									}
+								},
+								"sink": {
+									"type": "DelimitedTextSink",
+									"storeSettings": {
+										"type": "AzureBlobStorageWriteSettings"
+									},
+									"formatSettings": {
+										"type": "DelimitedTextWriteSettings",
+										"quoteAllText": true,
+										"fileExtension": ".txt"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"mappings": [
+										{
+											"source": {
+												"path": "['id']"
+											},
+											"sink": {
+												"name": "id",
+												"type": "Int64"
+											}
+										},
+										{
+											"source": {
+												"path": "['title']"
+											},
+											"sink": {
+												"name": "title",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "['url']"
+											},
+											"sink": {
+												"name": "url",
+												"type": "String"
+											}
+										},
+										{
+											"source": {
+												"path": "$['content_group_id']"
+											},
+											"sink": {
+												"name": "content_group_id",
+												"type": "Int64"
+											}
+										}
+									],
+									"collectionReference": "$['items']"
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "ContentPagesRestDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"QueryString": {
+											"value": "page=1&page_size=1000&group_id=@{item().id}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "ContentPagesCsvDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"FileName": {
+											"value": "content_group_@{item().id}.csv",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		],
+		"folder": {
+			"name": "content"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

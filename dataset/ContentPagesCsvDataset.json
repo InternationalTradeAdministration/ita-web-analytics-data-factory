@@ -1,0 +1,35 @@
+{
+	"name": "ContentPagesCsvDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"FileName": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "content"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@{dataset().FileName}",
+					"type": "Expression"
+				},
+				"folderPath": "content_pages",
+				"container": "ita-web-analytics"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	}
+}

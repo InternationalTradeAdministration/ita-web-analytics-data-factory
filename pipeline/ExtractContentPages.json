@@ -1,0 +1,219 @@
+{
+	"name": "ExtractContentPages",
+	"properties": {
+		"activities": [
+			{
+				"name": "Prevent Delete from failing when folder is empty",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "ContentGroupsCsvDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ContentPagesCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": "filler.csv"
+						}
+					}
+				]
+			},
+			{
+				"name": "Delete Folder",
+				"type": "Delete",
+				"dependsOn": [
+					{
+						"activity": "Prevent Delete from failing when folder is empty",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "ContentPagesFolderDataset",
+						"type": "DatasetReference"
+					},
+					"enableLogging": false,
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					}
+				}
+			},
+			{
+				"name": "ExtractWithoutGroupId",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ExtractByGroupId",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"additionalColumns": [
+							{
+								"name": "content_group_id",
+								"value": "1"
+							}
+						],
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id"
+								}
+							},
+							{
+								"source": {
+									"path": "['title']"
+								},
+								"sink": {
+									"name": "title"
+								}
+							},
+							{
+								"source": {
+									"path": "['url']"
+								},
+								"sink": {
+									"name": "url"
+								}
+							},
+							{
+								"source": {
+									"path": "$['content_group_id']"
+								},
+								"sink": {
+									"name": "content_group_id"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "ContentPagesRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"QueryString": "page=1&page_size=1000"
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "ContentPagesCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": "content_group_1.csv"
+						}
+					}
+				]
+			},
+			{
+				"name": "ExtractByGroupId",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "Delete Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractContentPagesByGroupId",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"folder": {
+			"name": "content"
+		},
+		"annotations": []
+	}
+}

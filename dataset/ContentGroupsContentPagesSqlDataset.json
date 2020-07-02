@@ -1,0 +1,19 @@
+{
+	"name": "ContentGroupsContentPagesSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "content"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "web_analytics",
+			"table": "content_groups_content_pages"
+		}
+	}
+}
