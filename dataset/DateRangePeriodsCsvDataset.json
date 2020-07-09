@@ -1,19 +1,16 @@
 {
-	"name": "AnalyticsPagesCsvDataset",
+	"name": "DateRangePeriodsCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
-		},
-		"folder": {
-			"name": "analytics"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "analytics_pages.csv",
+				"fileName": "date_range_periods.csv",
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",

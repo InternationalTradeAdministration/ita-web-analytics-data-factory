@@ -91,7 +91,20 @@
 			{
 				"name": "ExtractAnalyticsGroups",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "GenerateDateRangePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "GenerateDatePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -190,7 +203,20 @@
 			{
 				"name": "ExtractAnalyticsFilters",
 				"type": "Copy",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "GenerateDateRangePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "GenerateDatePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -296,6 +322,287 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsPageMetricsByDatePeriod_copy1",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsRegionMetricsByDatePeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsPageMetricsByDatePeriod",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "GenerateDatePeriods",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[web_analytics].[generate_date_periods]",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "date_period",
+									"type": "String",
+									"physicalType": "varchar"
+								},
+								"sink": {
+									"name": "date_period",
+									"type": "String"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "StoredProcedureSqlDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DatePeriodsCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "GenerateDateRangePeriods",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[web_analytics].[generate_date_range_periods]",
+						"queryTimeout": "02:00:00"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "date_range_period",
+									"type": "String",
+									"physicalType": "nvarchar"
+								},
+								"sink": {
+									"name": "date_range_period",
+									"type": "String",
+									"physicalType": "String"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "StoredProcedureSqlDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DateRangePeriodsCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "ExtractAnalyticsPages",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsPageMetricsByDatePeriod_copy1",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['title']"
+								},
+								"sink": {
+									"name": "title",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['url']"
+								},
+								"sink": {
+									"name": "url",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['average_page_views_per_visit']"
+								},
+								"sink": {
+									"name": "average_page_views_per_visit",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"path": "['bounce_rate']"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"path": "['page_views']"
+								},
+								"sink": {
+									"name": "page_views",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['visits']"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int32"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsPagesRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "20200203_@{convertFromUtc(adddays(utcnow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsPagesCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"folder": {
