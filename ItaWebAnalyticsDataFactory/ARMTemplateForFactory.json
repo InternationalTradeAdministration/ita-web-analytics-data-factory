@@ -2735,6 +2735,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 10,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
@@ -2901,9 +2902,18 @@
 								}
 							},
 							"dataset": {
-								"referenceName": "AnalyticsPagesCsvDataset",
+								"referenceName": "AnalyticsPageMetricsByPeriodCsvDataset",
 								"type": "DatasetReference",
-								"parameters": {}
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "@{pipeline().parameters.Period}.csv",
+										"type": "Expression"
+									}
+								}
 							},
 							"firstRowOnly": false
 						}
@@ -2945,7 +2955,7 @@
 												{
 													"name": "analytics_page_id",
 													"value": {
-														"value": "@{item().id}",
+														"value": "@{item().analytics_page_id}",
 														"type": "Expression"
 													}
 												},
@@ -3040,7 +3050,7 @@
 											"type": "DatasetReference",
 											"parameters": {
 												"QueryString": {
-													"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&page_id=@{item().id}",
+													"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&page_id=@{item().analytics_page_id}",
 													"type": "Expression"
 												}
 											}
@@ -3056,7 +3066,7 @@
 													"type": "Expression"
 												},
 												"FileName": {
-													"value": "@{item().id}.csv",
+													"value": "@{item().analytics_page_id}.csv",
 													"type": "Expression"
 												}
 											}
@@ -3082,7 +3092,7 @@
 				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsByPeriodCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsByPeriodFolderDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsPagesCsvDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsPageMetricsByPeriodCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsRestDataset')]"
 			]
 		},
@@ -4811,7 +4821,7 @@
 								}
 							},
 							"dataset": {
-								"referenceName": "DatePeriodsCsvDataset",
+								"referenceName": "EventTrackingDatePeriodsCsvDataset",
 								"type": "DatasetReference",
 								"parameters": {}
 							},
@@ -4836,6 +4846,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 10,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsPageMetricsByPeriod",
@@ -4866,7 +4877,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/DatePeriodsCsvDataset')]",
+				"[concat(variables('factoryId'), '/datasets/EventTrackingDatePeriodsCsvDataset')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsPageMetricsByPeriod')]"
 			]
 		},

@@ -1,0 +1,511 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ItaWebAnalyticsDataFactory"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsEventTrackingMetrics')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupDatePeriods",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "EventTrackingDatePeriodsCsvDataset",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "DatePeriod",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupDatePeriods",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupDatePeriods').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExtractAnalyticsEventTrackingMetricsByPeriod",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"Period": {
+												"value": "@{item().date_period}",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsEventTrackingMetricsByPeriod')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsEventTrackingMetricsByPeriod')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Prevent Delete from failing when folder is empty",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false
+						},
+						"inputs": [
+							{
+								"referenceName": "AnalyticsGroupsCsvDataset",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AnalyticsEventTrackingMetricsByPeriodCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									},
+									"FileName": "filler.csv"
+								}
+							}
+						]
+					},
+					{
+						"name": "Delete Period Folder",
+						"type": "Delete",
+						"dependsOn": [
+							{
+								"activity": "Prevent Delete from failing when folder is empty",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataset": {
+								"referenceName": "AnalyticsEventTrackingMetricsByPeriodFolderDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									}
+								}
+							},
+							"enableLogging": false,
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							}
+						}
+					},
+					{
+						"name": "LookupAnalyticsPages",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "Delete Period Folder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "AnalyticsPageMetricsByPeriodCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									},
+									"FileName": {
+										"value": "@{pipeline().parameters.Period}.csv",
+										"type": "Expression"
+									}
+								}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEachAnalyticsPage",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupAnalyticsPages",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupAnalyticsPages').output.value",
+								"type": "Expression"
+							},
+							"activities": [
+								{
+									"name": "ExtractAnalyticsEventTrackingMetricsByPageId",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 1,
+										"retryIntervalInSeconds": 60,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "RestSource",
+											"additionalColumns": [
+												{
+													"name": "analytics_page_id",
+													"value": {
+														"value": "@{item().analytics_page_id}",
+														"type": "Expression"
+													}
+												},
+												{
+													"name": "date",
+													"value": {
+														"value": "@{pipeline().parameters.Period}",
+														"type": "Expression"
+													}
+												}
+											],
+											"httpRequestTimeout": "00:01:40",
+											"requestInterval": "00.00:00:00.010",
+											"requestMethod": "GET"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"mappings": [
+												{
+													"source": {
+														"path": "[['action']"
+													},
+													"sink": {
+														"name": "action",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"path": "[['category']"
+													},
+													"sink": {
+														"name": "category",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"path": "[['events']"
+													},
+													"sink": {
+														"name": "events",
+														"type": "Int32"
+													}
+												},
+												{
+													"source": {
+														"path": "[['label']"
+													},
+													"sink": {
+														"name": "label",
+														"type": "String"
+													}
+												},
+												{
+													"source": {
+														"path": "$['analytics_page_id']"
+													},
+													"sink": {
+														"name": "analytics_page_id",
+														"type": "Int64"
+													}
+												},
+												{
+													"source": {
+														"path": "$['date']"
+													},
+													"sink": {
+														"name": "date",
+														"type": "String"
+													}
+												}
+											],
+											"collectionReference": "$['items']"
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "AnalyticsEventTrackingMetricsRestDataset",
+											"type": "DatasetReference",
+											"parameters": {
+												"QueryString": {
+													"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&page_id=@{item().analytics_page_id}",
+													"type": "Expression"
+												}
+											}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AnalyticsEventTrackingMetricsByPeriodCsvDataset",
+											"type": "DatasetReference",
+											"parameters": {
+												"Period": {
+													"value": "@{pipeline().parameters.Period}",
+													"type": "Expression"
+												},
+												"FileName": {
+													"value": "@{item().analytics_page_id}.csv",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"concurrency": 3,
+				"parameters": {
+					"Period": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsPageMetrics')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupDatePeriods",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "EventTrackingDatePeriodsCsvDataset",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "DatePeriod",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupDatePeriods",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupDatePeriods').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"batchCount": 10,
+							"activities": [
+								{
+									"name": "ExecuteExtractAnalyticsPageMetricsByPeriod",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExtractAnalyticsPageMetricsByPeriod",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"Period": {
+												"value": "@{item().date_period}",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		}
+	]
+}

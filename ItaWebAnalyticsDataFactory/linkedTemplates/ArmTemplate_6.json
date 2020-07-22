@@ -3628,6 +3628,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 10,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
@@ -3956,7 +3957,7 @@
 								}
 							},
 							"dataset": {
-								"referenceName": "DatePeriodsCsvDataset",
+								"referenceName": "EventTrackingDatePeriodsCsvDataset",
 								"type": "DatasetReference",
 								"parameters": {}
 							},
@@ -3981,6 +3982,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 10,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsPageMetricsByPeriod",
