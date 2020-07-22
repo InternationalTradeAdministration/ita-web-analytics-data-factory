@@ -1025,16 +1025,6 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "analytics_group_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_group_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
 									"name": "date",
 									"type": "String"
 								},
@@ -1045,7 +1035,7 @@
 							},
 							{
 								"source": {
-									"name": "id",
+									"name": "analytics_page_id",
 									"type": "String"
 								},
 								"sink": {
@@ -1105,6 +1095,278 @@
 				"outputs": [
 					{
 						"referenceName": "AnalyticsPageMetricsSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "LoadDefaultAnalyticsGroupAnalyticsPages",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"additionalColumns": [
+							{
+								"name": "analytics_group_id",
+								"value": "1"
+							}
+						],
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": {
+							"value": "TRUNCATE TABLE [web_analytics].[analytics_groups_analytics_pages]",
+							"type": "Expression"
+						},
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "analytics_group_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_page_id",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsPagesCsvDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsGroupsAnalyticsPagesSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "LoadAnalyticsGroupsAnalyticsPages",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "LoadDefaultAnalyticsGroupAnalyticsPages",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "analytics_groups_analytics_pages",
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "analytics_group_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "analytics_page_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_page_id",
+									"type": "Int64"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsGroupsAnalyticsPagesFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsGroupsAnalyticsPagesSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "LoadAnalyticsEventTrackingMetrics",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": {
+								"value": "analytics_event_tracking_metrics",
+								"type": "Expression"
+							},
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": {
+							"value": "TRUNCATE TABLE [web_analytics].[analytics_event_tracking_metrics]",
+							"type": "Expression"
+						},
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "analytics_page_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_page_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "date",
+									"type": "String"
+								},
+								"sink": {
+									"name": "date",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "category",
+									"type": "String"
+								},
+								"sink": {
+									"name": "category",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "action",
+									"type": "String"
+								},
+								"sink": {
+									"name": "action",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "label",
+									"type": "String"
+								},
+								"sink": {
+									"name": "label",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "events",
+									"type": "String"
+								},
+								"sink": {
+									"name": "events",
+									"type": "Int32"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "RootFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsEventTrackingMetricsSqlDataset",
 						"type": "DatasetReference"
 					}
 				]

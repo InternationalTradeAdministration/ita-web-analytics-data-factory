@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsTrafficSourcesMetrics",
+						"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -42,7 +42,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsHistoricalMetrics",
+						"referenceName": "ExtractAnalyticsHistoricalMetricsByPeriod",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -61,7 +61,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsBrowsersMetrics",
+						"referenceName": "ExtractAnalyticsBrowsersMetricsByPeriod",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
@@ -87,7 +87,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsVisitLengthMetrics",
+						"referenceName": "ExtractAnalyticsVisitLengthMetricsByPeriod",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,

@@ -63,8 +63,8 @@
 							"dependsOn": [],
 							"policy": {
 								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
+								"retry": 1,
+								"retryIntervalInSeconds": 60,
 								"secureOutput": false,
 								"secureInput": false
 							},
@@ -130,7 +130,10 @@
 									"referenceName": "AnalyticsGroupsAnalyticsPagesRestDataset",
 									"type": "DatasetReference",
 									"parameters": {
-										"GroupId": "@{item().id}"
+										"QueryString": {
+											"value": "group_id=@{item().id}&period=@{pipeline().parameters.Period}&page=1&page_size=1000",
+											"type": "Expression"
+										}
 									}
 								}
 							],
@@ -139,7 +142,10 @@
 									"referenceName": "AnalyticsGroupsAnalyticsPagesCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
-										"GroupId": "@{item().id}"
+										"FileName": {
+											"value": "analytics_group_@{item().id}_analytics_page_ids.csv",
+											"type": "Expression"
+										}
 									}
 								}
 							]
@@ -174,7 +180,7 @@
 					"enableLogging": false,
 					"storeSettings": {
 						"type": "AzureBlobStorageReadSettings",
-						"recursive": false
+						"recursive": true
 					}
 				}
 			},
@@ -222,12 +228,20 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsGroupsAnalyticsPagesFolderDataset",
-						"type": "DatasetReference"
+						"referenceName": "AnalyticsGroupsAnalyticsPagesCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": "filler.csv"
+						}
 					}
 				]
 			}
 		],
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "analytics"
 		},

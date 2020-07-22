@@ -3,45 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "Delete Period Folder",
-				"type": "Delete",
-				"dependsOn": [
-					{
-						"activity": "Prevent Delete from failing when folder is empty",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "AnalyticsPageMetricsByPeriodFolderDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
-							}
-						}
-					},
-					"enableLogging": false,
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true
-					}
-				}
-			},
-			{
-				"name": "Prevent Delete from failing when folder is empty",
-				"type": "Copy",
+				"name": "LookupDatePeriods",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -56,220 +19,26 @@
 						"type": "DelimitedTextSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
+							"recursive": false,
+							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
 							"type": "DelimitedTextReadSettings"
 						}
 					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsGroupsCsvDataset",
+					"dataset": {
+						"referenceName": "DatePeriodsCsvDataset",
 						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsPageMetricsByPeriodCsvDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
-							},
-							"FileName": "filler.csv"
-						}
-					}
-				]
+					},
+					"firstRowOnly": false
+				}
 			},
 			{
-				"name": "ExtractByPeriod",
-				"type": "Copy",
+				"name": "DatePeriod",
+				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Delete Period Folder",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 1,
-					"retryIntervalInSeconds": 60,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "RestSource",
-						"additionalColumns": [
-							{
-								"name": "analytics_group_id",
-								"value": "1"
-							},
-							{
-								"name": "date",
-								"value": {
-									"value": "@{pipeline().parameters.Period}",
-									"type": "Expression"
-								}
-							}
-						],
-						"httpRequestTimeout": "00:01:40",
-						"requestInterval": "00.00:00:00.010",
-						"requestMethod": "GET",
-						"paginationRules": {
-							"AbsoluteUrl": "$.links.next.href"
-						}
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"path": "['id']"
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "['title']"
-								},
-								"sink": {
-									"name": "title",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "['url']"
-								},
-								"sink": {
-									"name": "url",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "['average_page_views_per_visit']"
-								},
-								"sink": {
-									"name": "average_page_views_per_visit",
-									"type": "Decimal"
-								}
-							},
-							{
-								"source": {
-									"path": "['bounce_rate']"
-								},
-								"sink": {
-									"name": "bounce_rate",
-									"type": "Decimal"
-								}
-							},
-							{
-								"source": {
-									"path": "['page_views']"
-								},
-								"sink": {
-									"name": "page_views",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"path": "['visits']"
-								},
-								"sink": {
-									"name": "visits",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"path": "$['analytics_group_id']"
-								},
-								"sink": {
-									"name": "analytics_group_id"
-								}
-							},
-							{
-								"source": {
-									"path": "$['date']"
-								},
-								"sink": {
-									"name": "date"
-								}
-							}
-						],
-						"collectionReference": "$['items']"
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsPageMetricsRestDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"QueryString": {
-								"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsPageMetricsByPeriodCsvDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
-							},
-							"FileName": {
-								"value": "analytics_group_1.csv",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "ExtractByPeriodGroupId",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExtractByPeriod",
+						"activity": "LookupDatePeriods",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -277,29 +46,39 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsPageMetricsByGroupId",
-						"type": "PipelineReference"
+					"items": {
+						"value": "@activity('LookupDatePeriods').output.value",
+						"type": "Expression"
 					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@{pipeline().parameters.Period}",
-							"type": "Expression"
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExecuteExtractAnalyticsPageMetricsByPeriod",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsPageMetricsByPeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@{item().date_period}",
+										"type": "Expression"
+									}
+								}
+							}
 						}
-					}
+					]
 				}
 			}
 		],
-		"concurrency": 3,
-		"parameters": {
-			"Period": {
-				"type": "string"
-			}
-		},
 		"folder": {
 			"name": "analytics"
 		},
 		"annotations": []
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

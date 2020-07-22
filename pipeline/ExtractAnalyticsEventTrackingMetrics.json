@@ -1,5 +1,5 @@
 {
-	"name": "ExtractAnalyticsCountryMetricsByDatePeriod",
+	"name": "ExtractAnalyticsEventTrackingMetrics",
 	"properties": {
 		"activities": [
 			{
@@ -20,7 +20,6 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": false,
-							"wildcardFileName": "date_periods.csv",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -28,7 +27,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "RootFolderDataset",
+						"referenceName": "EventTrackingDatePeriodsCsvDataset",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -54,13 +53,13 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "ExecuteExtractAnalyticsCountryMetrics",
+							"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "ExtractAnalyticsCountryMetrics",
+									"referenceName": "ExtractAnalyticsEventTrackingMetricsByPeriod",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,

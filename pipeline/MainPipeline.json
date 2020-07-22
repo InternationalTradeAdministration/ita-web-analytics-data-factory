@@ -47,7 +47,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteQualityAssuranceDatasets",
+						"activity": "ExecuteExtractQualityAssuranceDatasets",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -63,9 +63,16 @@
 				}
 			},
 			{
-				"name": "ExecuteQualityAssuranceDatasets",
+				"name": "ExecuteExtractQualityAssuranceDatasets",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "ExecuteGeneratePeriodParameters",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -110,6 +117,19 @@
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "LoadContentDatasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExecuteGeneratePeriodParameters",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "GeneratePeriodParameters",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true

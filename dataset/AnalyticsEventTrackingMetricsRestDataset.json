@@ -1,5 +1,5 @@
 {
-	"name": "AnalyticsGroupsAnalyticsPagesRestDataset",
+	"name": "AnalyticsEventTrackingMetricsRestDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "SiteImproveRestLinkedService",
@@ -17,7 +17,7 @@
 		"type": "RestResource",
 		"typeProperties": {
 			"relativeUrl": {
-				"value": "v2/sites/17536213616/analytics/content/all_pages?@{dataset().QueryString}&filter_id=1717697832",
+				"value": "v2/sites/17536213616/analytics/event_tracking/events?@{dataset().QueryString}&filter_id=1717697832",
 				"type": "Expression"
 			}
 		},

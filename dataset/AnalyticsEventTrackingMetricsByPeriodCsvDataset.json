@@ -1,11 +1,14 @@
 {
-	"name": "AnalyticsGroupsAnalyticsPagesCsvDataset",
+	"name": "AnalyticsEventTrackingMetricsByPeriodCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
+			"Period": {
+				"type": "string"
+			},
 			"FileName": {
 				"type": "string"
 			}
@@ -22,7 +25,10 @@
 					"value": "@{dataset().FileName}",
 					"type": "Expression"
 				},
-				"folderPath": "analytics_groups_analytics_pages",
+				"folderPath": {
+					"value": "analytics_event_tracking_metrics/@{dataset().Period}",
+					"type": "Expression"
+				},
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",

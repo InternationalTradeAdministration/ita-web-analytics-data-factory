@@ -3,245 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ExtractByPeriod",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "Delete Period Folder",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 1,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "RestSource",
-						"additionalColumns": [
-							{
-								"name": "analytics_group_id",
-								"value": "1"
-							},
-							{
-								"name": "date",
-								"value": {
-									"value": "@{pipeline().parameters.Period}",
-									"type": "Expression"
-								}
-							},
-							{
-								"name": "country_id",
-								"value": {
-									"value": "@{pipeline().parameters.CountryId}",
-									"type": "Expression"
-								}
-							}
-						],
-						"httpRequestTimeout": "00:01:40",
-						"requestInterval": "00.00:00:00.010",
-						"requestMethod": "GET"
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"path": "['id']"
-								},
-								"sink": {
-									"name": "region_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "['bounce_rate']"
-								},
-								"sink": {
-									"name": "bounce_rate",
-									"type": "Decimal"
-								}
-							},
-							{
-								"source": {
-									"path": "['is_unknown']"
-								},
-								"sink": {
-									"name": "is_unknown",
-									"type": "Boolean"
-								}
-							},
-							{
-								"source": {
-									"path": "['region']"
-								},
-								"sink": {
-									"name": "region",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "['visits_of_parent']"
-								},
-								"sink": {
-									"name": "visits",
-									"type": "Int32"
-								}
-							},
-							{
-								"source": {
-									"path": "$['analytics_group_id']"
-								},
-								"sink": {
-									"name": "analytics_group_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "$['date']"
-								},
-								"sink": {
-									"name": "date",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "$['country_id']"
-								},
-								"sink": {
-									"name": "country_id",
-									"type": "Int64"
-								}
-							}
-						],
-						"collectionReference": "$['items']"
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsRegionMetricsRestDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"QueryString": {
-								"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}",
-								"type": "Expression"
-							},
-							"CountryId": {
-								"value": "@{pipeline().parameters.CountryId}",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsRegionMetricsByPeriodCsvDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
-							},
-							"FileName": {
-								"value": "analytics_group_1.csv",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "ExtractByPeriodGroupId",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExtractByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsRegionMetricsByGroupId",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@{pipeline().parameters.Period}",
-							"type": "Expression"
-						},
-						"CountryId": {
-							"value": "@{pipeline().parameters.CountryId}",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "Delete Period Folder",
-				"type": "Delete",
-				"dependsOn": [
-					{
-						"activity": "Prevent Delete from failing when folder is empty",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "AnalyticsRegionMetricsByPeriodFolderDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
-							}
-						}
-					},
-					"enableLogging": false,
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true
-					}
-				}
-			},
-			{
-				"name": "Prevent Delete from failing when folder is empty",
-				"type": "Copy",
+				"name": "LookupDatePeriods",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -256,59 +19,67 @@
 						"type": "DelimitedTextSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
+							"recursive": false,
+							"wildcardFileName": "date_periods.csv",
+							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
 							"type": "DelimitedTextReadSettings"
 						}
 					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsGroupsCsvDataset",
+					"dataset": {
+						"referenceName": "RootFolderDataset",
 						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "DatePeriod",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookupDatePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsRegionMetricsByPeriodCsvDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
-							},
-							"FileName": "filler.csv"
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupDatePeriods').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExecuteExtractAnalyticsRegionMetrics",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsRegionMetricsByPeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@{item().date_period}",
+										"type": "Expression"
+									}
+								}
+							}
 						}
-					}
-				]
+					]
+				}
 			}
 		],
-		"concurrency": 3,
-		"parameters": {
-			"Period": {
-				"type": "string"
-			},
-			"CountryId": {
-				"type": "string",
-				"defaultValue": "3229"
-			}
-		},
 		"folder": {
 			"name": "analytics"
 		},
 		"annotations": []
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
 }

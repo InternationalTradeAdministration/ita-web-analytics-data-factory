@@ -1,9 +1,9 @@
 {
-	"name": "ExtractAnalyticsPageMetricsByDatePeriod",
+	"name": "TransformAnalyticsBrowsersMetrics",
 	"properties": {
 		"activities": [
 			{
-				"name": "LookupDatePeriods",
+				"name": "LookupDateRangePeriods",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -20,7 +20,7 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": false,
-							"wildcardFileName": "date_periods.csv",
+							"wildcardFileName": "date_range_periods.csv",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
@@ -35,11 +35,11 @@
 				}
 			},
 			{
-				"name": "DatePeriod",
+				"name": "DateRangePeriod",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "LookupDatePeriods",
+						"activity": "LookupDateRangePeriods",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -48,25 +48,25 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('LookupDatePeriods').output.value",
+						"value": "@activity('LookupDateRangePeriods').output.value",
 						"type": "Expression"
 					},
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "ExecuteExtractAnalyticsPageMetrics",
+							"name": "ExecuteTransformAnalyticsBrowsersByPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "ExtractAnalyticsPageMetrics",
+									"referenceName": "ExtractAnalyticsBrowsersMetricsByPeriod",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
 								"parameters": {
 									"Period": {
-										"value": "@{item().date_period}",
+										"value": "@{item().date_range_period}",
 										"type": "Expression"
 									}
 								}
