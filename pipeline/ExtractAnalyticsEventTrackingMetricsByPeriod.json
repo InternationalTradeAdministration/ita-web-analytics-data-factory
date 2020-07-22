@@ -127,8 +127,18 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "AnalyticsPagesCsvDataset",
-						"type": "DatasetReference"
+						"referenceName": "AnalyticsPageMetricsByPeriodCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@{pipeline().parameters.Period}",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@{pipeline().parameters.Period}.csv",
+								"type": "Expression"
+							}
+						}
 					},
 					"firstRowOnly": false
 				}
@@ -170,7 +180,7 @@
 										{
 											"name": "analytics_page_id",
 											"value": {
-												"value": "@{item().id}",
+												"value": "@{item().analytics_page_id}",
 												"type": "Expression"
 											}
 										},
@@ -265,7 +275,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"QueryString": {
-											"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&page_id=@{item().id}",
+											"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&page_id=@{item().analytics_page_id}",
 											"type": "Expression"
 										}
 									}
@@ -281,7 +291,7 @@
 											"type": "Expression"
 										},
 										"FileName": {
-											"value": "@{item().id}.csv",
+											"value": "@{item().analytics_page_id}.csv",
 											"type": "Expression"
 										}
 									}

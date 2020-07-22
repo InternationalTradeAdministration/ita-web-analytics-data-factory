@@ -27,7 +27,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "DatePeriodsCsvDataset",
+						"referenceName": "EventTrackingDatePeriodsCsvDataset",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -51,6 +51,7 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
+					"batchCount": 10,
 					"activities": [
 						{
 							"name": "ExecuteExtractAnalyticsPageMetricsByPeriod",
