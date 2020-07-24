@@ -2935,6 +2935,7 @@
 								"value": "@activity('LookupAnalyticsPages').output.value",
 								"type": "Expression"
 							},
+							"batchCount": 25,
 							"activities": [
 								{
 									"name": "ExtractAnalyticsEventTrackingMetricsByPageId",
@@ -3077,7 +3078,7 @@
 						}
 					}
 				],
-				"concurrency": 3,
+				"concurrency": 2,
 				"parameters": {
 					"Period": {
 						"type": "string"
