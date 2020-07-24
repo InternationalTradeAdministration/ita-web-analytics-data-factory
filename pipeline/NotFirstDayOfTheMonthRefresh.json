@@ -1,0 +1,32 @@
+{
+	"name": "NotFirstDayOfTheMonthRefresh",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExecuteDailyRefresh",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ContinuousRefresh",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"DatePeriod": {
+							"value": "@{convertFromUtc(adddays(utcnow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"variables": {
+			"DateRange": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}

@@ -131,7 +131,7 @@
 									"type": "DatasetReference",
 									"parameters": {
 										"QueryString": {
-											"value": "group_id=@{item().id}&period=@{pipeline().parameters.Period}&page=1&page_size=1000",
+											"value": "group_id=@{item().id}&period=20200203_@{convertFromUtc(adddays(utcnow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}&page=1&page_size=1000",
 											"type": "Expression"
 										}
 									}
@@ -237,11 +237,6 @@
 				]
 			}
 		],
-		"parameters": {
-			"Period": {
-				"type": "string"
-			}
-		},
 		"folder": {
 			"name": "analytics"
 		},
