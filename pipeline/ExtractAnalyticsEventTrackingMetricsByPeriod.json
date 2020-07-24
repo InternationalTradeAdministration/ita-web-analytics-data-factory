@@ -160,7 +160,6 @@
 						"value": "@activity('LookupAnalyticsPages').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 25,
 					"activities": [
 						{
 							"name": "ExtractAnalyticsEventTrackingMetricsByPageId",
