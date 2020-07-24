@@ -56,11 +56,37 @@
 						{
 							"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
 							"type": "ExecutePipeline",
-							"dependsOn": [],
+							"dependsOn": [
+								{
+									"activity": "ExecuteExtractAnalyticsEventTrackingPages",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
 									"referenceName": "ExtractAnalyticsEventTrackingMetricsByPeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@{item().date_period}",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "ExecuteExtractAnalyticsEventTrackingPages",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsEventTrackingPagesByPeriod",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,

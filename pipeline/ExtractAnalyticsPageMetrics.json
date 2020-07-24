@@ -27,7 +27,7 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "EventTrackingDatePeriodsCsvDataset",
+						"referenceName": "DatePeriodsCsvDataset",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false

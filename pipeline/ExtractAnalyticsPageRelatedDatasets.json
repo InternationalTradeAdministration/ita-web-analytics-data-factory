@@ -107,7 +107,7 @@
 						"storedProcedureParameters": {
 							"initial_date": {
 								"type": "String",
-								"value": "20200701"
+								"value": "20200309"
 							}
 						},
 						"queryTimeout": "02:00:00"
