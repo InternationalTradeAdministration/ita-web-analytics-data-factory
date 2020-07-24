@@ -1,5 +1,5 @@
 {
-	"name": "TransformAnalyticsDatasets",
+	"name": "TransformAnalyticsBrowsersMetricsByPeriod",
 	"properties": {
 		"activities": [
 			{

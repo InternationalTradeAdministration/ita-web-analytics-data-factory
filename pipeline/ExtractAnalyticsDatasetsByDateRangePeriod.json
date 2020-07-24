@@ -113,7 +113,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "TransformAnalyticsDatasets",
+						"referenceName": "TransformAnalyticsBrowsersMetricsByPeriod",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
