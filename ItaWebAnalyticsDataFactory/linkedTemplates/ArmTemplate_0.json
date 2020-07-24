@@ -636,7 +636,7 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsFiltersAnalyticsPagesCsvDataset')]",
+			"name": "[concat(parameters('factoryName'), '/AnalyticsEventTrackingPagesByPeriodCsvDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -645,7 +645,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"FilterId": {
+					"Period": {
 						"type": "string"
 					}
 				},
@@ -658,10 +658,13 @@
 					"location": {
 						"type": "AzureBlobStorageLocation",
 						"fileName": {
-							"value": "analytics_filter_@{dataset().FilterId}_analytics_page_ids.csv",
+							"value": "@{dataset().Period}.csv",
 							"type": "Expression"
 						},
-						"folderPath": "analytics_filters_analytics_pages",
+						"folderPath": {
+							"value": "analytics_event_tracking_pages",
+							"type": "Expression"
+						},
 						"container": "ita-web-analytics"
 					},
 					"columnDelimiter": ",",

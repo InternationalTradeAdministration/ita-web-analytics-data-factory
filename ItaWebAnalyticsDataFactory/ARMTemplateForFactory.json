@@ -2740,11 +2740,37 @@
 								{
 									"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
 									"type": "ExecutePipeline",
-									"dependsOn": [],
+									"dependsOn": [
+										{
+											"activity": "ExecuteExtractAnalyticsEventTrackingPages",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
 									"userProperties": [],
 									"typeProperties": {
 										"pipeline": {
 											"referenceName": "ExtractAnalyticsEventTrackingMetricsByPeriod",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"Period": {
+												"value": "@{item().date_period}",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "ExecuteExtractAnalyticsEventTrackingPages",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExtractAnalyticsEventTrackingPagesByPeriod",
 											"type": "PipelineReference"
 										},
 										"waitOnCompletion": true,
@@ -2767,7 +2793,8 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/EventTrackingDatePeriodsCsvDataset')]",
-				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsEventTrackingMetricsByPeriod')]"
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsEventTrackingMetricsByPeriod')]",
+				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsEventTrackingPagesByPeriod')]"
 			]
 		},
 		{
@@ -2871,7 +2898,7 @@
 						}
 					},
 					{
-						"name": "LookupAnalyticsPages",
+						"name": "LookupAnalyticsEventTrackingPages",
 						"type": "Lookup",
 						"dependsOn": [
 							{
@@ -2902,15 +2929,11 @@
 								}
 							},
 							"dataset": {
-								"referenceName": "AnalyticsPageMetricsByPeriodCsvDataset",
+								"referenceName": "AnalyticsEventTrackingPagesByPeriodCsvDataset",
 								"type": "DatasetReference",
 								"parameters": {
 									"Period": {
 										"value": "@{pipeline().parameters.Period}",
-										"type": "Expression"
-									},
-									"FileName": {
-										"value": "@{pipeline().parameters.Period}.csv",
 										"type": "Expression"
 									}
 								}
@@ -2919,11 +2942,11 @@
 						}
 					},
 					{
-						"name": "ForEachAnalyticsPage",
+						"name": "ForEachAnalyticsEventTrackingPage",
 						"type": "ForEach",
 						"dependsOn": [
 							{
-								"activity": "LookupAnalyticsPages",
+								"activity": "LookupAnalyticsEventTrackingPages",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -2932,7 +2955,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@activity('LookupAnalyticsPages').output.value",
+								"value": "@activity('LookupAnalyticsEventTrackingPages').output.value",
 								"type": "Expression"
 							},
 							"activities": [
@@ -2955,7 +2978,7 @@
 												{
 													"name": "analytics_page_id",
 													"value": {
-														"value": "@{item().analytics_page_id}",
+														"value": "@{item().id}",
 														"type": "Expression"
 													}
 												},
@@ -3050,7 +3073,7 @@
 											"type": "DatasetReference",
 											"parameters": {
 												"QueryString": {
-													"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&page_id=@{item().analytics_page_id}",
+													"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&page_id=@{item().id}",
 													"type": "Expression"
 												}
 											}
@@ -3066,7 +3089,7 @@
 													"type": "Expression"
 												},
 												"FileName": {
-													"value": "@{item().analytics_page_id}.csv",
+													"value": "@{item().id}.csv",
 													"type": "Expression"
 												}
 											}
@@ -3092,8 +3115,159 @@
 				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsByPeriodCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsByPeriodFolderDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsPageMetricsByPeriodCsvDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingPagesByPeriodCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsRestDataset')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsEventTrackingPagesByPeriod')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExtractByPeriod",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 1,
+							"retryIntervalInSeconds": 60,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"additionalColumns": [
+									{
+										"name": "date",
+										"value": {
+											"value": "@{pipeline().parameters.Period}",
+											"type": "Expression"
+										}
+									}
+								],
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"AbsoluteUrl": "$.links.next.href"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "[['id']"
+										},
+										"sink": {
+											"name": "id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "[['title']"
+										},
+										"sink": {
+											"name": "title",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "[['url']"
+										},
+										"sink": {
+											"name": "url",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "[['events']"
+										},
+										"sink": {
+											"name": "events",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['visits']"
+										},
+										"sink": {
+											"name": "visits",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "$['date']"
+										},
+										"sink": {
+											"name": "date",
+											"type": "String"
+										}
+									}
+								],
+								"collectionReference": "$['items']"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AnalyticsEventTrackingPagesRestDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"QueryString": {
+										"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "AnalyticsEventTrackingPagesByPeriodCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@{pipeline().parameters.Period}",
+										"type": "Expression"
+									}
+								}
+							}
+						]
+					}
+				],
+				"parameters": {
+					"Period": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingPagesRestDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingPagesByPeriodCsvDataset')]"
 			]
 		},
 		{
@@ -4821,7 +4995,7 @@
 								}
 							},
 							"dataset": {
-								"referenceName": "EventTrackingDatePeriodsCsvDataset",
+								"referenceName": "DatePeriodsCsvDataset",
 								"type": "DatasetReference",
 								"parameters": {}
 							},
@@ -4877,7 +5051,7 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/datasets/EventTrackingDatePeriodsCsvDataset')]",
+				"[concat(variables('factoryId'), '/datasets/DatePeriodsCsvDataset')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsPageMetricsByPeriod')]"
 			]
 		},
@@ -5272,7 +5446,7 @@
 								"storedProcedureParameters": {
 									"initial_date": {
 										"type": "String",
-										"value": "20200701"
+										"value": "20200309"
 									}
 								},
 								"queryTimeout": "02:00:00"
@@ -12820,6 +12994,80 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/AzureSqlDatabaseLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AnalyticsEventTrackingPagesByPeriodCsvDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Period": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@{dataset().Period}.csv",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "analytics_event_tracking_pages",
+							"type": "Expression"
+						},
+						"container": "ita-web-analytics"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/AzureBlobStorageLinkedService')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AnalyticsEventTrackingPagesRestDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "SiteImproveRestLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"QueryString": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {
+					"relativeUrl": {
+						"value": "v2/sites/17536213616/analytics/event_tracking/pages?@{dataset().QueryString}&filter_id=1717697832",
+						"type": "Expression"
+					}
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/SiteImproveRestLinkedService')]"
 			]
 		},
 		{
