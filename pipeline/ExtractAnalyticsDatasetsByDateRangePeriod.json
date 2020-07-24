@@ -3,61 +3,16 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ExecuteExtractAnalyticsTrafficSourcesMetrics",
+				"name": "ExecuteExtractAnalyticsBrowsersMetricsByPeriod",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractAnalyticsHistoricalMetrics",
+						"activity": "ExecuteExtractAnalyticsGroupsFiltersDatasets",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					}
 				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.Period",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsHistoricalMetrics",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsBrowsersMetrics",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsHistoricalMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.Period",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsBrowsersMetrics",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -67,44 +22,18 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"Period": {
-							"value": "@pipeline().parameters.Period",
+							"value": "@pipeline().parameters.DateRangePeriod",
 							"type": "Expression"
 						}
 					}
 				}
 			},
 			{
-				"name": "ExecuteExtractAnalyticsVisitorLengthMetrics",
+				"name": "ExecuteTransformAnalyticsBrowsersByPeriod",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractAnalyticsTrafficSourcesMetrics",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsVisitLengthMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.Period",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteTransformAnalyticsDatasets",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsBrowsersMetrics",
+						"activity": "ExecuteExtractAnalyticsBrowsersMetricsByPeriod",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -119,23 +48,114 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"Period": {
-							"value": "@{pipeline().parameters.Period}",
+							"value": "@pipeline().parameters.DateRangePeriod",
 							"type": "Expression"
 						}
 					}
+				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsHistoricalMetricsByPeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsBrowsersMetricsByPeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsHistoricalMetricsByPeriod",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@pipeline().parameters.DateRangePeriod",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsHistoricalMetricsByPeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@pipeline().parameters.DateRangePeriod",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsVisitLengthMetricsByPeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsVisitLengthMetricsByPeriod",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@pipeline().parameters.DateRangePeriod",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsGroupsFiltersDatasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsGroupsAndFiltersDatasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
 				}
 			}
 		],
 		"concurrency": 1,
 		"parameters": {
-			"Period": {
-				"type": "string"
+			"DateRangePeriod": {
+				"type": "string",
+				"defaultValue": "this_month"
 			}
 		},
 		"folder": {
 			"name": "analytics"
 		},
 		"annotations": []
-	},
-	"type": "Microsoft.DataFactory/factories/pipelines"
+	}
 }

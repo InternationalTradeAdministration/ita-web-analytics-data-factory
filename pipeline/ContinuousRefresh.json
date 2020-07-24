@@ -3,486 +3,11 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ExecuteExtractAnalyticsBrowsersMetricsByPeriod",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExtractAnalyticsGroups",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "ExtractAnalyticsFilters",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsBrowsersMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.DateRangePeriod",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteTransformAnalyticsBrowsersByPeriod",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsBrowsersMetricsByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "TransformAnalyticsBrowsersMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.DateRangePeriod",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsHistoricalMetricsByPeriod",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsBrowsersMetricsByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsHistoricalMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.DateRangePeriod",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsHistoricalMetricsByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.DateRangePeriod",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsVisitLengthMetricsByPeriod",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsVisitLengthMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.DateRangePeriod",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsCountryMetrics",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsVisitLengthMetricsByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsCountryMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.DatePeriod",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsRegionMetrics",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsCountryMetrics",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsRegionMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@{convertFromUtc(adddays(utcnow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExtractAnalyticsGroups",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "RestSource",
-						"httpRequestTimeout": "00:01:40",
-						"requestInterval": "00.00:00:00.010",
-						"requestMethod": "GET",
-						"paginationRules": {
-							"AbsoluteUrl": "$.links.next.href"
-						}
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"path": "['id']"
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "['bounce_rate']"
-								},
-								"sink": {
-									"name": "bounce_rate",
-									"type": "Decimal"
-								}
-							},
-							{
-								"source": {
-									"path": "['group_name']"
-								},
-								"sink": {
-									"name": "group_name",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "['page_views']"
-								},
-								"sink": {
-									"name": "page_views",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "['visits']"
-								},
-								"sink": {
-									"name": "visits",
-									"type": "Int64"
-								}
-							}
-						],
-						"collectionReference": "$['items']"
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsGroupsRestDataset",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsGroupsCsvDataset",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
-				"name": "ExtractAnalyticsFilters",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "RestSource",
-						"httpRequestTimeout": "00:01:40",
-						"requestInterval": "00.00:00:00.010",
-						"requestMethod": "GET",
-						"paginationRules": {
-							"AbsoluteUrl": "$.links.next.href"
-						}
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"path": "['id']"
-								},
-								"sink": {
-									"name": "id"
-								}
-							},
-							{
-								"source": {
-									"path": "['name']"
-								},
-								"sink": {
-									"name": "name"
-								}
-							}
-						],
-						"collectionReference": "$['items']"
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsFiltersRestDataset",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsFiltersCsvDataset",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
-				"name": "ExecuteExtractAnalyticsPageMetricsByPeriod",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsRegionMetrics",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsPageMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.DatePeriod",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsPages",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsPageMetricsByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsPages",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsGroupsAnalyticsPages",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsPages",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsGroupsAnalyticsPages",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsEventTrackingPages",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsEventTrackingMetricsByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.DatePeriod",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsEventTrackingPages",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsGroupsAnalyticsPages",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsEventTrackingPagesByPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.DatePeriod",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
 				"name": "ExecuteLoadAnalyticsRelatedDatasets",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractAnalyticsEventTrackingMetrics",
+						"activity": "ExecuteExtractAnalyticsDatasetsByDatePeriod",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -495,6 +20,71 @@
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsGroupsFiltersDatasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsGroupsAndFiltersDatasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsDatasetsByDateRangePeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsGroupsFiltersDatasets",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsDatasetsByDateRangePeriod",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"DateRangePeriod": {
+							"value": "@pipeline().parameters.DateRangePeriod",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsDatasetsByDatePeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsDatasetsByDateRangePeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsDatasetsByDatePeriod",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"DatePeriod": {
+							"value": "@pipeline().parameters.DatePeriod",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],

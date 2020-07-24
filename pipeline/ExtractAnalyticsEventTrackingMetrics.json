@@ -51,7 +51,7 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 10,
+					"batchCount": 1,
 					"activities": [
 						{
 							"name": "ExecuteExtractAnalyticsEventTrackingMetrics",

@@ -1273,7 +1273,7 @@
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"wildcardFolderPath": {
-								"value": "analytics_event_tracking_metrics",
+								"value": "analytics_event_tracking_metrics/consolidated",
 								"type": "Expression"
 							},
 							"wildcardFileName": "*.csv",
