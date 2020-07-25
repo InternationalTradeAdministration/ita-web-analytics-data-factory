@@ -1,12 +1,12 @@
 {
-	"name": "Every10Minutes",
+	"name": "DailyRefresh",
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "MainPipeline",
+					"referenceName": "ContinuousRefresh",
 					"type": "PipelineReference"
 				}
 			}
@@ -14,11 +14,15 @@
 		"type": "ScheduleTrigger",
 		"typeProperties": {
 			"recurrence": {
-				"frequency": "Minute",
-				"interval": 10,
-				"startTime": "2020-05-28T18:20:00.000Z",
-				"endTime": "2020-05-28T21:00:00.000Z",
-				"timeZone": "UTC"
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2020-07-25T00:00:00.000Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"hours": [
+						8
+					]
+				}
 			}
 		}
 	}

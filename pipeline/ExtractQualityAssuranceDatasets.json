@@ -113,6 +113,26 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "ExecuteExtractQualityAssuranceSummaryMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExtractContentGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractQualityAssuranceSummaryMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"folder": {

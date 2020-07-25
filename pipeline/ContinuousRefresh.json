@@ -25,7 +25,14 @@
 			{
 				"name": "ExecuteExtractAnalyticsGroupsFiltersDatasets",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractContentPages",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -55,7 +62,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"DateRangePeriod": {
-							"value": "@pipeline().parameters.DateRangePeriod",
+							"value": "@variables('DateRangePeriod')",
 							"type": "Expression"
 						}
 					}
@@ -81,21 +88,148 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"DatePeriod": {
-							"value": "@pipeline().parameters.DatePeriod",
+							"value": "@convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMMdd')",
 							"type": "Expression"
 						}
 					}
 				}
+			},
+			{
+				"name": "If first day of the month",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(dayOfMonth(convertFromUtc(utcNow(), 'Eastern Standard Time', 's')), 1)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set DateRange to this_month",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "DateRangePeriod",
+								"value": "this_month"
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Set DateRange to last month range",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "DateRangePeriod",
+								"value": {
+									"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMM')}01_@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "ExecuteExtractQualityAssuranceDatasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "If first day of the month",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractQualityAssuranceDatasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExecuteLoadQualityAssuranceDatasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractQualityAssuranceDatasets",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "LoadQualityAssuranceDatasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExecuteExtractContentPages",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractQualityAssuranceDatasets",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractContentPages",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExecuteLoadContentDatasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractContentPages",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "LoadContentDatasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"concurrency": 1,
-		"parameters": {
+		"variables": {
 			"DateRangePeriod": {
-				"type": "string",
-				"defaultValue": "this_month"
+				"type": "String"
 			},
-			"DatePeriod": {
-				"type": "string"
+			"DayOfMonth": {
+				"type": "String"
+			},
+			"Now": {
+				"type": "String"
+			},
+			"YYYYmmdd": {
+				"type": "String"
+			},
+			"LastMonthRange": {
+				"type": "String"
 			}
 		},
 		"annotations": []
