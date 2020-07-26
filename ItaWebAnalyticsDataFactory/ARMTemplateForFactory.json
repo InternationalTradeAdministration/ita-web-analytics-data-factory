@@ -5951,7 +5951,8 @@
 											"path": "[['id']"
 										},
 										"sink": {
-											"name": "analytics_page_id"
+											"name": "analytics_page_id",
+											"type": "Int64"
 										}
 									},
 									{
