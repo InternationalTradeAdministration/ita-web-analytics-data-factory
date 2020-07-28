@@ -3572,8 +3572,8 @@
 						}
 					},
 					{
-						"name": "ConsolidateAnalyticsEventTrackingMetrics",
-						"type": "Copy",
+						"name": "GetAnalyticsEventTrackingMetricsByPeriodFolderMetadata",
+						"type": "GetMetadata",
 						"dependsOn": [
 							{
 								"activity": "ForEachAnalyticsEventTrackingPage",
@@ -3591,54 +3591,8 @@
 						},
 						"userProperties": [],
 						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"wildcardFolderPath": {
-										"value": "analytics_event_tracking_metrics/@{pipeline().parameters.Period}",
-										"type": "Expression"
-									},
-									"wildcardFileName": "*.csv",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings",
-									"copyBehavior": "MergeFiles"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "RootFolderDataset",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "AnalyticsEventTrackingMetricsByPeriodConsolidatedCsvDataset",
+							"dataset": {
+								"referenceName": "AnalyticsEventTrackingMetricsByPeriodFolderDataset",
 								"type": "DatasetReference",
 								"parameters": {
 									"Period": {
@@ -3646,8 +3600,110 @@
 										"type": "Expression"
 									}
 								}
+							},
+							"fieldList": [
+								"exists"
+							],
+							"storeSettings": {
+								"type": "AzureBlobStorageReadSettings",
+								"recursive": true
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
 							}
-						]
+						}
+					},
+					{
+						"name": "If AnalyticsEventTrackingMetricsByPeriod exists",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "GetAnalyticsEventTrackingMetricsByPeriodFolderMetadata",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('GetAnalyticsEventTrackingMetricsByPeriodFolderMetadata').output.exists, true)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ConsolidateAnalyticsEventTrackingMetrics",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "DelimitedTextSource",
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true,
+												"wildcardFolderPath": {
+													"value": "analytics_event_tracking_metrics/@{pipeline().parameters.Period}",
+													"type": "Expression"
+												},
+												"wildcardFileName": "*.csv",
+												"enablePartitionDiscovery": false
+											},
+											"formatSettings": {
+												"type": "DelimitedTextReadSettings"
+											}
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobStorageWriteSettings",
+												"copyBehavior": "MergeFiles"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "RootFolderDataset",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "AnalyticsEventTrackingMetricsByPeriodConsolidatedCsvDataset",
+											"type": "DatasetReference",
+											"parameters": {
+												"Period": {
+													"value": "@pipeline().parameters.Period",
+													"type": "Expression"
+												}
+											}
+										}
+									]
+								}
+							]
+						}
 					}
 				],
 				"parameters": {
@@ -3665,9 +3721,9 @@
 				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsByPeriodCsvDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsByPeriodFolderDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingPagesByPeriodCsvDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsRestDataset')]",
 				"[concat(variables('factoryId'), '/datasets/RootFolderDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsByPeriodConsolidatedCsvDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsRestDataset')]"
+				"[concat(variables('factoryId'), '/datasets/AnalyticsEventTrackingMetricsByPeriodConsolidatedCsvDataset')]"
 			]
 		},
 		{
