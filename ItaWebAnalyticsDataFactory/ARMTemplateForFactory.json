@@ -1824,6 +1824,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 5,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsCountryMetrics",
@@ -3206,7 +3207,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
-							"batchCount": 1,
+							"batchCount": 5,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
@@ -5814,7 +5815,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
-							"batchCount": 10,
+							"batchCount": 5,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsPageMetricsByPeriod",
@@ -6244,7 +6245,8 @@
 										"value": "20200309"
 									}
 								},
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"sink": {
 								"type": "DelimitedTextSink",
@@ -6508,6 +6510,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 5,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsRegionMetrics",
@@ -9846,8 +9849,7 @@
 									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "JsonWriteSettings",
-									"quoteAllText": true
+									"type": "JsonWriteSettings"
 								}
 							},
 							"enableStaging": false,
@@ -9978,8 +9980,7 @@
 									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "JsonWriteSettings",
-									"quoteAllText": true
+									"type": "JsonWriteSettings"
 								}
 							},
 							"enableStaging": false
@@ -10107,8 +10108,7 @@
 												"type": "AzureBlobStorageWriteSettings"
 											},
 											"formatSettings": {
-												"type": "JsonWriteSettings",
-												"quoteAllText": true
+												"type": "JsonWriteSettings"
 											}
 										},
 										"enableStaging": false,
@@ -10716,7 +10716,8 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderStoredProcedureName": "[[web_analytics].[generate_date_periods]",
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"sink": {
 								"type": "DelimitedTextSink",
@@ -10783,7 +10784,8 @@
 							"source": {
 								"type": "AzureSqlSource",
 								"sqlReaderStoredProcedureName": "[[web_analytics].[generate_date_range_periods]",
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"sink": {
 								"type": "DelimitedTextSink",

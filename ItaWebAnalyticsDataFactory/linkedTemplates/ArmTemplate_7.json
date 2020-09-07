@@ -751,8 +751,7 @@
 									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "JsonWriteSettings",
-									"quoteAllText": true
+									"type": "JsonWriteSettings"
 								}
 							},
 							"enableStaging": false,
@@ -883,8 +882,7 @@
 									"type": "AzureBlobStorageWriteSettings"
 								},
 								"formatSettings": {
-									"type": "JsonWriteSettings",
-									"quoteAllText": true
+									"type": "JsonWriteSettings"
 								}
 							},
 							"enableStaging": false
@@ -1793,6 +1791,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 5,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsCountryMetrics",
@@ -2457,7 +2456,8 @@
 										"value": "20200309"
 									}
 								},
-								"queryTimeout": "02:00:00"
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"sink": {
 								"type": "DelimitedTextSink",
@@ -2573,6 +2573,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 5,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsRegionMetrics",
