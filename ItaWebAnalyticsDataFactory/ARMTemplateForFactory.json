@@ -3207,7 +3207,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
-							"batchCount": 5,
+							"batchCount": 1,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
