@@ -1,0 +1,32 @@
+{
+	"name": "AnalyticsCampaignNameDetailMetricsRestDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SiteImproveRestLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"ParameterNameId": {
+				"type": "string"
+			},
+			"ParameterValueId": {
+				"type": "string"
+			},
+			"Period": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "v2/sites/17536213616/analytics/campaigns/names/@{dataset().ParameterNameId}/@{dataset().ParameterValueId}/details?period=@{dataset().Period}&filter_id=1717697832&page=1&page_size=1000",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}

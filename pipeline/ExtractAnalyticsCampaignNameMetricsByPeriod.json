@@ -1,0 +1,247 @@
+{
+	"name": "ExtractAnalyticsCampaignNameMetricsByPeriod",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExtractByPeriod",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ForEachAnalyticsCampaignName",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"additionalColumns": [
+							{
+								"name": "period",
+								"value": {
+									"value": "@{pipeline().parameters.Period}",
+									"type": "Expression"
+								}
+							}
+						],
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['name']"
+								},
+								"sink": {
+									"name": "name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['bounce_rate']"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"path": "['pages']"
+								},
+								"sink": {
+									"name": "pages",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['parameter_name_id']"
+								},
+								"sink": {
+									"name": "parameter_name_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['parameter_value_id']"
+								},
+								"sink": {
+									"name": "parameter_value_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['visits']"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "$['period']"
+								},
+								"sink": {
+									"name": "period",
+									"type": "String"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsCampaignNameMetricsRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"QueryString": {
+								"value": "period=@{pipeline().parameters.Period}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsCampaignNameMetricsByPeriodCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@{pipeline().parameters.Period}",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			},
+			{
+				"name": "LookupAnalyticsCampaignNames",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "AnalyticsCampaignNameMetricsByPeriodCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
+							}
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachAnalyticsCampaignName",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookupAnalyticsCampaignNames",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupAnalyticsCampaignNames').output.value",
+						"type": "Expression"
+					},
+					"batchCount": 5,
+					"activities": [
+						{
+							"name": "ExtractAnalyticsCampaignNameDetailMetricsByPeriod",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsCampaignNameDetailMetricsByPeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@pipeline().parameters.Period",
+										"type": "Expression"
+									},
+									"ParameterNameId": {
+										"value": "@item().parameter_name_id",
+										"type": "Expression"
+									},
+									"ParameterValueId": {
+										"value": "@item().parameter_value_id",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"concurrency": 3,
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}

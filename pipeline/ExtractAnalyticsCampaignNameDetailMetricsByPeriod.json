@@ -1,0 +1,183 @@
+{
+	"name": "ExtractAnalyticsCampaignNameDetailMetricsByPeriod",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExtractByPeriod",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"additionalColumns": [
+							{
+								"name": "period",
+								"value": {
+									"value": "@{pipeline().parameters.Period}",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "parameter_name_id",
+								"value": {
+									"value": "@pipeline().parameters.ParameterNameId",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "parameter_value_id",
+								"value": {
+									"value": "@pipeline().parameters.ParameterValueId",
+									"type": "Expression"
+								}
+							}
+						],
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['items'][0]['bounce_rate']"
+								},
+								"sink": {
+									"name": "bounce_rate"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['medium']"
+								},
+								"sink": {
+									"name": "medium"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['source']"
+								},
+								"sink": {
+									"name": "source"
+								}
+							},
+							{
+								"source": {
+									"path": "$['items'][0]['visits_of_parent']"
+								},
+								"sink": {
+									"name": "visits_of_parent"
+								}
+							},
+							{
+								"source": {
+									"path": "$['period']"
+								},
+								"sink": {
+									"name": "period"
+								}
+							},
+							{
+								"source": {
+									"path": "$['parameter_name_id']"
+								},
+								"sink": {
+									"name": "parameter_name_id"
+								}
+							},
+							{
+								"source": {
+									"path": "$['parameter_value_id']"
+								},
+								"sink": {
+									"name": "parameter_value_id"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsCampaignNameDetailMetricsRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"ParameterNameId": {
+								"value": "@pipeline().parameters.ParameterNameId",
+								"type": "Expression"
+							},
+							"ParameterValueId": {
+								"value": "@pipeline().parameters.ParameterValueId",
+								"type": "Expression"
+							},
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsCampaignNameDetailMetricsByPeriodCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@{pipeline().parameters.Period}",
+								"type": "Expression"
+							},
+							"ParameterNameId": {
+								"value": "@pipeline().parameters.ParameterNameId",
+								"type": "Expression"
+							},
+							"ParameterValueId": {
+								"value": "@pipeline().parameters.ParameterValueId",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"concurrency": 3,
+		"parameters": {
+			"Period": {
+				"type": "string"
+			},
+			"ParameterNameId": {
+				"type": "string"
+			},
+			"ParameterValueId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}
