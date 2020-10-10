@@ -5,14 +5,7 @@
 			{
 				"name": "ExecuteExtractAnalyticsBrowsersMetricsByPeriod",
 				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsGroupsFiltersDatasets",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -130,19 +123,6 @@
 							"type": "Expression"
 						}
 					}
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsGroupsFiltersDatasets",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsGroupsAndFiltersDatasets",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
 				}
 			}
 		],

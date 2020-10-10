@@ -1,26 +1,26 @@
 {
-	"name": "FullRefresh",
+	"name": "RefreshByDatePeriod",
 	"properties": {
 		"activities": [
 			{
-				"name": "ExecuteGeneratePeriodParameters",
+				"name": "ExecuteExtractAnalyticsCountryMetrics",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "GeneratePeriodParameters",
+						"referenceName": "ExtractAnalyticsCountryMetrics",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "ExecuteRefreshWithoutInterval",
+				"name": "ExecuteExtractAnalyticsRegionMetrics",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteGeneratePeriodParameters",
+						"activity": "ExecuteExtractAnalyticsCountryMetrics",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -29,18 +29,18 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "RefreshWithoutInterval",
+						"referenceName": "ExtractAnalyticsRegionMetrics",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "ExecuteRefreshByDateRangePeriod",
+				"name": "ExecuteExtractAnalyticsPageMetrics",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteRefreshWithoutInterval",
+						"activity": "ExecuteExtractAnalyticsRegionMetrics",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -49,27 +49,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "RefreshByDateRangePeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "ExecuteRefreshByDatePeriod",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteRefreshByDateRangePeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "RefreshByDatePeriod",
+						"referenceName": "ExtractAnalyticsPageMetrics",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
