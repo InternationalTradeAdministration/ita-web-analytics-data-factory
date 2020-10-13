@@ -1,0 +1,164 @@
+{
+	"name": "ExtractMonthlyAnalyticsHistoricalMetricsByParameters",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExtractByQueryString",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"additionalColumns": [
+							{
+								"name": "analytics_group_id",
+								"value": {
+									"value": "@pipeline().parameters.AnalyticsGroupId",
+									"type": "Expression"
+								}
+							}
+						],
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['bounce_rate']"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"path": "['new_visitors']"
+								},
+								"sink": {
+									"name": "new_visitors",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['page_views']"
+								},
+								"sink": {
+									"name": "page_views",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['returning_visitors']"
+								},
+								"sink": {
+									"name": "returning_visitors",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['timestamp']"
+								},
+								"sink": {
+									"name": "timestamp",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['unique_visitors']"
+								},
+								"sink": {
+									"name": "unique_visitors",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['visits']"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_group_id']"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "MonthlyAnalyticsHistoricalMetricsRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"QueryString": {
+								"value": "@pipeline().parameters.QueryString",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "MonthlyAnalyticsHistoricalMetricsByPeriodCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"FileName": {
+								"value": "analytics_group_@{pipeline().parameters.AnalyticsGroupId}.csv",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"concurrency": 8,
+		"parameters": {
+			"AnalyticsGroupId": {
+				"type": "string"
+			},
+			"QueryString": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}

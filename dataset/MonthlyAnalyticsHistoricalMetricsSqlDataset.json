@@ -1,0 +1,19 @@
+{
+	"name": "MonthlyAnalyticsHistoricalMetricsSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "web_analytics",
+			"table": "monthly_analytics_historical_metrics"
+		}
+	}
+}
