@@ -124,6 +124,46 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "ExecuteExtractMonthlyAnalyticsHistoricalMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsVisitLengthMetricsByPeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractMonthlyAnalyticsHistoricalMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExecuteExtractMonthlyAnalyticsOutboundLinkMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractMonthlyAnalyticsHistoricalMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"concurrency": 1,
