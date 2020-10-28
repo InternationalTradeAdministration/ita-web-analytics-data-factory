@@ -10911,7 +10911,7 @@
 								"value": "@activity('LookupDateRangePeriods').output.value",
 								"type": "Expression"
 							},
-							"isSequential": false,
+							"isSequential": true,
 							"activities": [
 								{
 									"name": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
@@ -19550,7 +19550,7 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2020-07-25T00:00:00.000Z",
+						"startTime": "2020-07-25T00:00:00Z",
 						"timeZone": "UTC",
 						"schedule": {
 							"hours": [
@@ -19600,7 +19600,7 @@
 							"name": "Unpivot1"
 						}
 					],
-					"script": "source(output(\n\t\tcontent_group_id as long,\n\t\titems as (css_files as integer, documents as integer, emails as integer, links as integer, media_files as integer, meta_tags as integer, national_identity_numbers as integer, pages as integer, phone_numbers as integer, script_files as integer, timestamp as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\trowUrlColumn: 'file_path') ~> JsonSource\nJsonSource foldDown(unroll(items),\n\tmapColumn(\n\t\tfile_path,\n\t\tcontent_group_id,\n\t\teach(items, match(true()))\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: true) ~> Flatten1\nUnpivot1 derive(file_path = replace(replace(file_path, 'raw', 'transformed'), 'json', 'csv')) ~> DerivedColumn1\nFlatten1 unpivot(output(\n\t\tdata_category as string,\n\t\tcount as integer\n\t),\n\tungroupBy(file_path,\n\t\tcontent_group_id,\n\t\ttimestamp),\n\tlateral: false,\n\tignoreNullPivots: true) ~> Unpivot1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'file_path',\n\ttruncate: true) ~> sink1"
+					"script": "source(output(\n\t\tcontent_group_id as long,\n\t\titems as (css_files as integer, documents as integer, emails as integer, links as integer, media_files as integer, meta_tags as integer, national_identity_numbers as integer, pages as integer, phone_numbers as integer, script_files as integer, timestamp as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\trowUrlColumn: 'file_path',\n\tdocumentForm: 'documentPerLine') ~> JsonSource\nJsonSource foldDown(unroll(items),\n\tmapColumn(\n\t\tfile_path,\n\t\tcontent_group_id,\n\t\teach(items, match(true()))\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: true) ~> Flatten1\nUnpivot1 derive(file_path = replace(replace(file_path, 'raw', 'transformed'), 'json', 'csv')) ~> DerivedColumn1\nFlatten1 unpivot(output(\n\t\tdata_category as string,\n\t\tcount as integer\n\t),\n\tungroupBy(file_path,\n\t\tcontent_group_id,\n\t\ttimestamp),\n\tlateral: false,\n\tignoreNullPivots: true) ~> Unpivot1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'file_path',\n\ttruncate: true) ~> sink1"
 				}
 			},
 			"dependsOn": [

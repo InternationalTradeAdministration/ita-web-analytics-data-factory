@@ -2493,7 +2493,7 @@
 								"value": "@activity('LookupDateRangePeriods').output.value",
 								"type": "Expression"
 							},
-							"isSequential": false,
+							"isSequential": true,
 							"activities": [
 								{
 									"name": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",

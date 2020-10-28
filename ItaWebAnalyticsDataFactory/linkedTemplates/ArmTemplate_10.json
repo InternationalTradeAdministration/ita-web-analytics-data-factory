@@ -273,7 +273,7 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2020-07-25T00:00:00.000Z",
+						"startTime": "2020-07-25T00:00:00Z",
 						"timeZone": "UTC",
 						"schedule": {
 							"hours": [
