@@ -1,0 +1,93 @@
+{
+	"name": "ExtractVisitorFeedByParameters",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExtractVisitorFeed",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET"
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "WivVisitorFeedRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"QueryString": {
+								"value": "limit=100&dateFrom=@{pipeline().parameters.DateFrom}&dateTo=@{pipeline().parameters.DateTo}&page=@{pipeline().parameters.Page}",
+								"type": "Expression"
+							},
+							"Token": {
+								"value": "@pipeline().parameters.Token",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "WivVisitorFeedJsonDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"DateFrom": {
+								"value": "@pipeline().parameters.DateFrom",
+								"type": "Expression"
+							},
+							"DateTo": {
+								"value": "@pipeline().parameters.DateTo",
+								"type": "Expression"
+							},
+							"Page": {
+								"value": "@pipeline().parameters.Page",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"concurrency": 10,
+		"parameters": {
+			"DateFrom": {
+				"type": "string"
+			},
+			"DateTo": {
+				"type": "string"
+			},
+			"Page": {
+				"type": "string"
+			},
+			"Token": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": []
+	}
+}

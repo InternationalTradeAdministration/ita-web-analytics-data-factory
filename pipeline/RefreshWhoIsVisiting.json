@@ -1,0 +1,327 @@
+{
+	"name": "RefreshWhoIsVisiting",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExtractVisitors",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractAnalyticsByDateRangePeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "visitor_feed",
+							"wildcardFileName": "*.json"
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings",
+							"copyBehavior": "MergeFiles"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['name']"
+								},
+								"sink": {
+									"name": "name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['countryShortName']"
+								},
+								"sink": {
+									"name": "countryShortName",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['region']"
+								},
+								"sink": {
+									"name": "region",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['firstVisited']"
+								},
+								"sink": {
+									"name": "firstVisited",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['company']"
+								},
+								"sink": {
+									"name": "company",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"path": "['ignored']"
+								},
+								"sink": {
+									"name": "ignored",
+									"type": "Boolean"
+								}
+							}
+						],
+						"collectionReference": "$['data']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "RootJsonFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "WivVisitorsCsvDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "DedupVisitors",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "ExtractVisitors",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "DedupVisitorsDataflow",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "ExecuteLoadWhoIsVisiting",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DedupVisitors",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "LoadWhoIsVisiting",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "If first day of the month",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(dayOfMonth(convertFromUtc(utcNow(), 'Eastern Standard Time', 's')), 1)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set dateFrom to first day of current month",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set firstDayNextMonth",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "dateFrom",
+								"value": {
+									"value": "@{convertFromUtc(addDays(variables('firstDayNextMonth'), -1), 'Eastern Standard Time', 'yyyy-MM')}-01",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set firstDayNextMonth",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "firstDayNextMonth",
+								"value": {
+									"value": "@{startOfMonth(getFutureTime(1, 'Month'), 'yyyy-MM-dd')}T10:00:00Z",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set dateTo to end of current month",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set firstDayNextMonth",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "dateTo",
+								"value": {
+									"value": "@{convertFromUtc(addDays(variables('firstDayNextMonth'), -1), 'Eastern Standard Time', 'yyyy-MM-dd')}",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Set dateFrom to first day of last month",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "dateFrom",
+								"value": {
+									"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyy-MM')}-01",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set dateTo to last day of last month",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "dateTo",
+								"value": {
+									"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyy-MM-dd')}",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsByDateRangePeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "If first day of the month",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractVisitorFeed",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"DateFrom": {
+							"value": "@variables('dateFrom')",
+							"type": "Expression"
+						},
+						"DateTo": {
+							"value": "@variables('dateTo')",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"concurrency": 1,
+		"variables": {
+			"dateRange": {
+				"type": "String"
+			},
+			"firstDayNextMonth": {
+				"type": "String"
+			},
+			"dateFrom": {
+				"type": "String"
+			},
+			"dateTo": {
+				"type": "String"
+			}
+		},
+		"annotations": []
+	}
+}

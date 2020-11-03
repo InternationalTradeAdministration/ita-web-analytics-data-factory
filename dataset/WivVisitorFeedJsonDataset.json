@@ -1,0 +1,40 @@
+{
+	"name": "WivVisitorFeedJsonDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"DateFrom": {
+				"type": "string"
+			},
+			"DateTo": {
+				"type": "string"
+			},
+			"Page": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "page_@{dataset().Page}.json",
+					"type": "Expression"
+				},
+				"folderPath": {
+					"value": "visitor_feed/@{dataset().DateFrom}_@{dataset().DateTo}",
+					"type": "Expression"
+				},
+				"container": "ita-web-analytics"
+			}
+		},
+		"schema": {}
+	}
+}

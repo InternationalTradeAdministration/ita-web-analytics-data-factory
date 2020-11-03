@@ -1,0 +1,29 @@
+{
+	"name": "WivVisitorFeedRestDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "WhoIsVisitingRestLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"QueryString": {
+				"type": "string"
+			},
+			"Token": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "api/v1/accounts/25508/visitor-feed?token=@{dataset().Token}&@{dataset().QueryString}",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}

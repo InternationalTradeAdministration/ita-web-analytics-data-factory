@@ -1,0 +1,211 @@
+{
+	"name": "ExtractVisitorFeed",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExecuteExtractFirstPageOfVisitorFeed",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "GetWhoIsVisitingToken",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractVisitorFeedByParameters",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"DateFrom": {
+							"value": "@pipeline().parameters.DateFrom",
+							"type": "Expression"
+						},
+						"DateTo": {
+							"value": "@pipeline().parameters.DateTo",
+							"type": "Expression"
+						},
+						"Page": "1",
+						"Token": {
+							"value": "@activity('GetWhoIsVisitingToken').output.value",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "LookupCurrentPageResponse",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractFirstPageOfVisitorFeed",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "WivVisitorFeedJsonDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"DateFrom": {
+								"value": "@pipeline().parameters.DateFrom",
+								"type": "Expression"
+							},
+							"DateTo": {
+								"value": "@pipeline().parameters.DateTo",
+								"type": "Expression"
+							},
+							"Page": "1"
+						}
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "ForEachPage",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "SetPages",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@variables('pages')",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExecuteExtractVisitorFeedByParameters",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractVisitorFeedByParameters",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"DateFrom": {
+										"value": "@pipeline().parameters.DateFrom",
+										"type": "Expression"
+									},
+									"DateTo": {
+										"value": "@pipeline().parameters.DateTo",
+										"type": "Expression"
+									},
+									"Page": {
+										"value": "@item()",
+										"type": "Expression"
+									},
+									"Token": {
+										"value": "@activity('GetWhoIsVisitingToken').output.value",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "SetPages",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupCurrentPageResponse",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "pages",
+					"value": {
+						"value": "@range(1,activity('LookupCurrentPageResponse').output.value[0].pagination.pagesCount)",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "GetWhoIsVisitingToken",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@{pipeline().globalParameters.WhoIsVisitingTokenSecretIdentifierURL}?api-version=7.0",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"DateFrom": {
+				"type": "string"
+			},
+			"DateTo": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"page": {
+				"type": "String",
+				"defaultValue": "1"
+			},
+			"tempPage": {
+				"type": "String"
+			},
+			"pages": {
+				"type": "Array"
+			}
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": []
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"name": "WhoIsVisitingRestLinkedService",
+	"properties": {
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "https://iptrack.io",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Anonymous"
+		}
+	}
+}

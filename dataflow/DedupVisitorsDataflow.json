@@ -1,0 +1,35 @@
+{
+	"name": "DedupVisitorsDataflow",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "WivVisitorsCsvDataset",
+						"type": "DatasetReference"
+					},
+					"name": "Visitors"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "RootFolderDataset",
+						"type": "DatasetReference"
+					},
+					"name": "DedupedVisitorCsv"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FilteredVisitors"
+				},
+				{
+					"name": "DedupedVisitors"
+				}
+			],
+			"script": "source(output(\n\t\tid as long,\n\t\tname as string,\n\t\tcountryShortName as string,\n\t\tregion as string,\n\t\tfirstVisited as string,\n\t\tcompany as boolean,\n\t\tignored as boolean\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> Visitors\nVisitors filter(!isNull(id)) ~> FilteredVisitors\nFilteredVisitors aggregate(groupBy(id),\n\teach(match(name!='id'), $$ = first($$))) ~> DedupedVisitors\nDedupedVisitors sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['deduped_visitors.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DedupedVisitorCsv"
+		}
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"name": "ItaWebAnalyticsDataFactory",
+	"properties": {
+		"globalParameters": {
+			"WhoIsVisitingTokenSecretIdentifierURL": {
+				"type": "string",
+				"value": "https://ita-web-analytics-kv1.vault.azure.net/secrets/WhoIsVisitingToken/20fd560610b74ff4a31fce818df95cdf"
+			}
+		}
+	},
+	"location": "eastus"
+}
