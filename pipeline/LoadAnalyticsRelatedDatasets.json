@@ -1088,7 +1088,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "RootFolderDataset",
+						"referenceName": "RootFolderCustomEscapeDataset",
 						"type": "DatasetReference"
 					}
 				],

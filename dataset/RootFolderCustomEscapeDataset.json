@@ -1,34 +1,15 @@
 {
-	"name": "AnalyticsPageMetricsByPeriodCsvDataset",
+	"name": "RootFolderCustomEscapeDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
-		},
-		"parameters": {
-			"Period": {
-				"type": "string"
-			},
-			"FileName": {
-				"type": "string"
-			}
-		},
-		"folder": {
-			"name": "analytics"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": {
-					"value": "@{dataset().FileName}",
-					"type": "Expression"
-				},
-				"folderPath": {
-					"value": "analytics_page_metrics/@{dataset().Period}",
-					"type": "Expression"
-				},
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",
