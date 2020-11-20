@@ -1,0 +1,159 @@
+{
+	"name": "ExtractMonthlyAnalyticsExternalReferringDomainMetricsByPeriod",
+	"properties": {
+		"activities": [
+			{
+				"name": "Period Folder",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "MonthlyAnalyticsExternalReferringDomainMetricsByPeriodFolderDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "If Period Folder exists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "Period Folder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('Period Folder').output.exists, true)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "Delete Period Folder",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "MonthlyAnalyticsExternalReferringDomainMetricsByPeriodFolderDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"Period": {
+											"value": "@{pipeline().parameters.Period}",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "ExecuteExtractByPeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "If Period Folder exists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractMonthlyAnalyticsExternalReferringDomainMetricsByParameters",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@pipeline().parameters.Period",
+							"type": "Expression"
+						},
+						"AnalyticsGroupId": "1",
+						"QueryString": {
+							"value": "period=@{pipeline().parameters.Period}",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "ExtractByPeriodGroupId",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "If Period Folder exists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractMonthlyAnalyticsExternalReferringDomainMetricsByGroupId",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@{pipeline().parameters.Period}",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}

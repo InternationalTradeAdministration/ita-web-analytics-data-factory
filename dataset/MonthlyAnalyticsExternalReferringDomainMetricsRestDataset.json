@@ -1,0 +1,26 @@
+{
+	"name": "MonthlyAnalyticsExternalReferringDomainMetricsRestDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "SiteImproveRestLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"QueryString": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "v2/sites/17536213616/analytics/traffic_sources/external_referring_domains?page=1&page_size=1000&filter_id=1717697832&@{dataset().QueryString}",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}
