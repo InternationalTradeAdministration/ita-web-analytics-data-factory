@@ -23,7 +23,7 @@
 				}
 			},
 			{
-				"name": "ExecuteExtractAnalyticsGroupsFiltersDatasets",
+				"name": "ExecuteExtractAnalyticsGroups",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -36,7 +36,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsGroupsAndFiltersDatasets",
+						"referenceName": "ExtractAnalyticsGroups",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
@@ -47,7 +47,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractAnalyticsGroupsFiltersDatasets",
+						"activity": "ExecuteExtractAnalyticsGroups",
 						"dependencyConditions": [
 							"Succeeded"
 						]
