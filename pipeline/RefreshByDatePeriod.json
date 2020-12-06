@@ -22,7 +22,7 @@
 					{
 						"activity": "ExecuteExtractAnalyticsCountryMetrics",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
@@ -42,7 +42,7 @@
 					{
 						"activity": "ExecuteExtractAnalyticsRegionMetrics",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
