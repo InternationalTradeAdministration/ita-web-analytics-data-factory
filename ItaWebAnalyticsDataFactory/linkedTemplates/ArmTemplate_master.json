@@ -34,6 +34,10 @@
 				"secretName": "SiteImproveApiUserName"
 			}
 		},
+		"WhoIsVisitingRestLinkedService_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://iptrack.io"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -63,6 +67,9 @@
 					},
 					"AzureKeyVaultLinkedService_properties_typeProperties_baseUrl": {
 						"value": "[parameters('AzureKeyVaultLinkedService_properties_typeProperties_baseUrl')]"
+					},
+					"WhoIsVisitingRestLinkedService_properties_typeProperties_url": {
+						"value": "[parameters('WhoIsVisitingRestLinkedService_properties_typeProperties_url')]"
 					},
 					"AzureBlobStorageLinkedService_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('AzureBlobStorageLinkedService_properties_typeProperties_connectionString_secretName')]"
