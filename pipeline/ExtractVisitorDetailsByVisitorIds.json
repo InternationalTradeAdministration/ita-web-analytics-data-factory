@@ -1,0 +1,57 @@
+{
+	"name": "ExtractVisitorDetailsByVisitorIds",
+	"properties": {
+		"activities": [
+			{
+				"name": "ForEachVisitorId",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.visitorIds",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExecuteExtractVisitorDetailByParameter",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractVisitorDetailByParameters",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Token": {
+										"value": "@pipeline().parameters.whoIsVisitingToken",
+										"type": "Expression"
+									},
+									"VisitorId": {
+										"value": "@item().visitorId",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			}
+		],
+		"parameters": {
+			"visitorIds": {
+				"type": "array"
+			},
+			"whoIsVisitingToken": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": []
+	}
+}

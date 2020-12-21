@@ -1,0 +1,19 @@
+{
+	"name": "WivVisitorDetailsSqlDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDatabaseLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [],
+		"typeProperties": {
+			"schema": "web_analytics",
+			"table": "visitor_details"
+		}
+	}
+}

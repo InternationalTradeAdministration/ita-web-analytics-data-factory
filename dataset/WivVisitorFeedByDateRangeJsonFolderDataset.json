@@ -1,0 +1,33 @@
+{
+	"name": "WivVisitorFeedByDateRangeJsonFolderDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"DateFrom": {
+				"type": "string"
+			},
+			"DateTo": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "visitor_feed/@{dataset().DateFrom}_@{dataset().DateTo}",
+					"type": "Expression"
+				},
+				"container": "ita-web-analytics"
+			}
+		},
+		"schema": {}
+	}
+}

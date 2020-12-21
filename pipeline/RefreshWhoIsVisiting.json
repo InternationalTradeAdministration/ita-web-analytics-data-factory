@@ -3,185 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ExtractVisitors",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsByDateRangePeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "JsonSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true,
-							"wildcardFolderPath": "visitor_feed",
-							"wildcardFileName": "*.json"
-						},
-						"formatSettings": {
-							"type": "JsonReadSettings"
-						}
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings",
-							"copyBehavior": "MergeFiles"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"path": "['id']"
-								},
-								"sink": {
-									"name": "id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "['name']"
-								},
-								"sink": {
-									"name": "name",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "['countryShortName']"
-								},
-								"sink": {
-									"name": "countryShortName",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "['region']"
-								},
-								"sink": {
-									"name": "region",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "['firstVisited']"
-								},
-								"sink": {
-									"name": "firstVisited",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "['company']"
-								},
-								"sink": {
-									"name": "company",
-									"type": "Boolean"
-								}
-							},
-							{
-								"source": {
-									"path": "['ignored']"
-								},
-								"sink": {
-									"name": "ignored",
-									"type": "Boolean"
-								}
-							}
-						],
-						"collectionReference": "$['data']"
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "RootJsonFolderDataset",
-						"type": "DatasetReference"
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "WivVisitorsCsvDataset",
-						"type": "DatasetReference"
-					}
-				]
-			},
-			{
-				"name": "DedupVisitors",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "ExtractVisitors",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "DedupVisitorsDataflow",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "ExecuteLoadWhoIsVisiting",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "DedupVisitors",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "LoadWhoIsVisiting",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
 				"name": "If first day of the month",
 				"type": "IfCondition",
 				"dependsOn": [],
@@ -277,7 +98,7 @@
 				}
 			},
 			{
-				"name": "ExecuteExtractAnalyticsByDateRangePeriod",
+				"name": "ExecuteExtractVisitorFeedByDateRange",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -305,6 +126,224 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "LoadSessions",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractVisitorFeedByDateRange",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "visitor_feed",
+							"wildcardFileName": "*.json"
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE web_analytics.visitor_sessions",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['visitorId']"
+								},
+								"sink": {
+									"name": "visitor_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['sessionStart']"
+								},
+								"sink": {
+									"name": "session_start",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['pageViews']"
+								},
+								"sink": {
+									"name": "page_views",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "['duration']"
+								},
+								"sink": {
+									"name": "duration",
+									"type": "Int32"
+								}
+							},
+							{
+								"source": {
+									"path": "['source']"
+								},
+								"sink": {
+									"name": "source",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['firstVisit']"
+								},
+								"sink": {
+									"name": "first_visit",
+									"type": "Boolean"
+								}
+							}
+						],
+						"collectionReference": "$['sessions']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "RootJsonFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "WivVisitorSessionsSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "ExecuteExtractVisitorDetails",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "LoadSessions",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractVisitorDetails",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "LoadVisitorDetails",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractVisitorDetails",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "JsonSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "visitor_details",
+							"wildcardFileName": "*.json",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "JsonReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE web_analytics.visitor_details",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['data']['id']"
+								},
+								"sink": {
+									"name": "id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['data']"
+								},
+								"sink": {
+									"name": "json",
+									"type": "String"
+								}
+							}
+						],
+						"mapComplexValuesToString": true
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "RootJsonFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "WivVisitorDetailsSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"concurrency": 1,

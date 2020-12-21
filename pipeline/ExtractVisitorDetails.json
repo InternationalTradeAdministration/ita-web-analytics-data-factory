@@ -1,0 +1,248 @@
+{
+	"name": "ExtractVisitorDetails",
+	"properties": {
+		"activities": [
+			{
+				"name": "GetWhoIsVisitingToken",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": true,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@{pipeline().globalParameters.WhoIsVisitingTokenSecretIdentifierURL}?api-version=7.0",
+						"type": "Expression"
+					},
+					"method": "GET",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://vault.azure.net"
+					}
+				}
+			},
+			{
+				"name": "LookupInitialVisitorIdNotInVisitorDetails",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT DISTINCT(s.visitor_id) as visitorId FROM web_analytics.visitor_sessions s\nWHERE s.visitor_id NOT IN (SELECT d.id FROM web_analytics.visitor_details d)\nORDER BY 1\nOFFSET 0 ROWS\nFETCH NEXT @{variables('fetchRowCount')} ROWS ONLY",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "AzureSqlDatabaseDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "Until VisitorIds is empty",
+				"type": "Until",
+				"dependsOn": [
+					{
+						"activity": "Set visitorIds",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "GetWhoIsVisitingToken",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@empty(variables('visitorIds'))",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "Set tempOffset",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "ExecuteExtractVisitorDetailsByVisitorIds",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "tempOffset",
+								"value": {
+									"value": "@string(add(int(variables('offset')), int(variables('fetchRowCount'))))",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "Set offset",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "Set tempOffset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "offset",
+								"value": {
+									"value": "@variables('tempOffset')",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "LookupNextVisitorIdNotInVisitorDetails",
+							"type": "Lookup",
+							"dependsOn": [
+								{
+									"activity": "Set offset",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT DISTINCT(s.visitor_id) as visitorId FROM web_analytics.visitor_sessions s\nWHERE s.visitor_id NOT IN (SELECT d.id FROM web_analytics.visitor_details d)\nORDER BY 1\nOFFSET @{variables('offset')} ROWS\nFETCH NEXT @{variables('fetchRowCount')} ROWS ONLY",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "AzureSqlDatabaseDataset",
+									"type": "DatasetReference"
+								},
+								"firstRowOnly": false
+							}
+						},
+						{
+							"name": "re-set visitorIds",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "LookupNextVisitorIdNotInVisitorDetails",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "visitorIds",
+								"value": {
+									"value": "@activity('LookupNextVisitorIdNotInVisitorDetails').output.value",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "ExecuteExtractVisitorDetailsByVisitorIds",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractVisitorDetailsByVisitorIds",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"visitorIds": {
+										"value": "@variables('visitorIds')",
+										"type": "Expression"
+									},
+									"whoIsVisitingToken": {
+										"value": "@activity('GetWhoIsVisitingToken').output.value",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					],
+					"timeout": "7.00:00:00"
+				}
+			},
+			{
+				"name": "Set visitorIds",
+				"type": "SetVariable",
+				"dependsOn": [
+					{
+						"activity": "LookupInitialVisitorIdNotInVisitorDetails",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"variableName": "visitorIds",
+					"value": {
+						"value": "@activity('LookupInitialVisitorIdNotInVisitorDetails').output.value",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"variables": {
+			"offset": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"visitorIds": {
+				"type": "Array"
+			},
+			"tempOffset": {
+				"type": "String",
+				"defaultValue": "0"
+			},
+			"fetchRowCount": {
+				"type": "String",
+				"defaultValue": "5000"
+			}
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": []
+	}
+}

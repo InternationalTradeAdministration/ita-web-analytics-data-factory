@@ -1,0 +1,79 @@
+{
+	"name": "ExtractVisitorDetailByParameters",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExtractVisitorDetail",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET"
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false
+				},
+				"inputs": [
+					{
+						"referenceName": "WivVisitorDetailRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Token": {
+								"value": "@pipeline().parameters.Token",
+								"type": "Expression"
+							},
+							"VisitorId": {
+								"value": "@pipeline().parameters.VisitorId",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "WivVisitorDetailJsonDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"VisitorId": {
+								"value": "@pipeline().parameters.VisitorId",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"concurrency": 10,
+		"parameters": {
+			"Token": {
+				"type": "string"
+			},
+			"VisitorId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": []
+	}
+}

@@ -11,6 +11,12 @@
 						"dependencyConditions": [
 							"Succeeded"
 						]
+					},
+					{
+						"activity": "If VisitorFeedByDateRangeFolderExists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
 				"userProperties": [],
@@ -90,7 +96,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "SetPages",
+						"activity": "LookupCurrentPageResponse",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -99,7 +105,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@variables('pages')",
+						"value": "@range(1,activity('LookupCurrentPageResponse').output.value[0].pagination.pagesCount)",
 						"type": "Expression"
 					},
 					"isSequential": false,
@@ -139,26 +145,6 @@
 				}
 			},
 			{
-				"name": "SetPages",
-				"type": "SetVariable",
-				"dependsOn": [
-					{
-						"activity": "LookupCurrentPageResponse",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"variableName": "pages",
-					"value": {
-						"value": "@range(1,activity('LookupCurrentPageResponse').output.value[0].pagination.pagesCount)",
-						"type": "Expression"
-					}
-				}
-			},
-			{
 				"name": "GetWhoIsVisitingToken",
 				"type": "WebActivity",
 				"dependsOn": [],
@@ -181,6 +167,101 @@
 						"resource": "https://vault.azure.net"
 					}
 				}
+			},
+			{
+				"name": "GetVisitorFeedByDateRangeJsonFolderMetadata",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "WivVisitorFeedByDateRangeJsonFolderDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"DateFrom": {
+								"value": "@pipeline().parameters.DateFrom",
+								"type": "Expression"
+							},
+							"DateTo": {
+								"value": "@pipeline().parameters.DateTo",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"enablePartitionDiscovery": false
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "If VisitorFeedByDateRangeFolderExists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "GetVisitorFeedByDateRangeJsonFolderMetadata",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@activity('GetVisitorFeedByDateRangeJsonFolderMetadata').output.exists",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "DeleteVisitorFeedByDateRangeJsonFolder",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "WivVisitorFeedByDateRangeJsonFolderDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"DateFrom": {
+											"value": "@pipeline().parameters.DateFrom",
+											"type": "Expression"
+										},
+										"DateTo": {
+											"value": "@pipeline().parameters.DateTo",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"parameters": {
@@ -189,18 +270,6 @@
 			},
 			"DateTo": {
 				"type": "string"
-			}
-		},
-		"variables": {
-			"page": {
-				"type": "String",
-				"defaultValue": "1"
-			},
-			"tempPage": {
-				"type": "String"
-			},
-			"pages": {
-				"type": "Array"
 			}
 		},
 		"folder": {
