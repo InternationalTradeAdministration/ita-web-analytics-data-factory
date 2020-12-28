@@ -6,10 +6,7 @@
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"DateFrom": {
-				"type": "string"
-			},
-			"DateTo": {
+			"Folder": {
 				"type": "string"
 			}
 		},
@@ -22,7 +19,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"folderPath": {
-					"value": "visitor_feed/@{dataset().DateFrom}_@{dataset().DateTo}",
+					"value": "visitor_feed/@{dataset().Folder}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"
