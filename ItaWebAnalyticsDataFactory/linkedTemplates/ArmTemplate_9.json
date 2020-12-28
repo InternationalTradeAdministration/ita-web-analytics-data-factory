@@ -3421,6 +3421,12 @@
 								"dependencyConditions": [
 									"Succeeded"
 								]
+							},
+							{
+								"activity": "If DateFrom and DateTo are equals",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
 						"userProperties": [],
@@ -3442,6 +3448,10 @@
 								"Page": "1",
 								"Token": {
 									"value": "@activity('GetWhoIsVisitingToken').output.value",
+									"type": "Expression"
+								},
+								"Folder": {
+									"value": "@variables('folder')",
 									"type": "Expression"
 								}
 							}
@@ -3481,15 +3491,11 @@
 								"referenceName": "WivVisitorFeedJsonDataset",
 								"type": "DatasetReference",
 								"parameters": {
-									"DateFrom": {
-										"value": "@pipeline().parameters.DateFrom",
+									"Page": "1",
+									"Folder": {
+										"value": "@variables('folder')",
 										"type": "Expression"
-									},
-									"DateTo": {
-										"value": "@pipeline().parameters.DateTo",
-										"type": "Expression"
-									},
-									"Page": "1"
+									}
 								}
 							},
 							"firstRowOnly": false
@@ -3541,6 +3547,10 @@
 											"Token": {
 												"value": "@activity('GetWhoIsVisitingToken').output.value",
 												"type": "Expression"
+											},
+											"Folder": {
+												"value": "@variables('folder')",
+												"type": "Expression"
 											}
 										}
 									}
@@ -3576,7 +3586,14 @@
 					{
 						"name": "GetVisitorFeedByDateRangeJsonFolderMetadata",
 						"type": "GetMetadata",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "If DateFrom and DateTo are equals",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
@@ -3590,12 +3607,8 @@
 								"referenceName": "WivVisitorFeedByDateRangeJsonFolderDataset",
 								"type": "DatasetReference",
 								"parameters": {
-									"DateFrom": {
-										"value": "@pipeline().parameters.DateFrom",
-										"type": "Expression"
-									},
-									"DateTo": {
-										"value": "@pipeline().parameters.DateTo",
+									"Folder": {
+										"value": "@variables('folder')",
 										"type": "Expression"
 									}
 								}
@@ -3648,12 +3661,8 @@
 											"referenceName": "WivVisitorFeedByDateRangeJsonFolderDataset",
 											"type": "DatasetReference",
 											"parameters": {
-												"DateFrom": {
-													"value": "@pipeline().parameters.DateFrom",
-													"type": "Expression"
-												},
-												"DateTo": {
-													"value": "@pipeline().parameters.DateTo",
+												"Folder": {
+													"value": "@variables('folder')",
 													"type": "Expression"
 												}
 											}
@@ -3668,6 +3677,48 @@
 								}
 							]
 						}
+					},
+					{
+						"name": "If DateFrom and DateTo are equals",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.DateFrom, pipeline().parameters.DateTo)",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Set folder to DateFrom_DateTo",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "folder",
+										"value": {
+											"value": "@{pipeline().parameters.DateFrom}_@{pipeline().parameters.DateTo}",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Set folder to DateFrom",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "folder",
+										"value": {
+											"value": "@pipeline().parameters.DateFrom",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
 					}
 				],
 				"parameters": {
@@ -3676,6 +3727,11 @@
 					},
 					"DateTo": {
 						"type": "string"
+					}
+				},
+				"variables": {
+					"folder": {
+						"type": "String"
 					}
 				},
 				"folder": {

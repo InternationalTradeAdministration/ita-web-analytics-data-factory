@@ -614,106 +614,11 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "If first day of the month",
-						"type": "IfCondition",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@equals(dayOfMonth(convertFromUtc(utcNow(), 'Eastern Standard Time', 's')), 1)",
-								"type": "Expression"
-							},
-							"ifFalseActivities": [
-								{
-									"name": "Set dateFrom to first day of current month",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Set firstDayNextMonth",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "dateFrom",
-										"value": {
-											"value": "@{convertFromUtc(addDays(variables('firstDayNextMonth'), -1), 'Eastern Standard Time', 'yyyy-MM')}-01",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Set firstDayNextMonth",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "firstDayNextMonth",
-										"value": {
-											"value": "@{startOfMonth(getFutureTime(1, 'Month'), 'yyyy-MM-dd')}T10:00:00Z",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Set dateTo to end of current month",
-									"type": "SetVariable",
-									"dependsOn": [
-										{
-											"activity": "Set firstDayNextMonth",
-											"dependencyConditions": [
-												"Succeeded"
-											]
-										}
-									],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "dateTo",
-										"value": {
-											"value": "@{convertFromUtc(addDays(variables('firstDayNextMonth'), -1), 'Eastern Standard Time', 'yyyy-MM-dd')}",
-											"type": "Expression"
-										}
-									}
-								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "Set dateFrom to first day of last month",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "dateFrom",
-										"value": {
-											"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyy-MM')}-01",
-											"type": "Expression"
-										}
-									}
-								},
-								{
-									"name": "Set dateTo to last day of last month",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "dateTo",
-										"value": {
-											"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyy-MM-dd')}",
-											"type": "Expression"
-										}
-									}
-								}
-							]
-						}
-					},
-					{
 						"name": "ExecuteExtractVisitorFeedByDateRange",
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "If first day of the month",
+								"activity": "Set yesterday",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -728,11 +633,11 @@
 							"waitOnCompletion": true,
 							"parameters": {
 								"DateFrom": {
-									"value": "@variables('dateFrom')",
+									"value": "@variables('yesterday')",
 									"type": "Expression"
 								},
 								"DateTo": {
-									"value": "@variables('dateTo')",
+									"value": "@variables('yesterday')",
 									"type": "Expression"
 								}
 							}
@@ -960,20 +865,24 @@
 								"parameters": {}
 							}
 						]
+					},
+					{
+						"name": "Set yesterday",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "yesterday",
+							"value": {
+								"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyy-MM-dd')}",
+								"type": "Expression"
+							}
+						}
 					}
 				],
 				"concurrency": 1,
 				"variables": {
-					"dateRange": {
-						"type": "String"
-					},
-					"firstDayNextMonth": {
-						"type": "String"
-					},
-					"dateFrom": {
-						"type": "String"
-					},
-					"dateTo": {
+					"yesterday": {
 						"type": "String"
 					}
 				},

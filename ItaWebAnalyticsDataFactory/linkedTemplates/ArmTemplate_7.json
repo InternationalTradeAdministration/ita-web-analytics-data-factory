@@ -81,10 +81,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"DateFrom": {
-						"type": "string"
-					},
-					"DateTo": {
+					"Folder": {
 						"type": "string"
 					}
 				},
@@ -97,7 +94,7 @@
 					"location": {
 						"type": "AzureBlobStorageLocation",
 						"folderPath": {
-							"value": "visitor_feed/@{dataset().DateFrom}_@{dataset().DateTo}",
+							"value": "visitor_feed/@{dataset().Folder}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
@@ -117,13 +114,10 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"DateFrom": {
-						"type": "string"
-					},
-					"DateTo": {
-						"type": "string"
-					},
 					"Page": {
+						"type": "string"
+					},
+					"Folder": {
 						"type": "string"
 					}
 				},
@@ -140,7 +134,7 @@
 							"type": "Expression"
 						},
 						"folderPath": {
-							"value": "visitor_feed/@{dataset().DateFrom}_@{dataset().DateTo}",
+							"value": "visitor_feed/@{dataset().Folder}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"

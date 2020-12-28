@@ -2435,16 +2435,12 @@
 								"referenceName": "WivVisitorFeedJsonDataset",
 								"type": "DatasetReference",
 								"parameters": {
-									"DateFrom": {
-										"value": "@pipeline().parameters.DateFrom",
-										"type": "Expression"
-									},
-									"DateTo": {
-										"value": "@pipeline().parameters.DateTo",
-										"type": "Expression"
-									},
 									"Page": {
 										"value": "@pipeline().parameters.Page",
+										"type": "Expression"
+									},
+									"Folder": {
+										"value": "@pipeline().parameters.Folder",
 										"type": "Expression"
 									}
 								}
@@ -2464,6 +2460,9 @@
 						"type": "string"
 					},
 					"Token": {
+						"type": "string"
+					},
+					"Folder": {
 						"type": "string"
 					}
 				},
