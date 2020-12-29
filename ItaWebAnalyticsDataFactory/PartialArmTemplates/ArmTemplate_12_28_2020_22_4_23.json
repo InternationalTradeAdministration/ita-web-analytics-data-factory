@@ -1,0 +1,416 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "ItaWebAnalyticsDataFactory"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/RefreshAllWhoIsVisiting')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "LookupDatePeriods",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": false,
+									"wildcardFileName": "wiv_date_periods.csv",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "RootFolderDataset",
+								"type": "DatasetReference"
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "DatePeriod",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "LookupDatePeriods",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('LookupDatePeriods').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "ExecuteRefreshWhoIsVisiting",
+									"type": "ExecutePipeline",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "RefreshWhoIsVisiting",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"DatePeriod": {
+												"value": "@item().date_period",
+												"type": "Expression"
+											}
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"concurrency": 1,
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/RefreshWhoIsVisiting')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RefreshWhoIsVisiting')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecuteExtractVisitorFeedByDateRange",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "If Condition1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractVisitorFeed",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"DateFrom": {
+									"value": "@variables('datePeriod')",
+									"type": "Expression"
+								},
+								"DateTo": {
+									"value": "@variables('datePeriod')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "LoadSessions",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractVisitorFeedByDateRange",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "visitor_feed",
+									"wildcardFileName": "*.json"
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "TRUNCATE TABLE web_analytics.visitor_sessions",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "[['id']"
+										},
+										"sink": {
+											"name": "id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "[['visitorId']"
+										},
+										"sink": {
+											"name": "visitor_id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "[['sessionStart']"
+										},
+										"sink": {
+											"name": "session_start",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "[['pageViews']"
+										},
+										"sink": {
+											"name": "page_views",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "[['duration']"
+										},
+										"sink": {
+											"name": "duration",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "[['source']"
+										},
+										"sink": {
+											"name": "source",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "[['firstVisit']"
+										},
+										"sink": {
+											"name": "first_visit",
+											"type": "Boolean"
+										}
+									}
+								],
+								"collectionReference": "$['sessions']"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "RootJsonFolderDataset",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "WivVisitorSessionsSqlDataset",
+								"type": "DatasetReference"
+							}
+						]
+					},
+					{
+						"name": "ExecuteExtractVisitorDetails",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "LoadSessions",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractVisitorDetails",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true
+						}
+					},
+					{
+						"name": "LoadVisitorDetails",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractVisitorDetails",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "JsonSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"wildcardFolderPath": "visitor_details",
+									"wildcardFileName": "*.json",
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "JsonReadSettings"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"preCopyScript": "TRUNCATE TABLE web_analytics.visitor_details",
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "$['data']['id']"
+										},
+										"sink": {
+											"name": "id",
+											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "$['data']"
+										},
+										"sink": {
+											"name": "json",
+											"type": "String"
+										}
+									}
+								],
+								"mapComplexValuesToString": true
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "RootJsonFolderDataset",
+								"type": "DatasetReference"
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "WivVisitorDetailsSqlDataset",
+								"type": "DatasetReference"
+							}
+						]
+					},
+					{
+						"name": "If Condition1",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.DatePeriod, 'yesterday')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Set datePeriod to parameter value",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "datePeriod",
+										"value": {
+											"value": "@pipeline().parameters.DatePeriod",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Set datePeriod to yesterday",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "datePeriod",
+										"value": {
+											"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyy-MM-dd')}",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					}
+				],
+				"concurrency": 1,
+				"parameters": {
+					"DatePeriod": {
+						"type": "string",
+						"defaultValue": "yesterday"
+					}
+				},
+				"variables": {
+					"datePeriod": {
+						"type": "String"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		}
+	]
+}
