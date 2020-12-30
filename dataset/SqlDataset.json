@@ -1,5 +1,5 @@
 {
-	"name": "StoredProcedureSqlDataset",
+	"name": "SqlDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureSqlDatabaseLinkedService",

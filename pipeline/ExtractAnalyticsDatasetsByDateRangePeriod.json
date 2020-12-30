@@ -164,13 +164,38 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "ExtractMonthlyAnalyticsExternalReferringDomainMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractMonthlyAnalyticsOutboundLinkMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractMonthlyAnalyticsExternalReferringDomainMetricsByPeriod",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@pipeline().parameters.DateRangePeriod",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"concurrency": 1,
 		"parameters": {
 			"DateRangePeriod": {
-				"type": "string",
-				"defaultValue": "this_month"
+				"type": "string"
 			}
 		},
 		"folder": {

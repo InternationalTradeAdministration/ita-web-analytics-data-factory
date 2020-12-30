@@ -1628,6 +1628,136 @@
 						"type": "DatasetReference"
 					}
 				]
+			},
+			{
+				"name": "LoadMonthlyExternalReferringDomain",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": "monthly_analytics_external_referring_domain_metrics",
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": "TRUNCATE TABLE web_analytics.monthly_analytics_external_referring_domain_metrics",
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "id",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "analytics_external_domain_id",
+									"type": "Int64",
+									"physicalType": "bigint"
+								}
+							},
+							{
+								"source": {
+									"name": "analytics_group_id",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64",
+									"physicalType": "bigint"
+								}
+							},
+							{
+								"source": {
+									"name": "date",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "date",
+									"type": "String",
+									"physicalType": "char"
+								}
+							},
+							{
+								"source": {
+									"name": "external_referring_domain",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "external_referring_domain",
+									"type": "String",
+									"physicalType": "nvarchar"
+								}
+							},
+							{
+								"source": {
+									"name": "bounce_rate",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal",
+									"physicalType": "decimal",
+									"scale": 2,
+									"precision": 9
+								}
+							},
+							{
+								"source": {
+									"name": "visits",
+									"type": "String",
+									"physicalType": "String"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int64",
+									"physicalType": "bigint"
+								}
+							}
+						],
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "RootFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "MonthlyAnalyticsExternalReferringDomainMetricsSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
 			}
 		],
 		"folder": {

@@ -95,45 +95,6 @@
 				}
 			},
 			{
-				"name": "If first day of the month",
-				"type": "IfCondition",
-				"dependsOn": [],
-				"userProperties": [],
-				"typeProperties": {
-					"expression": {
-						"value": "@equals(dayOfMonth(convertFromUtc(utcNow(), 'Eastern Standard Time', 's')), 1)",
-						"type": "Expression"
-					},
-					"ifFalseActivities": [
-						{
-							"name": "Set DateRange to this_month",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "DateRangePeriod",
-								"value": "this_month"
-							}
-						}
-					],
-					"ifTrueActivities": [
-						{
-							"name": "Set DateRange to last month range",
-							"type": "SetVariable",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"variableName": "DateRangePeriod",
-								"value": {
-									"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMM')}01_@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}",
-									"type": "Expression"
-								}
-							}
-						}
-					]
-				}
-			},
-			{
 				"name": "ExecuteExtractQualityAssuranceDatasets",
 				"type": "ExecutePipeline",
 				"dependsOn": [
@@ -211,6 +172,112 @@
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "If first day of the month",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(dayOfMonth(convertFromUtc(utcNow(), 'Eastern Standard Time', 's')), 1)",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set DateRange to current month range",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "LookupDateRangePeriod",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "DateRangePeriod",
+								"value": {
+									"value": "@activity('LookupDateRangePeriod').output.firstRow.DateRangePeriod",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "LookupDateRangePeriod",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "SELECT CONCAT(CONVERT(char(8), DATEADD(DAY,1,EOMONTH(GETDATE(),-1)), 112), '_', CONVERT(char(80), EOMONTH(GETDATE()), 112)) AS DateRangePeriod",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "SqlDataset",
+									"type": "DatasetReference"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "LookupLastMonthDateRangePeriod",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": "SELECT CONCAT(CONVERT(char(8), DATEADD(MONTH, -1, GETDATE()), 112), '_', CONVERT(char(8), EOMONTH(GETDATE(), -1), 112)) AS DateRangePeriod",
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "SqlDataset",
+									"type": "DatasetReference"
+								}
+							}
+						},
+						{
+							"name": "Set DateRange to last month range",
+							"type": "SetVariable",
+							"dependsOn": [
+								{
+									"activity": "LookupLastMonthDateRangePeriod",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "DateRangePeriod",
+								"value": {
+									"value": "@activity('LookupLastMonthDateRangePeriod').output.firstRow.DateRangePeriod",
+									"type": "Expression"
+								}
+							}
+						}
+					]
 				}
 			}
 		],
