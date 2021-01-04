@@ -65,7 +65,7 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"DatePeriod": {
+									"Period": {
 										"value": "@item().date_period",
 										"type": "Expression"
 									}

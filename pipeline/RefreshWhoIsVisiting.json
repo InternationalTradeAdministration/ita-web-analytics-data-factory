@@ -7,7 +7,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "If DatePeriod equals yesterday",
+						"activity": "If Period equals yesterday",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -22,11 +22,11 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"DateFrom": {
-							"value": "@variables('datePeriod')",
+							"value": "@variables('period')",
 							"type": "Expression"
 						},
 						"DateTo": {
-							"value": "@variables('datePeriod')",
+							"value": "@variables('period')",
 							"type": "Expression"
 						}
 					}
@@ -170,7 +170,13 @@
 						"referenceName": "ExtractVisitorDetails",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@variables('period')",
+							"type": "Expression"
+						}
+					}
 				}
 			},
 			{
@@ -198,7 +204,10 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "visitor_details",
+							"wildcardFolderPath": {
+								"value": "visitor_details/@{variables('period')}",
+								"type": "Expression"
+							},
 							"wildcardFileName": "*.json",
 							"enablePartitionDiscovery": false
 						},
@@ -208,7 +217,6 @@
 					},
 					"sink": {
 						"type": "AzureSqlSink",
-						"preCopyScript": "TRUNCATE TABLE web_analytics.visitor_details",
 						"disableMetricsCollection": false
 					},
 					"enableStaging": false,
@@ -251,25 +259,25 @@
 				]
 			},
 			{
-				"name": "If DatePeriod equals yesterday",
+				"name": "If Period equals yesterday",
 				"type": "IfCondition",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(pipeline().parameters.DatePeriod, 'yesterday')",
+						"value": "@equals(pipeline().parameters.Period, 'yesterday')",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [
 						{
-							"name": "Set datePeriod to parameter value",
+							"name": "Set period to parameter value",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "datePeriod",
+								"variableName": "period",
 								"value": {
-									"value": "@pipeline().parameters.DatePeriod",
+									"value": "@pipeline().parameters.Period",
 									"type": "Expression"
 								}
 							}
@@ -277,12 +285,12 @@
 					],
 					"ifTrueActivities": [
 						{
-							"name": "Set datePeriod to yesterday",
+							"name": "Set period to yesterday",
 							"type": "SetVariable",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
-								"variableName": "datePeriod",
+								"variableName": "period",
 								"value": {
 									"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyy-MM-dd')}",
 									"type": "Expression"
@@ -295,13 +303,13 @@
 		],
 		"concurrency": 1,
 		"parameters": {
-			"DatePeriod": {
+			"Period": {
 				"type": "string",
 				"defaultValue": "yesterday"
 			}
 		},
 		"variables": {
-			"datePeriod": {
+			"period": {
 				"type": "String"
 			}
 		},

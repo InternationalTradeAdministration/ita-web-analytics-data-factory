@@ -56,6 +56,10 @@
 							"VisitorId": {
 								"value": "@pipeline().parameters.VisitorId",
 								"type": "Expression"
+							},
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
 							}
 						}
 					}
@@ -68,6 +72,9 @@
 				"type": "string"
 			},
 			"VisitorId": {
+				"type": "string"
+			},
+			"Period": {
 				"type": "string"
 			}
 		},
