@@ -24,6 +24,9 @@
 				"parameters": {
 					"VisitorId": {
 						"type": "string"
+					},
+					"Period": {
+						"type": "string"
 					}
 				},
 				"folder": {
@@ -39,7 +42,7 @@
 							"type": "Expression"
 						},
 						"folderPath": {
-							"value": "visitor_details",
+							"value": "visitor_details/@{dataset().Period}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"

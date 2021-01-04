@@ -3353,7 +3353,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@pipeline().parameters.visitorIds",
+								"value": "@pipeline().parameters.VisitorIds",
 								"type": "Expression"
 							},
 							"isSequential": false,
@@ -3371,11 +3371,15 @@
 										"waitOnCompletion": true,
 										"parameters": {
 											"Token": {
-												"value": "@pipeline().parameters.whoIsVisitingToken",
+												"value": "@pipeline().parameters.WhoIsVisitingToken",
 												"type": "Expression"
 											},
 											"VisitorId": {
 												"value": "@item().visitorId",
+												"type": "Expression"
+											},
+											"Period": {
+												"value": "@pipeline().parameters.Period",
 												"type": "Expression"
 											}
 										}
@@ -3386,10 +3390,13 @@
 					}
 				],
 				"parameters": {
-					"visitorIds": {
+					"VisitorIds": {
 						"type": "array"
 					},
-					"whoIsVisitingToken": {
+					"WhoIsVisitingToken": {
+						"type": "string"
+					},
+					"Period": {
 						"type": "string"
 					}
 				},

@@ -38,7 +38,7 @@
 			"type": "string",
 			"defaultValue": "https://iptrack.io"
 		},
-		"WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_DatePeriod": {
+		"WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_Period": {
 			"type": "string",
 			"defaultValue": "yesterday"
 		},
@@ -305,8 +305,8 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
-					"WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_DatePeriod": {
-						"value": "[parameters('WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_DatePeriod')]"
+					"WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_Period": {
+						"value": "[parameters('WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_Period')]"
 					}
 				}
 			},

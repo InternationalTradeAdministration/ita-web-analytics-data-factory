@@ -2997,6 +2997,10 @@
 											"whoIsVisitingToken": {
 												"value": "@activity('GetWhoIsVisitingToken').output.value",
 												"type": "Expression"
+											},
+											"Period": {
+												"value": "@pipeline().parameters.Period",
+												"type": "Expression"
 											}
 										}
 									}
@@ -3026,6 +3030,11 @@
 						}
 					}
 				],
+				"parameters": {
+					"Period": {
+						"type": "string"
+					}
+				},
 				"variables": {
 					"offset": {
 						"type": "String",
