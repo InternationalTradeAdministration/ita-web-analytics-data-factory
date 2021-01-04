@@ -159,10 +159,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetrics",
+						"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@pipeline().parameters.DateRangePeriod",
+							"type": "Expression"
+						}
+					}
 				}
 			},
 			{
