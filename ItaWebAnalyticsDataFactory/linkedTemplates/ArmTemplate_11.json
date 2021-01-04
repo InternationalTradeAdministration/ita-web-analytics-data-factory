@@ -1274,7 +1274,7 @@
 									"typeProperties": {
 										"variableName": "DateRangePeriod",
 										"value": {
-											"value": "@activity('LookupDateRangePeriod').output.firstRow.DateRangePeriod",
+											"value": "@trim(activity('LookupDateRangePeriod').output.firstRow.DateRangePeriod)",
 											"type": "Expression"
 										}
 									}
@@ -1348,7 +1348,7 @@
 									"typeProperties": {
 										"variableName": "DateRangePeriod",
 										"value": {
-											"value": "@activity('LookupLastMonthDateRangePeriod').output.firstRow.DateRangePeriod",
+											"value": "@trim(activity('LookupLastMonthDateRangePeriod').output.firstRow.DateRangePeriod)",
 											"type": "Expression"
 										}
 									}
