@@ -30,6 +30,9 @@
 		"WhoIsVisitingRestLinkedService_properties_typeProperties_url": {
 			"value": "https://iptrack.io"
 		},
+		"WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_DatePeriod": {
+			"value": "yesterday"
+		},
 		"containerUri": {
 			"value": ""
 		},

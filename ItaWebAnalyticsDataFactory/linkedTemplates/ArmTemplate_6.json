@@ -433,7 +433,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/StoredProcedureSqlDataset')]",
+			"name": "[concat(parameters('factoryName'), '/SqlDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
