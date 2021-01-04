@@ -187,11 +187,11 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"visitorIds": {
+									"VisitorIds": {
 										"value": "@variables('visitorIds')",
 										"type": "Expression"
 									},
-									"whoIsVisitingToken": {
+									"WhoIsVisitingToken": {
 										"value": "@activity('GetWhoIsVisitingToken').output.value",
 										"type": "Expression"
 									},
