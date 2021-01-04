@@ -4045,11 +4045,16 @@
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetrics",
+								"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
-							"parameters": {}
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.DateRangePeriod",
+									"type": "Expression"
+								}
+							}
 						}
 					},
 					{
@@ -4097,7 +4102,7 @@
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsTrafficSourcesMetricsByPeriod')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsVisitLengthMetricsByPeriod')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractMonthlyAnalyticsHistoricalMetrics')]",
-				"[concat(variables('factoryId'), '/pipelines/ExtractMonthlyAnalyticsOutboundLinkMetrics')]",
+				"[concat(variables('factoryId'), '/pipelines/ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractMonthlyAnalyticsExternalReferringDomainMetricsByPeriod')]"
 			]
 		},
