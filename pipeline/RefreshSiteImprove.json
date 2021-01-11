@@ -1,33 +1,53 @@
 {
-	"name": "MainPipeline",
+	"name": "RefreshSiteImprove",
 	"properties": {
 		"activities": [
 			{
-				"name": "ExecuteExtractAnalyticsDatasets",
+				"name": "ExecuteLoadDailyRefreshAnalyticsDatasets",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "LoadDailyRefreshAnalyticsDatasets",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExecuteExtractAnalyticsGroups",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
 						"activity": "ExecuteExtractContentPages",
 						"dependencyConditions": [
-							"Succeeded"
+							"Completed"
 						]
 					}
 				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsDatasets",
+						"referenceName": "ExtractAnalyticsGroups",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
 				}
 			},
 			{
-				"name": "ExecuteLoadAnalyticsRelatedDatasets",
+				"name": "ExecuteExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractAnalyticsDatasets",
+						"activity": "ExecuteExtractAnalyticsGroups",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -36,43 +56,22 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "LoadAnalyticsRelatedDatasets",
+						"referenceName": "ExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
 						"type": "PipelineReference"
 					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "ExecuteExtractContentPages",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractQualityAssuranceDatasets",
-						"dependencyConditions": [
-							"Succeeded"
-						]
+					"waitOnCompletion": true,
+					"parameters": {
+						"DatePeriod": {
+							"value": "@convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMMdd')",
+							"type": "Expression"
+						}
 					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractContentPages",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
 				}
 			},
 			{
 				"name": "ExecuteExtractQualityAssuranceDatasets",
 				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteGeneratePeriodParameters",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -87,7 +86,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractAnalyticsDatasets",
+						"activity": "ExecuteExtractQualityAssuranceDatasets",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -103,11 +102,31 @@
 				}
 			},
 			{
+				"name": "ExecuteExtractContentPages",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractQualityAssuranceDatasets",
+						"dependencyConditions": [
+							"Completed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractContentPages",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
 				"name": "ExecuteLoadContentDatasets",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractAnalyticsDatasets",
+						"activity": "ExecuteExtractContentPages",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -117,19 +136,6 @@
 				"typeProperties": {
 					"pipeline": {
 						"referenceName": "LoadContentDatasets",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "ExecuteGeneratePeriodParameters",
-				"type": "ExecutePipeline",
-				"dependsOn": [],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "GeneratePeriodParameters",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true

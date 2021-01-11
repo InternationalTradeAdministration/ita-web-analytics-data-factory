@@ -1,12 +1,12 @@
 {
-	"name": "DailyRefresh",
+	"name": "SiteImproveDailyTrigger",
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "ContinuousRefresh",
+					"referenceName": "RefreshSiteImprove",
 					"type": "PipelineReference"
 				}
 			}
@@ -16,11 +16,11 @@
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2020-07-25T00:00:00.000Z",
+				"startTime": "2020-07-25T00:00:00Z",
 				"timeZone": "UTC",
 				"schedule": {
 					"hours": [
-						8
+						9
 					]
 				}
 			}
