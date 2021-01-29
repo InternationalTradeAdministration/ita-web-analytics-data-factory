@@ -38,10 +38,6 @@
 			"type": "string",
 			"defaultValue": "https://iptrack.io"
 		},
-		"WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_Period": {
-			"type": "string",
-			"defaultValue": "yesterday"
-		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -304,14 +300,31 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_Period": {
-						"value": "[parameters('WhoIsVisitingDailyTrigger_properties_RefreshWhoIsVisiting_parameters_Period')]"
 					}
 				}
 			},
 			"dependsOn": [
 				"[resourceId('Microsoft.Resources/deployments', 'ItaWebAnalyticsDataFactory_ArmTemplate_10')]"
+			]
+		},
+		{
+			"name": "ItaWebAnalyticsDataFactory_ArmTemplate_12",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2018-02-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_12.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[resourceId('Microsoft.Resources/deployments', 'ItaWebAnalyticsDataFactory_ArmTemplate_11')]"
 			]
 		}
 	]
