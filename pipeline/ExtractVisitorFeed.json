@@ -54,7 +54,7 @@
 				}
 			},
 			{
-				"name": "LookupCurrentPageResponse",
+				"name": "LookupFirstPageResponse",
 				"type": "Lookup",
 				"dependsOn": [
 					{
@@ -102,7 +102,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "LookupCurrentPageResponse",
+						"activity": "LookupFirstPageResponse",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -111,7 +111,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@range(1,activity('LookupCurrentPageResponse').output.value[0].pagination.pagesCount)",
+						"value": "@range(1,activity('LookupFirstPageResponse').output.value[0].pagination.pagesCount)",
 						"type": "Expression"
 					},
 					"isSequential": false,

@@ -1,0 +1,22 @@
+{
+	"name": "WivTriggersJsonDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": "wiv_triggers.json",
+				"container": "ita-web-analytics"
+			}
+		},
+		"schema": {}
+	}
+}

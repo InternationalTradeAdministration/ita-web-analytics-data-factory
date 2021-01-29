@@ -1,0 +1,28 @@
+{
+	"name": "WivVisitorSessionsDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Date": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@{dataset().Date}.json",
+					"type": "Expression"
+				},
+				"folderPath": "visitor_sessions",
+				"container": "ita-web-analytics"
+			}
+		},
+		"schema": {}
+	}
+}

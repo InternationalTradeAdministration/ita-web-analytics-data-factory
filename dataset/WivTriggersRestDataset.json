@@ -1,0 +1,32 @@
+{
+	"name": "WivTriggersRestDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "WhoIsVisitingRestLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Token": {
+				"type": "string"
+			},
+			"DateFrom": {
+				"type": "string"
+			},
+			"DateTo": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "wiv"
+		},
+		"annotations": [],
+		"type": "RestResource",
+		"typeProperties": {
+			"relativeUrl": {
+				"value": "api/v1/accounts/25508/triggers?token=@{dataset().Token}&dateFrom=@{dataset().DateFrom}&dateTo=@{dataset().DateTo}",
+				"type": "Expression"
+			}
+		},
+		"schema": []
+	}
+}

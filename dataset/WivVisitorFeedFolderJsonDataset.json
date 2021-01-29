@@ -1,0 +1,19 @@
+{
+	"name": "WivVisitorFeedFolderJsonDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "visitor_feed",
+				"container": "ita-web-analytics"
+			}
+		},
+		"schema": {}
+	}
+}

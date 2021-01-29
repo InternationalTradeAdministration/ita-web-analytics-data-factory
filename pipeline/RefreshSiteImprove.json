@@ -29,7 +29,7 @@
 					{
 						"activity": "ExecuteExtractContentPages",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -62,7 +62,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"DatePeriod": {
-							"value": "@convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMMdd')",
+							"value": "@variables('period')",
 							"type": "Expression"
 						}
 					}
@@ -71,7 +71,14 @@
 			{
 				"name": "ExecuteExtractQualityAssuranceDatasets",
 				"type": "ExecutePipeline",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "If Period equals yesterday",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -108,7 +115,7 @@
 					{
 						"activity": "ExecuteExtractQualityAssuranceDatasets",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -140,9 +147,61 @@
 					},
 					"waitOnCompletion": true
 				}
+			},
+			{
+				"name": "If Period equals yesterday",
+				"type": "IfCondition",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(pipeline().parameters.Period, 'yesterday')",
+						"type": "Expression"
+					},
+					"ifFalseActivities": [
+						{
+							"name": "Set period to parameter value",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "period",
+								"value": {
+									"value": "@pipeline().parameters.Period",
+									"type": "Expression"
+								}
+							}
+						}
+					],
+					"ifTrueActivities": [
+						{
+							"name": "Set period to yesterday",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "period",
+								"value": {
+									"value": "@convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMMdd')",
+									"type": "Expression"
+								}
+							}
+						}
+					]
+				}
 			}
 		],
 		"concurrency": 1,
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
+		"variables": {
+			"period": {
+				"type": "String"
+			}
+		},
 		"annotations": []
 	}
 }

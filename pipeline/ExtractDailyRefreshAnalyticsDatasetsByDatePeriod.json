@@ -28,7 +28,7 @@
 					{
 						"activity": "ExecuteExtractAnalyticsCountryMetrics",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -41,7 +41,7 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"Period": {
-							"value": "@{convertFromUtc(adddays(utcnow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}",
+							"value": "@pipeline().parameters.DatePeriod",
 							"type": "Expression"
 						}
 					}
@@ -54,7 +54,7 @@
 					{
 						"activity": "ExecuteExtractAnalyticsRegionMetrics",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -80,7 +80,7 @@
 					{
 						"activity": "ExecuteExtractAnalyticsPageMetricsByPeriod",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],
@@ -100,7 +100,7 @@
 					{
 						"activity": "ExecuteExtractAnalyticsPages",
 						"dependencyConditions": [
-							"Completed"
+							"Succeeded"
 						]
 					}
 				],

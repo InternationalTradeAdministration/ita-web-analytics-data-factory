@@ -60,7 +60,7 @@
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "RefreshWhoIsVisiting",
+									"referenceName": "RefreshWhoIsVisitingByPeriod",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
