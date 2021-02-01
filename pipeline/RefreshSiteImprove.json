@@ -189,17 +189,157 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "PeriodIsEndofTheMonth",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "ExecuteExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "LookupEndOfMonth",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(variables('period'), activity('LookupEndOfMonth').output.firstRow.EndOfMonth)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "ExtractMonthlyRefreshAnalyticsDatasets",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "LookupDateRangePeriod",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractMonthlyRefreshAnalyticsDatasets",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"DateRangePeriod": {
+										"value": "@activity('LookupDateRangePeriod').output.firstRow.DateRangePeriod",
+										"type": "Expression"
+									}
+								}
+							}
+						},
+						{
+							"name": "LoadMonthlyRefreshAnalyticsDatasets",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "ExtractMonthlyRefreshAnalyticsDatasets",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "LoadMonthlyRefreshAnalyticsDatasets",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true
+							}
+						},
+						{
+							"name": "LookupDateRangePeriod",
+							"type": "Lookup",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "AzureSqlSource",
+									"sqlReaderQuery": {
+										"value": "SELECT CONCAT(CONVERT(char(8), DATEADD(DAY, 1, EOMONTH('@{variables('period')}', -1)), 112), '_', CONVERT(char(8), EOMONTH('@{variables('period')}'), 112)) AS DateRangePeriod",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"dataset": {
+									"referenceName": "SqlDataset",
+									"type": "DatasetReference"
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "LookupEndOfMonth",
+				"type": "Lookup",
+				"dependsOn": [
+					{
+						"activity": "If Period equals yesterday",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderQuery": {
+							"value": "SELECT CONVERT(CHAR(8), EOMONTH('@{variables('period')}'), 112) AS EndOfMonth",
+							"type": "Expression"
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SqlDataset",
+						"type": "DatasetReference"
+					}
+				}
 			}
 		],
 		"concurrency": 1,
 		"parameters": {
 			"Period": {
-				"type": "string"
+				"type": "string",
+				"defaultValue": "yesterday"
 			}
 		},
 		"variables": {
 			"period": {
 				"type": "String"
+			},
+			"test": {
+				"type": "Boolean"
 			}
 		},
 		"annotations": []

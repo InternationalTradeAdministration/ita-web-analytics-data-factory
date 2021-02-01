@@ -19,7 +19,6 @@
 						"value": "@activity('LookupAnalyticsFilters').output.value",
 						"type": "Expression"
 					},
-					"batchCount": 15,
 					"activities": [
 						{
 							"name": "ExtractAnalyticsHistoricalMetrics",

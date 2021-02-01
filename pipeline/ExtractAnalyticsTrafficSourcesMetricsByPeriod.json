@@ -7,7 +7,7 @@
 				"type": "Copy",
 				"dependsOn": [
 					{
-						"activity": "Delete Period Folder",
+						"activity": "PeriodFolderExists",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -202,16 +202,9 @@
 				}
 			},
 			{
-				"name": "Delete Period Folder",
-				"type": "Delete",
-				"dependsOn": [
-					{
-						"activity": "Prevent Delete from failing when folder is empty",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"name": "PeriodFolder",
+				"type": "GetMetadata",
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 0,
@@ -226,73 +219,73 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {
-								"value": "@{pipeline().parameters.Period}",
+								"value": "@pipeline().parameters.Period",
 								"type": "Expression"
 							}
 						}
 					},
-					"enableLogging": false,
+					"fieldList": [
+						"exists"
+					],
 					"storeSettings": {
 						"type": "AzureBlobStorageReadSettings",
 						"recursive": true
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
 					}
 				}
 			},
 			{
-				"name": "Prevent Delete from failing when folder is empty",
-				"type": "Copy",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
+				"name": "PeriodFolderExists",
+				"type": "IfCondition",
+				"dependsOn": [
 					{
-						"referenceName": "AnalyticsGroupsCsvDataset",
-						"type": "DatasetReference"
+						"activity": "PeriodFolder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('PeriodFolder').output.exists, true)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "DeletePeriodFolder",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
 							},
-							"FileName": "filler.csv"
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodFolderDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"Period": {
+											"value": "@pipeline().parameters.Period",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								}
+							}
 						}
-					}
-				]
+					]
+				}
 			}
 		],
 		"parameters": {

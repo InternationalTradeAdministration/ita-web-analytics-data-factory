@@ -16,18 +16,29 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": false,
-							"enablePartitionDiscovery": false
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[web_analytics].[generate_date_periods]",
+						"storedProcedureParameters": {
+							"endDate": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.EndDate",
+									"type": "Expression"
+								}
+							},
+							"startDate": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.StartDate",
+									"type": "Expression"
+								}
+							}
 						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"dataset": {
-						"referenceName": "DatePeriodsCsvDataset",
+						"referenceName": "SqlDataset",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -51,7 +62,6 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 5,
 					"activities": [
 						{
 							"name": "ExecuteExtractAnalyticsPageMetricsByPeriod",
@@ -76,6 +86,14 @@
 				}
 			}
 		],
+		"parameters": {
+			"StartDate": {
+				"type": "string"
+			},
+			"EndDate": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "analytics"
 		},
