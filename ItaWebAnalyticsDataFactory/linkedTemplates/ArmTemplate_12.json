@@ -13,85 +13,36 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/RefreshSiteImprove')]",
+			"name": "[concat(parameters('factoryName'), '/ExtractMonthlyRefreshAnalyticsDatasets')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
 					{
-						"name": "ExecuteLoadDailyRefreshAnalyticsDatasets",
+						"name": "ExecuteExtractAnalyticsHistoricalMetricsByPeriod",
 						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "LoadDailyRefreshAnalyticsDatasets",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "ExecuteExtractAnalyticsGroups",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractContentPages",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "ExtractAnalyticsGroups",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "ExecuteExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractAnalyticsGroups",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "ExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
+								"referenceName": "ExtractAnalyticsHistoricalMetricsByPeriod",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
 							"parameters": {
-								"DatePeriod": {
-									"value": "@variables('period')",
+								"Period": {
+									"value": "@pipeline().parameters.DateRangePeriod",
 									"type": "Expression"
 								}
 							}
 						}
 					},
 					{
-						"name": "ExecuteExtractQualityAssuranceDatasets",
+						"name": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "If Period equals yesterday",
+								"activity": "ExecuteExtractAnalyticsHistoricalMetricsByPeriod",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -100,130 +51,168 @@
 						"userProperties": [],
 						"typeProperties": {
 							"pipeline": {
-								"referenceName": "ExtractQualityAssuranceDatasets",
+								"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
 								"type": "PipelineReference"
 							},
 							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "ExecuteLoadQualityAssuranceDatasets",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractQualityAssuranceDatasets",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "LoadQualityAssuranceDatasets",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "ExecuteExtractContentPages",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractQualityAssuranceDatasets",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "ExtractContentPages",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "ExecuteLoadContentDatasets",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractContentPages",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "LoadContentDatasets",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "If Period equals yesterday",
-						"type": "IfCondition",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"expression": {
-								"value": "@equals(pipeline().parameters.Period, 'yesterday')",
-								"type": "Expression"
-							},
-							"ifFalseActivities": [
-								{
-									"name": "Set period to parameter value",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "period",
-										"value": {
-											"value": "@pipeline().parameters.Period",
-											"type": "Expression"
-										}
-									}
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.DateRangePeriod",
+									"type": "Expression"
 								}
-							],
-							"ifTrueActivities": [
-								{
-									"name": "Set period to yesterday",
-									"type": "SetVariable",
-									"dependsOn": [],
-									"userProperties": [],
-									"typeProperties": {
-										"variableName": "period",
-										"value": {
-											"value": "@convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMMdd')",
-											"type": "Expression"
-										}
-									}
+							}
+						}
+					},
+					{
+						"name": "ExecuteExtractMonthlyAnalyticsHistoricalMetrics",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractMonthlyAnalyticsHistoricalMetrics",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteExtractMonthlyAnalyticsOutboundLinkMetrics",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractMonthlyAnalyticsHistoricalMetrics",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.DateRangePeriod",
+									"type": "Expression"
 								}
-							]
+							}
+						}
+					},
+					{
+						"name": "ExtractMonthlyAnalyticsExternalReferringDomainMetrics",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractMonthlyAnalyticsOutboundLinkMetrics",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractMonthlyAnalyticsExternalReferringDomainMetricsByPeriod",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.DateRangePeriod",
+									"type": "Expression"
+								}
+							}
 						}
 					}
 				],
 				"concurrency": 1,
 				"parameters": {
-					"Period": {
+					"DateRangePeriod": {
 						"type": "string"
 					}
 				},
-				"variables": {
-					"period": {
-						"type": "String"
-					}
+				"folder": {
+					"name": "analytics"
 				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/RefreshByDatePeriod')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecuteExtractAnalyticsCountryMetrics",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsCountryMetrics",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteExtractAnalyticsRegionMetrics",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsCountryMetrics",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsRegionMetrics",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteExtractAnalyticsPageMetrics",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsRegionMetrics",
+								"dependencyConditions": [
+									"Completed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsPageMetrics",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					}
+				],
 				"annotations": []
 			},
 			"dependsOn": []
@@ -1528,6 +1517,367 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/RefreshSiteImprove')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecuteLoadDailyRefreshAnalyticsDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "LoadDailyRefreshAnalyticsDatasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteExtractAnalyticsGroups",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractContentPages",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsGroups",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsGroups",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"DatePeriod": {
+									"value": "@variables('period')",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ExecuteExtractQualityAssuranceDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "If Period equals yesterday",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractQualityAssuranceDatasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteLoadQualityAssuranceDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractQualityAssuranceDatasets",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "LoadQualityAssuranceDatasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteExtractContentPages",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractQualityAssuranceDatasets",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractContentPages",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteLoadContentDatasets",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractContentPages",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "LoadContentDatasets",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "If Period equals yesterday",
+						"type": "IfCondition",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(pipeline().parameters.Period, 'yesterday')",
+								"type": "Expression"
+							},
+							"ifFalseActivities": [
+								{
+									"name": "Set period to parameter value",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "period",
+										"value": {
+											"value": "@pipeline().parameters.Period",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"ifTrueActivities": [
+								{
+									"name": "Set period to yesterday",
+									"type": "SetVariable",
+									"dependsOn": [],
+									"userProperties": [],
+									"typeProperties": {
+										"variableName": "period",
+										"value": {
+											"value": "@convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyyMMdd')",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "PeriodIsEndofTheMonth",
+						"type": "IfCondition",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractDailyRefreshAnalyticsDatasetsByDatePeriod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "LookupEndOfMonth",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(variables('period'), activity('LookupEndOfMonth').output.firstRow.EndOfMonth)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "ExtractMonthlyRefreshAnalyticsDatasets",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "LookupDateRangePeriod",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "ExtractMonthlyRefreshAnalyticsDatasets",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {
+											"DateRangePeriod": {
+												"value": "@activity('LookupDateRangePeriod').output.firstRow.DateRangePeriod",
+												"type": "Expression"
+											}
+										}
+									}
+								},
+								{
+									"name": "LoadMonthlyRefreshAnalyticsDatasets",
+									"type": "ExecutePipeline",
+									"dependsOn": [
+										{
+											"activity": "ExtractMonthlyRefreshAnalyticsDatasets",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"pipeline": {
+											"referenceName": "LoadMonthlyRefreshAnalyticsDatasets",
+											"type": "PipelineReference"
+										},
+										"waitOnCompletion": true,
+										"parameters": {}
+									}
+								},
+								{
+									"name": "LookupDateRangePeriod",
+									"type": "Lookup",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "SELECT CONCAT(CONVERT(char(8), DATEADD(DAY, 1, EOMONTH('@{variables('period')}', -1)), 112), '_', CONVERT(char(8), EOMONTH('@{variables('period')}'), 112)) AS DateRangePeriod",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"dataset": {
+											"referenceName": "SqlDataset",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									}
+								}
+							]
+						}
+					},
+					{
+						"name": "LookupEndOfMonth",
+						"type": "Lookup",
+						"dependsOn": [
+							{
+								"activity": "If Period equals yesterday",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderQuery": {
+									"value": "SELECT CONVERT(CHAR(8), EOMONTH('@{variables('period')}'), 112) AS EndOfMonth",
+									"type": "Expression"
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "SqlDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						}
+					}
+				],
+				"concurrency": 1,
+				"parameters": {
+					"Period": {
+						"type": "string",
+						"defaultValue": "yesterday"
+					}
+				},
+				"variables": {
+					"period": {
+						"type": "String"
+					},
+					"test": {
+						"type": "Boolean"
+					}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/ExtractMonthlyRefreshAnalyticsDatasets')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/RefreshWhoIsVisiting')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -1573,41 +1923,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/RefreshWhoIsVisitingByPeriod')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/SiteImproveDailyTrigger')]",
-			"type": "Microsoft.DataFactory/factories/triggers",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"runtimeState": "Started",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "RefreshSiteImprove",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2020-07-25T00:00:00Z",
-						"timeZone": "UTC",
-						"schedule": {
-							"hours": [
-								9
-							]
-						}
-					}
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/RefreshSiteImprove')]"
 			]
 		},
 		{
@@ -1697,7 +2012,8 @@
 				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/RefreshByDateRangePeriod')]"
+				"[concat(variables('factoryId'), '/pipelines/RefreshByDateRangePeriod')]",
+				"[concat(variables('factoryId'), '/pipelines/RefreshByDatePeriod')]"
 			]
 		},
 		{

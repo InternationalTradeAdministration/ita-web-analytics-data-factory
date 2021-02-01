@@ -515,9 +515,6 @@
 				"parameters": {
 					"Period": {
 						"type": "string"
-					},
-					"FileName": {
-						"type": "string"
 					}
 				},
 				"folder": {
@@ -529,11 +526,11 @@
 					"location": {
 						"type": "AzureBlobStorageLocation",
 						"fileName": {
-							"value": "@{dataset().FileName}",
+							"value": "@{dataset().Period}.csv",
 							"type": "Expression"
 						},
 						"folderPath": {
-							"value": "analytics_page_metrics/@{dataset().Period}",
+							"value": "analytics_page_metrics",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"

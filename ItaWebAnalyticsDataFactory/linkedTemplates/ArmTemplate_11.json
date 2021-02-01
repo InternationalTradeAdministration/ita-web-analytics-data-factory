@@ -13,6 +13,191 @@
 	},
 	"resources": [
 		{
+			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsDatasetsByDatePeriod')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ExecuteExtractAnalyticsCountryMetrics",
+						"type": "ExecutePipeline",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsCountryMetricsByPeriod",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.DatePeriod",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ExecuteExtractAnalyticsRegionMetrics",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsCountryMetrics",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsRegionMetricsByPeriod",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@{convertFromUtc(adddays(utcnow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ExecuteExtractAnalyticsPageMetricsByPeriod",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsRegionMetrics",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsPageMetricsByPeriod",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.DatePeriod",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ExecuteExtractAnalyticsPages",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsPageMetricsByPeriod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsPages",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteExtractAnalyticsGroupsAnalyticsPages",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsPages",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsGroupsAnalyticsPages",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "ExecuteExtractAnalyticsEventTrackingMetrics",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsEventTrackingPages",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsEventTrackingMetricsByPeriod",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.DatePeriod",
+									"type": "Expression"
+								}
+							}
+						}
+					},
+					{
+						"name": "ExecuteExtractAnalyticsEventTrackingPages",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsGroupsAnalyticsPages",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "ExtractAnalyticsEventTrackingPagesByPeriod",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"Period": {
+									"value": "@pipeline().parameters.DatePeriod",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"concurrency": 1,
+				"parameters": {
+					"DatePeriod": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": []
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/ExtractAnalyticsHistoricalMetricsByPeriod')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -23,7 +208,7 @@
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "Delete Period Folder",
+								"activity": "PeriodFolderExists",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -236,16 +421,9 @@
 						}
 					},
 					{
-						"name": "Delete Period Folder",
-						"type": "Delete",
-						"dependsOn": [
-							{
-								"activity": "Prevent Delete from failing when folder is empty",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"name": "PeriodFolder",
+						"type": "GetMetadata",
+						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
@@ -260,74 +438,73 @@
 								"type": "DatasetReference",
 								"parameters": {
 									"Period": {
-										"value": "@{pipeline().parameters.Period}",
+										"value": "@pipeline().parameters.Period",
 										"type": "Expression"
 									}
 								}
 							},
-							"enableLogging": false,
+							"fieldList": [
+								"exists"
+							],
 							"storeSettings": {
 								"type": "AzureBlobStorageReadSettings",
 								"recursive": true
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
 							}
 						}
 					},
 					{
-						"name": "Prevent Delete from failing when folder is empty",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false
-						},
-						"inputs": [
+						"name": "PeriodFolderExists",
+						"type": "IfCondition",
+						"dependsOn": [
 							{
-								"referenceName": "AnalyticsGroupsCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {}
+								"activity": "PeriodFolder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
-						"outputs": [
-							{
-								"referenceName": "AnalyticsHistoricalMetricsByPeriodCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {
-									"Period": {
-										"value": "@{pipeline().parameters.Period}",
-										"type": "Expression"
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('PeriodFolder').output.exists, true)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "DeletePeriodFolder",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
 									},
-									"FileName": "filler.csv"
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "AnalyticsHistoricalMetricsByPeriodFolderDataset",
+											"type": "DatasetReference",
+											"parameters": {
+												"Period": {
+													"value": "@pipeline().parameters.Period",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true
+										}
+									}
 								}
-							}
-						]
+							]
+						}
 					}
 				],
 				"parameters": {
@@ -620,7 +797,7 @@
 						"type": "Copy",
 						"dependsOn": [
 							{
-								"activity": "Delete Period Folder",
+								"activity": "PeriodFolderExists",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -815,16 +992,9 @@
 						}
 					},
 					{
-						"name": "Delete Period Folder",
-						"type": "Delete",
-						"dependsOn": [
-							{
-								"activity": "Prevent Delete from failing when folder is empty",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"name": "PeriodFolder",
+						"type": "GetMetadata",
+						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
@@ -839,74 +1009,73 @@
 								"type": "DatasetReference",
 								"parameters": {
 									"Period": {
-										"value": "@{pipeline().parameters.Period}",
+										"value": "@pipeline().parameters.Period",
 										"type": "Expression"
 									}
 								}
 							},
-							"enableLogging": false,
+							"fieldList": [
+								"exists"
+							],
 							"storeSettings": {
 								"type": "AzureBlobStorageReadSettings",
 								"recursive": true
+							},
+							"formatSettings": {
+								"type": "DelimitedTextReadSettings"
 							}
 						}
 					},
 					{
-						"name": "Prevent Delete from failing when folder is empty",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false
-						},
-						"inputs": [
+						"name": "PeriodFolderExists",
+						"type": "IfCondition",
+						"dependsOn": [
 							{
-								"referenceName": "AnalyticsGroupsCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {}
+								"activity": "PeriodFolder",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
-						"outputs": [
-							{
-								"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {
-									"Period": {
-										"value": "@{pipeline().parameters.Period}",
-										"type": "Expression"
+						"userProperties": [],
+						"typeProperties": {
+							"expression": {
+								"value": "@equals(activity('PeriodFolder').output.exists, true)",
+								"type": "Expression"
+							},
+							"ifTrueActivities": [
+								{
+									"name": "DeletePeriodFolder",
+									"type": "Delete",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
 									},
-									"FileName": "filler.csv"
+									"userProperties": [],
+									"typeProperties": {
+										"dataset": {
+											"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodFolderDataset",
+											"type": "DatasetReference",
+											"parameters": {
+												"Period": {
+													"value": "@pipeline().parameters.Period",
+													"type": "Expression"
+												}
+											}
+										},
+										"enableLogging": false,
+										"storeSettings": {
+											"type": "AzureBlobStorageReadSettings",
+											"recursive": true
+										}
+									}
 								}
-							}
-						]
+							]
+						}
 					}
 				],
 				"parameters": {
@@ -2635,19 +2804,29 @@
 						"userProperties": [],
 						"typeProperties": {
 							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": false,
-									"wildcardFileName": "date_range_periods.csv",
-									"enablePartitionDiscovery": false
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[web_analytics].[generate_date_range_periods]",
+								"storedProcedureParameters": {
+									"endDate": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.EndDate",
+											"type": "Expression"
+										}
+									},
+									"startDate": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.StartDate",
+											"type": "Expression"
+										}
+									}
 								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
 							},
 							"dataset": {
-								"referenceName": "RootFolderDataset",
+								"referenceName": "SqlDataset",
 								"type": "DatasetReference",
 								"parameters": {}
 							},
@@ -2696,6 +2875,14 @@
 						}
 					}
 				],
+				"parameters": {
+					"StartDate": {
+						"type": "string"
+					},
+					"EndDate": {
+						"type": "string"
+					}
+				},
 				"folder": {
 					"name": "analytics"
 				},
@@ -2711,39 +2898,6 @@
 			"apiVersion": "2018-06-01",
 			"properties": {
 				"activities": [
-					{
-						"name": "LookupDateRangePeriods",
-						"type": "Lookup",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": false,
-									"wildcardFileName": "date_range_periods.csv",
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"dataset": {
-								"referenceName": "RootFolderDataset",
-								"type": "DatasetReference",
-								"parameters": {}
-							},
-							"firstRowOnly": false
-						}
-					},
 					{
 						"name": "DateRangePeriod",
 						"type": "ForEach",
@@ -2761,7 +2915,7 @@
 								"value": "@activity('LookupDateRangePeriods').output.value",
 								"type": "Expression"
 							},
-							"isSequential": false,
+							"isSequential": true,
 							"activities": [
 								{
 									"name": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
@@ -2784,8 +2938,59 @@
 								}
 							]
 						}
+					},
+					{
+						"name": "LookupDateRangePeriods",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "AzureSqlSource",
+								"sqlReaderStoredProcedureName": "[[web_analytics].[generate_date_range_periods]",
+								"storedProcedureParameters": {
+									"endDate": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.EndDate",
+											"type": "Expression"
+										}
+									},
+									"startDate": {
+										"type": "String",
+										"value": {
+											"value": "@pipeline().parameters.StartDate",
+											"type": "Expression"
+										}
+									}
+								},
+								"queryTimeout": "02:00:00",
+								"partitionOption": "None"
+							},
+							"dataset": {
+								"referenceName": "SqlDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
 					}
 				],
+				"parameters": {
+					"StartDate": {
+						"type": "string"
+					},
+					"EndDate": {
+						"type": "string"
+					}
+				},
 				"folder": {
 					"name": "analytics"
 				},
@@ -3063,75 +3268,6 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod')]"
-			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/RefreshByDatePeriod')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "ExecuteExtractAnalyticsCountryMetrics",
-						"type": "ExecutePipeline",
-						"dependsOn": [],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "ExtractAnalyticsCountryMetrics",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "ExecuteExtractAnalyticsRegionMetrics",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractAnalyticsCountryMetrics",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "ExtractAnalyticsRegionMetrics",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
-						"name": "ExecuteExtractAnalyticsPageMetrics",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractAnalyticsRegionMetrics",
-								"dependencyConditions": [
-									"Completed"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "ExtractAnalyticsPageMetrics",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					}
-				],
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsRegionMetrics')]"
 			]
 		}
 	]
