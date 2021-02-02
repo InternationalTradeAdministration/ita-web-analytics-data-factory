@@ -17,7 +17,7 @@
 		"type": "RestResource",
 		"typeProperties": {
 			"relativeUrl": {
-				"value": "v2/sites/17536213616/analytics/visitors/countries?@{dataset().QueryString}&filter_id=1717697832",
+				"value": "v2/sites/17536213616/analytics/visitors/countries?page=1&page_size=1000&filter_id=1717697832&@{dataset().QueryString}",
 				"type": "Expression"
 			}
 		},

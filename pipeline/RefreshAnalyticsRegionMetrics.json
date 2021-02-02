@@ -1,0 +1,63 @@
+{
+	"name": "RefreshAnalyticsRegionMetrics",
+	"properties": {
+		"activities": [
+			{
+				"name": "LoadAnalyticsRegionMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExtractAnalyticsRegionMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "LoadAnalyticsRegionMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExtractAnalyticsRegionMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsRegionMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"StartDate": {
+							"value": "@pipeline().parameters.StartDate",
+							"type": "Expression"
+						},
+						"EndDate": {
+							"value": "@pipeline().parameters.EndDate",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"StartDate": {
+				"type": "string"
+			},
+			"EndDate": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

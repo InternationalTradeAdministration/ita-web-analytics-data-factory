@@ -5,14 +5,7 @@
 			{
 				"name": "ExtractByPeriod",
 				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "Delete Period Folder",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
 					"retry": 1,
@@ -156,7 +149,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"QueryString": {
-								"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}",
+								"value": "period=@{pipeline().parameters.Period}",
 								"type": "Expression"
 							}
 						}
@@ -164,87 +157,21 @@
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsCountryMetricsByPeriodCsvDataset",
+						"referenceName": "AnalyticsCountryMetricsByGroupIdPeriodCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {
 								"value": "@{pipeline().parameters.Period}",
 								"type": "Expression"
 							},
-							"FileName": {
-								"value": "analytics_group_1.csv",
-								"type": "Expression"
-							}
+							"AnalyticsGroupId": "1"
 						}
 					}
 				]
 			},
 			{
-				"name": "ExtractByPeriodGroupId",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExtractByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsCountryMetricsByGroupId",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@{pipeline().parameters.Period}",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "Delete Period Folder",
-				"type": "Delete",
-				"dependsOn": [
-					{
-						"activity": "Prevent Delete from failing when folder is empty",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "AnalyticsCountryMetricsByPeriodFolderDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
-							}
-						}
-					},
-					"enableLogging": false,
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true
-					}
-				}
-			},
-			{
-				"name": "Prevent Delete from failing when folder is empty",
-				"type": "Copy",
+				"name": "LookupAnalyticsGroups",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -265,38 +192,57 @@
 							"type": "DelimitedTextReadSettings"
 						}
 					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false
-				},
-				"inputs": [
-					{
+					"dataset": {
 						"referenceName": "AnalyticsGroupsCsvDataset",
 						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "AnalyticsGroup",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "LookupAnalyticsGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
 					}
 				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsCountryMetricsByPeriodCsvDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
-							},
-							"FileName": "filler.csv"
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupAnalyticsGroups').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "Execute ExtractAnalyticsCountryMetricsByGroupIdPeriod",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsCountryMetricsByGroupIdPeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@pipeline().parameters.Period",
+										"type": "Expression"
+									},
+									"AnalyticsGroupId": {
+										"value": "@item().id",
+										"type": "Expression"
+									}
+								}
+							}
 						}
-					}
-				]
+					]
+				}
 			}
 		],
 		"concurrency": 3,

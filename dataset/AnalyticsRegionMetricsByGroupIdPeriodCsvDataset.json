@@ -1,5 +1,5 @@
 {
-	"name": "AnalyticsCountryMetricsByPeriodFolderDataset",
+	"name": "AnalyticsRegionMetricsByGroupIdPeriodCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
@@ -7,6 +7,9 @@
 		},
 		"parameters": {
 			"Period": {
+				"type": "string"
+			},
+			"AnalyticsGroupId": {
 				"type": "string"
 			}
 		},
@@ -18,8 +21,12 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@{dataset().Period}.csv",
+					"type": "Expression"
+				},
 				"folderPath": {
-					"value": "analytics_country_metrics/@{dataset().Period}",
+					"value": "analytics_region_metrics/analytics_group_@{dataset().AnalyticsGroupId}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"

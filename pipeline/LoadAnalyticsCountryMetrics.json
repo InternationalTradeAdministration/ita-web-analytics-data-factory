@@ -1,0 +1,158 @@
+{
+	"name": "LoadAnalyticsCountryMetrics",
+	"properties": {
+		"activities": [
+			{
+				"name": "LoadAnalyticsCountryMetrics",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"wildcardFolderPath": {
+								"value": "analytics_country_metrics",
+								"type": "Expression"
+							},
+							"wildcardFileName": "*.csv",
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "AzureSqlSink",
+						"preCopyScript": {
+							"value": "TRUNCATE TABLE [web_analytics].[analytics_country_metrics]",
+							"type": "Expression"
+						},
+						"disableMetricsCollection": false
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"name": "analytics_group_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "date",
+									"type": "String"
+								},
+								"sink": {
+									"name": "date",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "country_id",
+									"type": "String"
+								},
+								"sink": {
+									"name": "country_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"name": "country_code",
+									"type": "String"
+								},
+								"sink": {
+									"name": "country_code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "country_name",
+									"type": "String"
+								},
+								"sink": {
+									"name": "country_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"name": "is_region",
+									"type": "String"
+								},
+								"sink": {
+									"name": "is_region",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"name": "is_unknown",
+									"type": "String"
+								},
+								"sink": {
+									"name": "is_unknown",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
+									"name": "bounce_rate",
+									"type": "String"
+								},
+								"sink": {
+									"name": "bounce_rate",
+									"type": "Decimal"
+								}
+							},
+							{
+								"source": {
+									"name": "visits",
+									"type": "String"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int32"
+								}
+							}
+						]
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "RootFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsCountryMetricsSqlDataset",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}

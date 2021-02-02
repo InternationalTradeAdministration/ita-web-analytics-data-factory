@@ -1,0 +1,120 @@
+{
+	"name": "RefreshAnalyticsRegionMetricsByGroupId",
+	"properties": {
+		"activities": [
+			{
+				"name": "GenerateDatePeriods",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[web_analytics].[generate_date_periods]",
+						"storedProcedureParameters": {
+							"initial_date": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.StartDate",
+									"type": "Expression"
+								}
+							}
+						},
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"dataset": {
+						"referenceName": "SqlDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "DatePeriod",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GenerateDatePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GenerateDatePeriods').output.value",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "ExtractAnalyticsRegionMetricsByGroupIdPeriod",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsRegionMetricsByGroupIdPeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@item().date_period",
+										"type": "Expression"
+									},
+									"AnalyticsGroupId": {
+										"value": "@pipeline().parameters.AnalyticsGroupId",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "LoadAnalyticsRegionMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DatePeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "LoadAnalyticsRegionMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"StartDate": {
+				"type": "string",
+				"defaultValue": "20200203"
+			},
+			"AnalyticsGroupId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}

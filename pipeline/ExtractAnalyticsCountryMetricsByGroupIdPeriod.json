@@ -1,9 +1,9 @@
 {
-	"name": "ExtractAnalyticsRegionMetricsByPeriod",
+	"name": "ExtractAnalyticsCountryMetricsByGroupIdPeriod",
 	"properties": {
 		"activities": [
 			{
-				"name": "ExtractByPeriod",
+				"name": "ExtractAnalyticsCountryMetrics",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
@@ -20,7 +20,10 @@
 						"additionalColumns": [
 							{
 								"name": "analytics_group_id",
-								"value": "1"
+								"value": {
+									"value": "@pipeline().parameters.AnalyticsGroupId",
+									"type": "Expression"
+								}
 							},
 							{
 								"name": "date",
@@ -32,7 +35,10 @@
 						],
 						"httpRequestTimeout": "00:01:40",
 						"requestInterval": "00.00:00:00.010",
-						"requestMethod": "GET"
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
 					},
 					"sink": {
 						"type": "DelimitedTextSink",
@@ -54,7 +60,7 @@
 									"path": "['id']"
 								},
 								"sink": {
-									"name": "region_id",
+									"name": "country_id",
 									"type": "Int64"
 								}
 							},
@@ -69,6 +75,33 @@
 							},
 							{
 								"source": {
+									"path": "['country_code']"
+								},
+								"sink": {
+									"name": "country_code",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['country_name']"
+								},
+								"sink": {
+									"name": "country_name",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "['is_region']"
+								},
+								"sink": {
+									"name": "is_region",
+									"type": "Boolean"
+								}
+							},
+							{
+								"source": {
 									"path": "['is_unknown']"
 								},
 								"sink": {
@@ -78,16 +111,16 @@
 							},
 							{
 								"source": {
-									"path": "['region']"
+									"path": "['regions']"
 								},
 								"sink": {
-									"name": "region",
-									"type": "String"
+									"name": "regions",
+									"type": "Int32"
 								}
 							},
 							{
 								"source": {
-									"path": "['visits_of_parent']"
+									"path": "['visits']"
 								},
 								"sink": {
 									"name": "visits",
@@ -111,15 +144,6 @@
 									"name": "date",
 									"type": "String"
 								}
-							},
-							{
-								"source": {
-									"path": "$['country_id']"
-								},
-								"sink": {
-									"name": "country_id",
-									"type": "Int64"
-								}
 							}
 						],
 						"collectionReference": "$['items']"
@@ -127,110 +151,40 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsRegionMetricsRestDataset",
+						"referenceName": "AnalyticsCountryMetricsRestDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"QueryString": {
-								"value": "period=@{pipeline().parameters.Period}",
+								"value": "period=@{pipeline().parameters.Period}&group_id=@{pipeline().parameters.AnalyticsGroupId}",
 								"type": "Expression"
-							},
-							"CountryId": "3229"
+							}
 						}
 					}
 				],
 				"outputs": [
 					{
-						"referenceName": "AnalyticsRegionMetricsByGroupIdPeriodCsvDataset",
+						"referenceName": "AnalyticsCountryMetricsByGroupIdPeriodCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
 							"Period": {
 								"value": "@{pipeline().parameters.Period}",
 								"type": "Expression"
 							},
-							"AnalyticsGroupId": "1"
+							"AnalyticsGroupId": {
+								"value": "@pipeline().parameters.AnalyticsGroupId",
+								"type": "Expression"
+							}
 						}
 					}
 				]
-			},
-			{
-				"name": "LookupAnalyticsGroups",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"dataset": {
-						"referenceName": "AnalyticsGroupsCsvDataset",
-						"type": "DatasetReference"
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
-				"name": "AnalyticsGroup",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "LookupAnalyticsGroups",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('LookupAnalyticsGroups').output.value",
-						"type": "Expression"
-					},
-					"isSequential": false,
-					"activities": [
-						{
-							"name": "Execute ExtractAnalyticsRegionMetricsByGroupIdPeriod",
-							"type": "ExecutePipeline",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "ExtractAnalyticsRegionMetricsByGroupIdPeriod",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"Period": {
-										"value": "@pipeline().parameters.Period",
-										"type": "Expression"
-									},
-									"AnalyticsGroupId": {
-										"value": "@item().id",
-										"type": "Expression"
-									}
-								}
-							}
-						}
-					]
-				}
 			}
 		],
-		"concurrency": 10,
+		"concurrency": 3,
 		"parameters": {
 			"Period": {
+				"type": "string"
+			},
+			"AnalyticsGroupId": {
 				"type": "string"
 			}
 		},

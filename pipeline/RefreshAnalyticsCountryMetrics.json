@@ -1,0 +1,63 @@
+{
+	"name": "RefreshAnalyticsCountryMetrics",
+	"properties": {
+		"activities": [
+			{
+				"name": "LoadAnalyticsCountryMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "ExtractAnalyticsCountryMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "LoadAnalyticsCountryMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "ExtractAnalyticsCountryMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsCountryMetrics",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"StartDate": {
+							"value": "@pipeline().parameters.StartDate",
+							"type": "Expression"
+						},
+						"EndDate": {
+							"value": "@pipeline().parameters.EndDate",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"StartDate": {
+				"type": "string"
+			},
+			"EndDate": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}
