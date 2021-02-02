@@ -147,7 +147,7 @@
 				]
 			}
 		],
-		"concurrency": 8,
+		"concurrency": 15,
 		"parameters": {
 			"AnalyticsGroupId": {
 				"type": "string"
