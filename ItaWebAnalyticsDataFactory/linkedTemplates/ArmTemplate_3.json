@@ -13,44 +13,6 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsPageMetricsCsvDatasetByPeriod')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorageLinkedService",
-					"type": "LinkedServiceReference"
-				},
-				"parameters": {
-					"Period": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "analytics"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@{dataset().Period}.csv",
-							"type": "Expression"
-						},
-						"folderPath": "analytics_page_metrics",
-						"container": "ita-web-analytics"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/AnalyticsPageMetricsCsvDatasetByPeriodFilterId')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -423,7 +385,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsRegionMetricsByPeriodCsvDataset')]",
+			"name": "[concat(parameters('factoryName'), '/AnalyticsRegionMetricsByGroupIdPeriodCsvDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -435,7 +397,7 @@
 					"Period": {
 						"type": "string"
 					},
-					"FileName": {
+					"AnalyticsGroupId": {
 						"type": "string"
 					}
 				},
@@ -448,11 +410,11 @@
 					"location": {
 						"type": "AzureBlobStorageLocation",
 						"fileName": {
-							"value": "@{dataset().FileName}",
+							"value": "@{dataset().Period}.csv",
 							"type": "Expression"
 						},
 						"folderPath": {
-							"value": "analytics_region_metrics/@{dataset().Period}",
+							"value": "analytics_region_metrics/analytics_group_@{dataset().AnalyticsGroupId}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
@@ -517,7 +479,8 @@
 						"type": "string"
 					},
 					"CountryId": {
-						"type": "string"
+						"type": "string",
+						"defaultValue": "3229"
 					}
 				},
 				"folder": {
@@ -527,7 +490,7 @@
 				"type": "RestResource",
 				"typeProperties": {
 					"relativeUrl": {
-						"value": "v2/sites/17536213616/analytics/visitors/countries/@{dataset().CountryId}/regions?@{dataset().QueryString}&filter_id=1717697832",
+						"value": "v2/sites/17536213616/analytics/visitors/countries/@{dataset().CountryId}/regions?page=1&page_size=1000&filter_id=1717697832&@{dataset().QueryString}",
 						"type": "Expression"
 					}
 				},
@@ -664,6 +627,28 @@
 					}
 				},
 				"schema": []
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AnalyticsTrafficSourcesMetricsSqlDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureSqlDatabaseLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [],
+				"typeProperties": {
+					"schema": "web_analytics",
+					"table": "analytics_traffic_sources_metrics"
+				}
 			},
 			"dependsOn": []
 		}
