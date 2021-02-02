@@ -11638,32 +11638,11 @@
 						}
 					},
 					{
-						"name": "ExecuteExtractMonthlyAnalyticsHistoricalMetrics",
-						"type": "ExecutePipeline",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"userProperties": [],
-						"typeProperties": {
-							"pipeline": {
-								"referenceName": "ExtractMonthlyAnalyticsHistoricalMetrics",
-								"type": "PipelineReference"
-							},
-							"waitOnCompletion": true,
-							"parameters": {}
-						}
-					},
-					{
 						"name": "ExecuteExtractMonthlyAnalyticsOutboundLinkMetrics",
 						"type": "ExecutePipeline",
 						"dependsOn": [
 							{
-								"activity": "ExecuteExtractMonthlyAnalyticsHistoricalMetrics",
+								"activity": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -11725,7 +11704,6 @@
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsHistoricalMetricsByPeriod')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsTrafficSourcesMetricsByPeriod')]",
-				"[concat(variables('factoryId'), '/pipelines/ExtractMonthlyAnalyticsHistoricalMetrics')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractMonthlyAnalyticsExternalReferringDomainMetricsByPeriod')]"
 			]
