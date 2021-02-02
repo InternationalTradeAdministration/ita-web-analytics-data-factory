@@ -179,7 +179,7 @@
 				]
 			}
 		],
-		"concurrency": 15,
+		"concurrency": 20,
 		"parameters": {
 			"Period": {
 				"type": "string"
