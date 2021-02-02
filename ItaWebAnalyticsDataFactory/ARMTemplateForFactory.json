@@ -5145,6 +5145,7 @@
 								"value": "@activity('LookupAnalyticsFilters').output.value",
 								"type": "Expression"
 							},
+							"batchCount": 15,
 							"activities": [
 								{
 									"name": "ExtractAnalyticsHistoricalMetrics",
@@ -5415,7 +5416,7 @@
 								"value": "@activity('LookupAnalyticsGroups').output.value",
 								"type": "Expression"
 							},
-							"batchCount": 2,
+							"batchCount": 4,
 							"activities": [
 								{
 									"name": "ExtractAnalyticsHistoricalMetrics",
@@ -7768,7 +7769,7 @@
 								"value": "@activity('LookupAnalyticsGroups').output.value",
 								"type": "Expression"
 							},
-							"batchCount": 2,
+							"batchCount": 4,
 							"activities": [
 								{
 									"name": "ExtractAnalyticsTrafficSourcesMetrics",
