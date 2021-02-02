@@ -2394,7 +2394,7 @@
 						]
 					}
 				],
-				"concurrency": 8,
+				"concurrency": 10,
 				"parameters": {
 					"Period": {
 						"type": "string"
@@ -2564,7 +2564,7 @@
 						]
 					}
 				],
-				"concurrency": 8,
+				"concurrency": 15,
 				"parameters": {
 					"AnalyticsGroupId": {
 						"type": "string"
@@ -2733,7 +2733,7 @@
 						]
 					}
 				],
-				"concurrency": 8,
+				"concurrency": 10,
 				"parameters": {
 					"Period": {
 						"type": "string"

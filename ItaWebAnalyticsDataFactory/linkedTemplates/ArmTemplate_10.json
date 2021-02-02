@@ -1444,6 +1444,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 30,
 							"activities": [
 								{
 									"name": "ExecuteExtractByGroupId",
@@ -1543,6 +1544,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 30,
 							"activities": [
 								{
 									"name": "ExecuteExtractByGroupId",
@@ -1633,6 +1635,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 30,
 							"activities": [
 								{
 									"name": "ExecuteExtractByGroupId",

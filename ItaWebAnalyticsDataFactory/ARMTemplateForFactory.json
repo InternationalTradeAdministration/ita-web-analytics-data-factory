@@ -10255,6 +10255,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 30,
 							"activities": [
 								{
 									"name": "ExecuteExtractByGroupId",
@@ -10455,7 +10456,7 @@
 						]
 					}
 				],
-				"concurrency": 8,
+				"concurrency": 10,
 				"parameters": {
 					"Period": {
 						"type": "string"
@@ -10840,6 +10841,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 30,
 							"activities": [
 								{
 									"name": "ExecuteExtractByGroupId",
@@ -11029,7 +11031,7 @@
 						]
 					}
 				],
-				"concurrency": 8,
+				"concurrency": 15,
 				"parameters": {
 					"AnalyticsGroupId": {
 						"type": "string"
@@ -11194,6 +11196,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 30,
 							"activities": [
 								{
 									"name": "ExecuteExtractByGroupId",
@@ -11394,7 +11397,7 @@
 						]
 					}
 				],
-				"concurrency": 8,
+				"concurrency": 10,
 				"parameters": {
 					"Period": {
 						"type": "string"
