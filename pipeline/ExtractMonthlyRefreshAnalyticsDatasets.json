@@ -48,31 +48,11 @@
 				}
 			},
 			{
-				"name": "ExecuteExtractMonthlyAnalyticsHistoricalMetrics",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractMonthlyAnalyticsHistoricalMetrics",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true
-				}
-			},
-			{
 				"name": "ExecuteExtractMonthlyAnalyticsOutboundLinkMetrics",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractMonthlyAnalyticsHistoricalMetrics",
+						"activity": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
 						"dependencyConditions": [
 							"Succeeded"
 						]
