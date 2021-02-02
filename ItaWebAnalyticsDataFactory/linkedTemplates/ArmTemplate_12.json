@@ -6,6 +6,10 @@
 			"type": "string",
 			"metadata": "Data Factory name",
 			"defaultValue": "ItaWebAnalyticsDataFactory"
+		},
+		"SiteImproveDailyTrigger_properties_RefreshSiteImprove_parameters_Period": {
+			"type": "string",
+			"defaultValue": "yesterday"
 		}
 	},
 	"variables": {
@@ -810,7 +814,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"expression": {
-								"value": "@equals(pipeline().parameters.Period, 'yesterday')",
+								"value": "@or(equals(trim(pipeline().parameters.Period), 'yesterday'),empty(trim(pipeline().parameters.Period)))",
 								"type": "Expression"
 							},
 							"ifFalseActivities": [
@@ -1649,7 +1653,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"expression": {
-								"value": "@equals(pipeline().parameters.Period, 'yesterday')",
+								"value": "@or(equals(trim(pipeline().parameters.Period), 'yesterday'),empty(trim(pipeline().parameters.Period)))",
 								"type": "Expression"
 							},
 							"ifFalseActivities": [
@@ -1894,6 +1898,43 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/SiteImproveDailyTrigger')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "RefreshSiteImprove",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"Period": "[parameters('SiteImproveDailyTrigger_properties_RefreshSiteImprove_parameters_Period')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2021-02-02T00:00:00",
+						"timeZone": "Eastern Standard Time",
+						"schedule": {
+							"hours": [
+								5
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/RefreshSiteImprove')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/WhoIsVisitingDailyTrigger')]",
 			"type": "Microsoft.DataFactory/factories/triggers",
 			"apiVersion": "2018-06-01",
@@ -1914,14 +1955,11 @@
 					"recurrence": {
 						"frequency": "Day",
 						"interval": 1,
-						"startTime": "2021-01-04T08:00:00Z",
-						"timeZone": "UTC",
+						"startTime": "2021-01-04T08:00:00",
+						"timeZone": "Eastern Standard Time",
 						"schedule": {
-							"minutes": [
-								0
-							],
 							"hours": [
-								10
+								5
 							]
 						}
 					}

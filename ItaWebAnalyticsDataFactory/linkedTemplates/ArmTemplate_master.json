@@ -38,6 +38,10 @@
 			"type": "string",
 			"defaultValue": "https://iptrack.io"
 		},
+		"SiteImproveDailyTrigger_properties_RefreshSiteImprove_parameters_Period": {
+			"type": "string",
+			"defaultValue": "yesterday"
+		},
 		"containerUri": {
 			"type": "string",
 			"metadata": "URI to storage account containing linked ARM templates"
@@ -320,6 +324,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"SiteImproveDailyTrigger_properties_RefreshSiteImprove_parameters_Period": {
+						"value": "[parameters('SiteImproveDailyTrigger_properties_RefreshSiteImprove_parameters_Period')]"
 					}
 				}
 			},
