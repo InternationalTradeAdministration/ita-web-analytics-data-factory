@@ -5651,6 +5651,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 30,
 							"activities": [
 								{
 									"name": "Execute ExtractAnalyticsCountryMetricsByGroupIdPeriod",

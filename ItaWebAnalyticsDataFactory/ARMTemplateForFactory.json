@@ -2957,7 +2957,7 @@
 						]
 					}
 				],
-				"concurrency": 15,
+				"concurrency": 20,
 				"parameters": {
 					"Period": {
 						"type": "string"
@@ -3198,6 +3198,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 30,
 							"activities": [
 								{
 									"name": "Execute ExtractAnalyticsCountryMetricsByGroupIdPeriod",
@@ -7308,6 +7309,7 @@
 								"type": "Expression"
 							},
 							"isSequential": false,
+							"batchCount": 30,
 							"activities": [
 								{
 									"name": "Execute ExtractAnalyticsRegionMetricsByGroupIdPeriod",
