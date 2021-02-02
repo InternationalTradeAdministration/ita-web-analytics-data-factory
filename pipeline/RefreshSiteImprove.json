@@ -155,7 +155,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(pipeline().parameters.Period, 'yesterday')",
+						"value": "@or(equals(trim(pipeline().parameters.Period), 'yesterday'),empty(trim(pipeline().parameters.Period)))",
 						"type": "Expression"
 					},
 					"ifFalseActivities": [

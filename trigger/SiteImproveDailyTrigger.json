@@ -1,13 +1,16 @@
 {
-	"name": "WhoIsVisitingDailyTrigger",
+	"name": "SiteImproveDailyTrigger",
 	"properties": {
 		"annotations": [],
 		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
-					"referenceName": "RefreshWhoIsVisiting",
+					"referenceName": "RefreshSiteImprove",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"Period": "yesterday"
 				}
 			}
 		],
@@ -16,7 +19,7 @@
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2021-01-04T08:00:00",
+				"startTime": "2021-02-02T00:00:00",
 				"timeZone": "Eastern Standard Time",
 				"schedule": {
 					"hours": [
