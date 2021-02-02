@@ -31,6 +31,13 @@
 									"value": "@{pipeline().parameters.Period}",
 									"type": "Expression"
 								}
+							},
+							{
+								"name": "country_id",
+								"value": {
+									"value": "@pipeline().parameters.CountryId",
+									"type": "Expression"
+								}
 							}
 						],
 						"httpRequestTimeout": "00:01:40",
@@ -168,6 +175,9 @@
 				"type": "string"
 			},
 			"AnalyticsGroupId": {
+				"type": "string"
+			},
+			"CountryId": {
 				"type": "string"
 			}
 		},
