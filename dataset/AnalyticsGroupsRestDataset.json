@@ -12,7 +12,7 @@
 		"type": "RestResource",
 		"typeProperties": {
 			"relativeUrl": {
-				"value": "v2/sites/17536213616/analytics/overview/groups?page=1&page_size=1000&period=20200203_@{convertFromUtc(adddays(utcnow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}",
+				"value": "v2/sites/17536213616/analytics/overview/groups?page=1&page_size=1000&period=@{convertFromUtc(adddays(utcnow(), -1), 'Eastern Standard Time', 'yyyyMMdd')}",
 				"type": "Expression"
 			}
 		},

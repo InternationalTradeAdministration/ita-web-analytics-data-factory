@@ -1,28 +1,16 @@
 {
-	"name": "AnalyticsGroupsAnalyticsPagesCsvDataset",
+	"name": "AnalyticsGroupsAnalyticsPagesRawFolderCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
-		},
-		"parameters": {
-			"GroupId": {
-				"type": "string"
-			}
-		},
-		"folder": {
-			"name": "analytics"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "all.csv",
-				"folderPath": {
-					"value": "analytics_groups_analytics_pages/consolidated/@{dataset().GroupId}",
-					"type": "Expression"
-				},
+				"folderPath": "analytics_groups_analytics_pages/raw",
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",
@@ -30,6 +18,15 @@
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},
-		"schema": []
+		"schema": [
+			{
+				"name": "analytics_page_id",
+				"type": "String"
+			},
+			{
+				"name": "analytics_group_id",
+				"type": "String"
+			}
+		]
 	}
 }

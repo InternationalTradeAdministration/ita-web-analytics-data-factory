@@ -1,14 +1,9 @@
 {
-	"name": "AnalyticsGroupsAnalyticsPagesCsvDataset",
+	"name": "AnalyticsPagesFolderCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
-		},
-		"parameters": {
-			"GroupId": {
-				"type": "string"
-			}
 		},
 		"folder": {
 			"name": "analytics"
@@ -18,15 +13,11 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": "all.csv",
-				"folderPath": {
-					"value": "analytics_groups_analytics_pages/consolidated/@{dataset().GroupId}",
-					"type": "Expression"
-				},
+				"folderPath": "analytics_pages",
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",
-			"escapeChar": "\\",
+			"escapeChar": "\"",
 			"firstRowAsHeader": true,
 			"quoteChar": "\""
 		},

@@ -74,8 +74,65 @@
 				}
 			},
 			{
-				"name": "ExecuteExtractAnalyticsPages",
+				"name": "ExtractAnalyticsGroupsAnalyticsPagesByPeriod",
 				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "LookupAnalyticsGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsGroupsAnalyticsPagesByPeriod",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"Period": {
+							"value": "@pipeline().parameters.DatePeriod",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "DedupAnalyticsGroupsAnalyticsPages",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "ExtractAnalyticsGroupsAnalyticsPagesByPeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "DedupAnalyticsGroupsAnalyticsPages",
+						"type": "DataFlowReference"
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "LookupAnalyticsGroups",
+				"type": "Lookup",
 				"dependsOn": [
 					{
 						"activity": "ExecuteExtractAnalyticsPageMetricsByPeriod",
@@ -84,33 +141,30 @@
 						]
 					}
 				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
 				"userProperties": [],
 				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsPages",
-						"type": "PipelineReference"
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
 					},
-					"waitOnCompletion": true
-				}
-			},
-			{
-				"name": "ExecuteExtractAnalyticsGroupsAnalyticsPages",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExecuteExtractAnalyticsPages",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsGroupsAnalyticsPages",
-						"type": "PipelineReference"
+					"dataset": {
+						"referenceName": "AnalyticsGroupsCsvDataset",
+						"type": "DatasetReference"
 					},
-					"waitOnCompletion": true
+					"firstRowOnly": false
 				}
 			}
 		],

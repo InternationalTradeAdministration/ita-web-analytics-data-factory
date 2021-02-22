@@ -36,7 +36,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsPages",
+						"referenceName": "ExtractAnalyticsPagesByPeriod",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true
