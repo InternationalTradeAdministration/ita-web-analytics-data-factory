@@ -1,16 +1,27 @@
 {
-	"name": "AnalyticsGroupsAnalyticsPagesRawFolderCsvDataset",
+	"name": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Stage": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
 		},
 		"annotations": [],
 		"type": "DelimitedText",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"folderPath": "analytics_groups_analytics_pages/raw",
+				"folderPath": {
+					"value": "analytics_groups_analytics_pages/@{dataset().Stage}",
+					"type": "Expression"
+				},
 				"container": "ita-web-analytics"
 			},
 			"columnDelimiter": ",",

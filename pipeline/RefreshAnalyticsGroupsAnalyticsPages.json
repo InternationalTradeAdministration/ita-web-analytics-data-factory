@@ -1,5 +1,5 @@
 {
-	"name": "RebuildAnalyticsGroupsAnalyticsPages",
+	"name": "RefreshAnalyticsGroupsAnalyticsPages",
 	"properties": {
 		"activities": [
 			{
@@ -67,7 +67,7 @@
 						]
 					},
 					{
-						"activity": "ConsolidatedFolderExists",
+						"activity": "StagingFolderExists",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -82,13 +82,13 @@
 					"isSequential": true,
 					"activities": [
 						{
-							"name": "ExtractAnalyticsGroupsAnalyticsPagesByPeriod",
+							"name": "ExtractAnalyticsGroupsAnalyticsPagesByGroupsPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "ExtractAnalyticsGroupsAnalyticsPagesByGroupIdsPeriod",
+									"referenceName": "ExtractAnalyticsGroupsAnalyticsPagesByGroupsPeriod",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
@@ -97,7 +97,7 @@
 										"value": "@{item().date_range_period}",
 										"type": "Expression"
 									},
-									"GroupIds": {
+									"AnalyticsGroups": {
 										"value": "@activity('LookupAnalyticsGroups').output.value",
 										"type": "Expression"
 									}
@@ -121,8 +121,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "AnalyticsGroupsAnalyticsPagesRawFolderCsvDataset",
-						"type": "DatasetReference"
+						"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Stage": "raw"
+						}
 					},
 					"fieldList": [
 						"exists"
@@ -168,8 +171,11 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataset": {
-									"referenceName": "AnalyticsGroupsAnalyticsPagesRawFolderCsvDataset",
-									"type": "DatasetReference"
+									"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"Stage": "raw"
+									}
 								},
 								"enableLogging": false,
 								"storeSettings": {
@@ -212,38 +218,7 @@
 				}
 			},
 			{
-				"name": "DedupAnalyticsGroupsAnalyticsPages",
-				"type": "ExecuteDataFlow",
-				"dependsOn": [
-					{
-						"activity": "DateRangePeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataflow": {
-						"referenceName": "DedupAnalyticsGroupsAnalyticsPages",
-						"type": "DataFlowReference"
-					},
-					"compute": {
-						"coreCount": 8,
-						"computeType": "General"
-					},
-					"traceLevel": "Fine"
-				}
-			},
-			{
-				"name": "ConsolidatedFolder",
+				"name": "StagingFolder",
 				"type": "GetMetadata",
 				"dependsOn": [],
 				"policy": {
@@ -256,8 +231,11 @@
 				"userProperties": [],
 				"typeProperties": {
 					"dataset": {
-						"referenceName": "AnalyticsGroupsAnalyticsPagesConsolidatedFolderCsvDataset",
-						"type": "DatasetReference"
+						"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Stage": "staging"
+						}
 					},
 					"fieldList": [
 						"exists"
@@ -272,11 +250,11 @@
 				}
 			},
 			{
-				"name": "ConsolidatedFolderExists",
+				"name": "StagingFolderExists",
 				"type": "IfCondition",
 				"dependsOn": [
 					{
-						"activity": "ConsolidatedFolder",
+						"activity": "StagingFolder",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -285,12 +263,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"expression": {
-						"value": "@equals(activity('ConsolidatedFolder').output.exists, true)",
+						"value": "@equals(activity('StagingFolder').output.exists, true)",
 						"type": "Expression"
 					},
 					"ifTrueActivities": [
 						{
-							"name": "DeleteConsolidatedFolder",
+							"name": "DeleteStagingFolder",
 							"type": "Delete",
 							"dependsOn": [],
 							"policy": {
@@ -303,8 +281,11 @@
 							"userProperties": [],
 							"typeProperties": {
 								"dataset": {
-									"referenceName": "AnalyticsGroupsAnalyticsPagesConsolidatedFolderCsvDataset",
-									"type": "DatasetReference"
+									"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"Stage": "staging"
+									}
 								},
 								"enableLogging": false,
 								"storeSettings": {
@@ -314,6 +295,26 @@
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "PostProcessAnalyticsGroupsAnalyticsPages",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DateRangePeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PostProcessAnalyticsGroupsAnalyticsPages",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
 				}
 			}
 		],

@@ -1,5 +1,5 @@
 {
-	"name": "ExtractAnalyticsGroupsAnalyticsPagesByPeriod",
+	"name": "ResetAnalyticsGroupsAnalyticsPagesByGroupsPeriods",
 	"properties": {
 		"activities": [
 			{
@@ -83,36 +83,6 @@
 				}
 			},
 			{
-				"name": "LookupAnalyticsGroups",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"dataset": {
-						"referenceName": "AnalyticsGroupsCsvDataset",
-						"type": "DatasetReference"
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
 				"name": "ConsolidatedFolder",
 				"type": "GetMetadata",
 				"dependsOn": [
@@ -136,7 +106,7 @@
 						"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
-							"Stage": "consolidated"
+							"Stage": "staging"
 						}
 					},
 					"fieldList": [
@@ -235,48 +205,6 @@
 				}
 			},
 			{
-				"name": "ExtractAnalyticsGroupsAnalyticsPagesByGroupsPeriod",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ConsolidatedFolderExists",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "LookupAnalyticsGroups",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "StagingFolderExists",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsGroupsAnalyticsPagesByGroupsPeriod",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@pipeline().parameters.Period",
-							"type": "Expression"
-						},
-						"AnalyticsGroups": {
-							"value": "@activity('LookupAnalyticsGroups').output.value",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
 				"name": "StagingFolder",
 				"type": "GetMetadata",
 				"dependsOn": [],
@@ -293,7 +221,7 @@
 						"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
 						"type": "DatasetReference",
 						"parameters": {
-							"Stage": "staging"
+							"Stage": "raw"
 						}
 					},
 					"fieldList": [
@@ -355,11 +283,219 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "AnalyticsGroup",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "ConsolidatedFolderExists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.AnalyticsGroups",
+						"type": "Expression"
+					},
+					"activities": [
+						{
+							"name": "AnalyticsGroupsAnalyticsPagesRawByGroupId",
+							"type": "GetMetadata",
+							"dependsOn": [
+								{
+									"activity": "Set analyticsGroupId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "AnalyticsGroupsAnalyticsPagesStageCsvDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"AnalyticsGroupId": {
+											"value": "@variables('analyticsGroupId')",
+											"type": "Expression"
+										},
+										"Stage": "raw"
+									}
+								},
+								"fieldList": [
+									"exists"
+								],
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							}
+						},
+						{
+							"name": "Set analyticsGroupId",
+							"type": "SetVariable",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"variableName": "analyticsGroupId",
+								"value": {
+									"value": "@item().id",
+									"type": "Expression"
+								}
+							}
+						},
+						{
+							"name": "AnalyticsGroupsAnalyticsPagesRawByGroupIdExists",
+							"type": "IfCondition",
+							"dependsOn": [
+								{
+									"activity": "AnalyticsGroupsAnalyticsPagesRawByGroupId",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"userProperties": [],
+							"typeProperties": {
+								"expression": {
+									"value": "@equals(activity('AnalyticsGroupsAnalyticsPagesRawByGroupId').output.exists, true)",
+									"type": "Expression"
+								},
+								"ifTrueActivities": [
+									{
+										"name": "DeleteAnalyticsGroupsAnalyticsPagesRawByGroupId",
+										"type": "Delete",
+										"dependsOn": [],
+										"policy": {
+											"timeout": "7.00:00:00",
+											"retry": 0,
+											"retryIntervalInSeconds": 30,
+											"secureOutput": false,
+											"secureInput": false
+										},
+										"userProperties": [],
+										"typeProperties": {
+											"dataset": {
+												"referenceName": "AnalyticsGroupsAnalyticsPagesStageCsvDataset",
+												"type": "DatasetReference",
+												"parameters": {
+													"AnalyticsGroupId": {
+														"value": "@variables('analyticsGroupId')",
+														"type": "Expression"
+													},
+													"Stage": "raw"
+												}
+											},
+											"enableLogging": false,
+											"storeSettings": {
+												"type": "AzureBlobStorageReadSettings",
+												"recursive": true
+											}
+										}
+									}
+								]
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "DateRangePeriod",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "AnalyticsGroup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "StagingFolderExists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.DateRangePeriods",
+						"type": "Expression"
+					},
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "ExtractAnalyticsGroupsAnalyticsPagesByGroupsPeriod",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsGroupsAnalyticsPagesByGroupsPeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@{item().date_range_period}",
+										"type": "Expression"
+									},
+									"AnalyticsGroups": {
+										"value": "@pipeline().parameters.AnalyticsGroups",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "PostProcessAnalyticsGroupsAnalyticsPages",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "DateRangePeriod",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "PostProcessAnalyticsGroupsAnalyticsPages",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
 			}
 		],
 		"parameters": {
-			"Period": {
-				"type": "string"
+			"AnalyticsGroups": {
+				"type": "array"
+			},
+			"DateRangePeriods": {
+				"type": "array"
+			}
+		},
+		"variables": {
+			"analyticsGroupId": {
+				"type": "String"
 			}
 		},
 		"folder": {

@@ -1,15 +1,15 @@
 {
-	"name": "ExtractAnalyticsGroupsAnalyticsPagesByGroupIdsPeriod",
+	"name": "ExtractAnalyticsGroupsAnalyticsPagesByGroupsPeriod",
 	"properties": {
 		"activities": [
 			{
-				"name": "AnalyticsGroupExtractAnalyticsPages",
+				"name": "AnalyticsGroup",
 				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@pipeline().parameters.GroupIds",
+						"value": "@pipeline().parameters.AnalyticsGroups",
 						"type": "Expression"
 					},
 					"activities": [
@@ -61,19 +61,19 @@
 									"mappings": [
 										{
 											"source": {
-												"path": "['id']"
+												"path": "$['analytics_group_id']"
 											},
 											"sink": {
-												"name": "analytics_page_id",
+												"name": "analytics_group_id",
 												"type": "Int64"
 											}
 										},
 										{
 											"source": {
-												"path": "$['analytics_group_id']"
+												"path": "['id']"
 											},
 											"sink": {
-												"name": "analytics_group_id",
+												"name": "analytics_page_id",
 												"type": "Int64"
 											}
 										}
@@ -95,10 +95,10 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "AnalyticsGroupsAnalyticsPagesByPeriodCsvDataset",
+									"referenceName": "AnalyticsGroupsAnalyticsPagesByGroupIdPeriodCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
-										"GroupId": {
+										"AnalyticsGroupId": {
 											"value": "@item().id",
 											"type": "Expression"
 										},
@@ -118,7 +118,7 @@
 			"Period": {
 				"type": "string"
 			},
-			"GroupIds": {
+			"AnalyticsGroups": {
 				"type": "array"
 			}
 		},

@@ -1,0 +1,199 @@
+{
+	"name": "PostProcessAnalyticsGroupsAnalyticsPages",
+	"properties": {
+		"activities": [
+			{
+				"name": "DedupAnalyticsGroupsAnalyticsPages",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "DedupAnalyticsGroupsAnalyticsPages",
+						"type": "DataFlowReference",
+						"datasetParameters": {
+							"RawAnalyticsGroupsAnalyticsPages": {
+								"Stage": "raw"
+							},
+							"DedupedAnalyticsGroupsAnalyticsPages": {
+								"Stage": "staging"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "Fine"
+				}
+			},
+			{
+				"name": "ConsolidatedFolder",
+				"type": "GetMetadata",
+				"dependsOn": [
+					{
+						"activity": "DedupAnalyticsGroupsAnalyticsPages",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Stage": "consolidated"
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "DelimitedTextReadSettings"
+					}
+				}
+			},
+			{
+				"name": "ConsolidatedFolderExists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "ConsolidatedFolder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('ConsolidatedFolder').output.exists, true)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "DeleteConsolidatedFolder",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"Stage": "consolidated"
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "CopyFromStagingToConsolidated",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "ConsolidatedFolderExists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false,
+							"prefix": "analytics_groups_analytics_pages/staging/"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "RootFolderDataset",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"Stage": "consolidated"
+						}
+					}
+				]
+			}
+		],
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}
