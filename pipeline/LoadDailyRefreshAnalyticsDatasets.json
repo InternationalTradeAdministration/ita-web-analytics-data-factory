@@ -649,7 +649,7 @@
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": "analytics_groups_analytics_pages",
+							"wildcardFolderPath": "analytics_groups_analytics_pages/consolidated",
 							"wildcardFileName": "*.csv",
 							"enablePartitionDiscovery": false
 						},
@@ -690,7 +690,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsGroupsAnalyticsPagesFolderDataset",
+						"referenceName": "RootFolderDataset",
 						"type": "DatasetReference"
 					}
 				],
