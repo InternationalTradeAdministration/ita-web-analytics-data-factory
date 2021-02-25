@@ -6630,7 +6630,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "LookupDatePeriods",
+						"name": "GenerateDatePeriods",
 						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
@@ -6677,7 +6677,7 @@
 						"type": "ForEach",
 						"dependsOn": [
 							{
-								"activity": "LookupDatePeriods",
+								"activity": "GenerateDatePeriods",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -6686,7 +6686,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@activity('LookupDatePeriods').output.value",
+								"value": "@activity('GenerateDatePeriods').output.value",
 								"type": "Expression"
 							},
 							"isSequential": false,
@@ -6884,175 +6884,6 @@
 								}
 							}
 						]
-					},
-					{
-						"name": "CopyAnalyticsPageMetrics",
-						"type": "Copy",
-						"dependsOn": [
-							{
-								"activity": "ExtractByPeriod",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "DelimitedTextSource",
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true,
-									"enablePartitionDiscovery": false
-								},
-								"formatSettings": {
-									"type": "DelimitedTextReadSettings"
-								}
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"name": "analytics_page_id",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "id",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "title",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "title",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "url",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "url",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "average_page_views_per_visit",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "average_page_views_per_visit",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "bounce_rate",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "bounce_rate",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "page_views",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "page_views",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "visits",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "visits",
-											"type": "String",
-											"physicalType": "String"
-										}
-									},
-									{
-										"source": {
-											"name": "date",
-											"type": "String",
-											"physicalType": "String"
-										},
-										"sink": {
-											"name": "date",
-											"type": "String",
-											"physicalType": "String"
-										}
-									}
-								],
-								"typeConversion": true,
-								"typeConversionSettings": {
-									"allowDataTruncation": true,
-									"treatBooleanAsNumber": false
-								}
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "AnalyticsPageMetricsByPeriodCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {
-									"Period": {
-										"value": "@pipeline().parameters.Period",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "NewAnalyticsPagesCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {}
-							}
-						]
 					}
 				],
 				"concurrency": 3,
@@ -7068,8 +6899,7 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/datasets/AnalyticsPageMetricsRestDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsPageMetricsByPeriodCsvDataset')]",
-				"[concat(variables('factoryId'), '/datasets/NewAnalyticsPagesCsvDataset')]"
+				"[concat(variables('factoryId'), '/datasets/AnalyticsPageMetricsByPeriodCsvDataset')]"
 			]
 		},
 		{
@@ -10744,6 +10574,12 @@
 								"dependencyConditions": [
 									"Succeeded"
 								]
+							},
+							{
+								"activity": "ExecuteExtractAnalyticsPageMetricsByPeriod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
 						"userProperties": [],
@@ -10767,6 +10603,12 @@
 						"dependsOn": [
 							{
 								"activity": "ExtractAnalyticsGroupsAnalyticsPagesByPeriod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							},
+							{
+								"activity": "UpdateNewAnalyticsPages",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -10804,14 +10646,7 @@
 					{
 						"name": "LookupAnalyticsGroups",
 						"type": "Lookup",
-						"dependsOn": [
-							{
-								"activity": "ExecuteExtractAnalyticsPageMetricsByPeriod",
-								"dependencyConditions": [
-									"Succeeded"
-								]
-							}
-						],
+						"dependsOn": [],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
@@ -10838,6 +10673,175 @@
 							},
 							"firstRowOnly": false
 						}
+					},
+					{
+						"name": "UpdateNewAnalyticsPages",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "ExecuteExtractAnalyticsPageMetricsByPeriod",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"name": "analytics_page_id",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "id",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "title",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "title",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "url",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "url",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "average_page_views_per_visit",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "average_page_views_per_visit",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "bounce_rate",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "bounce_rate",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "page_views",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "page_views",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "visits",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "visits",
+											"type": "String",
+											"physicalType": "String"
+										}
+									},
+									{
+										"source": {
+											"name": "date",
+											"type": "String",
+											"physicalType": "String"
+										},
+										"sink": {
+											"name": "date",
+											"type": "String",
+											"physicalType": "String"
+										}
+									}
+								],
+								"typeConversion": true,
+								"typeConversionSettings": {
+									"allowDataTruncation": true,
+									"treatBooleanAsNumber": false
+								}
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "AnalyticsPageMetricsByPeriodCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {
+									"Period": {
+										"value": "@pipeline().parameters.DatePeriod",
+										"type": "Expression"
+									}
+								}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "NewAnalyticsPagesCsvDataset",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
 					}
 				],
 				"concurrency": 1,
@@ -10857,7 +10861,9 @@
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsPageMetricsByPeriod')]",
 				"[concat(variables('factoryId'), '/pipelines/ExtractAnalyticsGroupsAnalyticsPagesByPeriod')]",
 				"[concat(variables('factoryId'), '/dataflows/DedupAnalyticsGroupsAnalyticsPages')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsCsvDataset')]"
+				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsCsvDataset')]",
+				"[concat(variables('factoryId'), '/datasets/AnalyticsPageMetricsByPeriodCsvDataset')]",
+				"[concat(variables('factoryId'), '/datasets/NewAnalyticsPagesCsvDataset')]"
 			]
 		},
 		{
@@ -17566,7 +17572,7 @@
 								"storeSettings": {
 									"type": "AzureBlobStorageReadSettings",
 									"recursive": true,
-									"wildcardFolderPath": "analytics_groups_analytics_pages",
+									"wildcardFolderPath": "analytics_groups_analytics_pages/consolidated",
 									"wildcardFileName": "*.csv",
 									"enablePartitionDiscovery": false
 								},
@@ -17607,7 +17613,7 @@
 						},
 						"inputs": [
 							{
-								"referenceName": "AnalyticsGroupsAnalyticsPagesFolderDataset",
+								"referenceName": "RootFolderDataset",
 								"type": "DatasetReference",
 								"parameters": {}
 							}
@@ -17636,8 +17642,7 @@
 				"[concat(variables('factoryId'), '/datasets/AnalyticsPagesSqlDataset')]",
 				"[concat(variables('factoryId'), '/datasets/RootFolderCustomEscapeDataset')]",
 				"[concat(variables('factoryId'), '/datasets/AnalyticsPageMetricsSqlDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsAnalyticsPagesSqlDataset')]",
-				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsAnalyticsPagesFolderDataset')]"
+				"[concat(variables('factoryId'), '/datasets/AnalyticsGroupsAnalyticsPagesSqlDataset')]"
 			]
 		},
 		{

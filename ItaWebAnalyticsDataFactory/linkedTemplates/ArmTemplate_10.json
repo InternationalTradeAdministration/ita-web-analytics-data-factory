@@ -1743,7 +1743,7 @@
 			"properties": {
 				"activities": [
 					{
-						"name": "LookupDatePeriods",
+						"name": "GenerateDatePeriods",
 						"type": "Lookup",
 						"dependsOn": [],
 						"policy": {
@@ -1790,7 +1790,7 @@
 						"type": "ForEach",
 						"dependsOn": [
 							{
-								"activity": "LookupDatePeriods",
+								"activity": "GenerateDatePeriods",
 								"dependencyConditions": [
 									"Succeeded"
 								]
@@ -1799,7 +1799,7 @@
 						"userProperties": [],
 						"typeProperties": {
 							"items": {
-								"value": "@activity('LookupDatePeriods').output.value",
+								"value": "@activity('GenerateDatePeriods').output.value",
 								"type": "Expression"
 							},
 							"isSequential": false,
