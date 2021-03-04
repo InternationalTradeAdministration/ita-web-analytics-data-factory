@@ -3675,7 +3675,14 @@
 					{
 						"name": "LoadAnalyticsGroupsAnalyticsPages",
 						"type": "Copy",
-						"dependsOn": [],
+						"dependsOn": [
+							{
+								"activity": "LoadDefaultAnalyticsGroupAnalyticsPages",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
 						"policy": {
 							"timeout": "7.00:00:00",
 							"retry": 0,
