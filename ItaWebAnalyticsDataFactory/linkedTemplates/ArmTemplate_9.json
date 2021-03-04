@@ -13,178 +13,6 @@
 	},
 	"resources": [
 		{
-			"name": "[concat(parameters('factoryName'), '/ExtractMonthlyAnalyticsOutboundLinkMetricsByParameters')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "ExtractByPeriod",
-						"type": "Copy",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "7.00:00:00",
-							"retry": 1,
-							"retryIntervalInSeconds": 60,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"source": {
-								"type": "RestSource",
-								"additionalColumns": [
-									{
-										"name": "analytics_group_id",
-										"value": {
-											"value": "@pipeline().parameters.AnalyticsGroupId",
-											"type": "Expression"
-										}
-									},
-									{
-										"name": "date",
-										"value": {
-											"value": "@{substring(pipeline().parameters.Period, 0, 8)}",
-											"type": "Expression"
-										}
-									}
-								],
-								"httpRequestTimeout": "00:01:40",
-								"requestInterval": "00.00:00:00.010",
-								"requestMethod": "GET"
-							},
-							"sink": {
-								"type": "DelimitedTextSink",
-								"storeSettings": {
-									"type": "AzureBlobStorageWriteSettings"
-								},
-								"formatSettings": {
-									"type": "DelimitedTextWriteSettings",
-									"quoteAllText": true,
-									"fileExtension": ".txt"
-								}
-							},
-							"enableStaging": false,
-							"translator": {
-								"type": "TabularTranslator",
-								"mappings": [
-									{
-										"source": {
-											"path": "[['id']"
-										},
-										"sink": {
-											"name": "id",
-											"type": "Int64"
-										}
-									},
-									{
-										"source": {
-											"path": "[['title']"
-										},
-										"sink": {
-											"name": "title",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"path": "[['url']"
-										},
-										"sink": {
-											"name": "url",
-											"type": "String"
-										}
-									},
-									{
-										"source": {
-											"path": "[['pages']"
-										},
-										"sink": {
-											"name": "pages",
-											"type": "Int64"
-										}
-									},
-									{
-										"source": {
-											"path": "[['visits']"
-										},
-										"sink": {
-											"name": "visits",
-											"type": "Int64"
-										}
-									},
-									{
-										"source": {
-											"path": "$['analytics_group_id']"
-										},
-										"sink": {
-											"name": "analytics_group_id",
-											"type": "Int64"
-										}
-									},
-									{
-										"source": {
-											"path": "$['date']"
-										},
-										"sink": {
-											"name": "date",
-											"type": "String"
-										}
-									}
-								],
-								"collectionReference": "$['items']"
-							}
-						},
-						"inputs": [
-							{
-								"referenceName": "MonthlyAnalyticsOutboundLinkMetricsRestDataset",
-								"type": "DatasetReference",
-								"parameters": {
-									"QueryString": {
-										"value": "@pipeline().parameters.QueryString",
-										"type": "Expression"
-									}
-								}
-							}
-						],
-						"outputs": [
-							{
-								"referenceName": "MonthlyAnalyticsOutboundLinkMetricsByPeriodCsvDataset",
-								"type": "DatasetReference",
-								"parameters": {
-									"Period": {
-										"value": "@{pipeline().parameters.Period}",
-										"type": "Expression"
-									},
-									"FileName": {
-										"value": "analytics_group_@{pipeline().parameters.AnalyticsGroupId}.csv",
-										"type": "Expression"
-									}
-								}
-							}
-						]
-					}
-				],
-				"concurrency": 10,
-				"parameters": {
-					"Period": {
-						"type": "string"
-					},
-					"AnalyticsGroupId": {
-						"type": "string"
-					},
-					"QueryString": {
-						"type": "string"
-					}
-				},
-				"folder": {
-					"name": "analytics"
-				},
-				"annotations": []
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/ExtractQualityAssuranceInventoryMetricsByGroupId')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -5368,7 +5196,7 @@
 						},
 						{
 							"dataset": {
-								"referenceName": "AnalyticsGroupsAnalyticsPagesRawFolderCsvDataset",
+								"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
 								"type": "DatasetReference"
 							},
 							"name": "RawAnalyticsGroupsAnalyticsPages"
@@ -5384,7 +5212,7 @@
 						},
 						{
 							"dataset": {
-								"referenceName": "AnalyticsGroupsAnalyticsPagesConsolidatedFolderCsvDataset",
+								"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
 								"type": "DatasetReference"
 							},
 							"name": "DedupedAnalyticsGroupsAnalyticsPages"
@@ -5404,7 +5232,7 @@
 							"name": "AddOutputFilePathColumn"
 						}
 					],
-					"script": "source(output(\n\t\tid as long,\n\t\ttitle as string,\n\t\turl as string,\n\t\taverage_page_views_per_visit as double,\n\t\tbounce_rate as double,\n\t\tpage_views as integer,\n\t\tvisits as integer\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tinferDriftedColumnTypes: true) ~> AllAnalyticsPages\nsource(output(\n\t\tid as long,\n\t\ttitle as string,\n\t\turl as string,\n\t\taverage_page_views_per_visit as double,\n\t\tbounce_rate as double,\n\t\tpage_views as integer,\n\t\tvisits as integer,\n\t\tdate as date\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> NewAnalyticsPages\nsource(output(\n\t\tanalytics_page_id as string,\n\t\tanalytics_group_id as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:['analytics_groups_analytics_pages/raw/**/*.csv'],\n\tpartitionBy('key',\n\t\t0,\n\t\tanalytics_group_id\n\t)) ~> RawAnalyticsGroupsAnalyticsPages\nAllAnalyticsPages, NewAnalyticsPages union(byName: true)~> Consolidate\nConsolidate aggregate(groupBy(id),\n\teach(match(name!='id'), $$ = last($$))) ~> RemoveDuplicates\nRawAnalyticsGroupsAnalyticsPages aggregate(groupBy(analytics_group_id,\n\t\tanalytics_page_id),\n\teach(match(false()), $$ = first($$))) ~> RemoveDuplicateAnalyticsGroupsAnalyticsPages\nRemoveDuplicateAnalyticsGroupsAnalyticsPages derive(outputFilePath = \"analytics_groups_analytics_pages/consolidated/{analytics_group_id}/all.csv\") ~> AddOutputFilePathColumn\nRemoveDuplicates sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['analytics_pages.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DedupedAnalyticsPages\nAddOutputFilePathColumn sink(input(\n\t\tanalytics_page_id as string,\n\t\tanalytics_group_id as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'outputFilePath',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DedupedAnalyticsGroupsAnalyticsPages"
+					"script": "source(output(\n\t\tid as long,\n\t\ttitle as string,\n\t\turl as string,\n\t\taverage_page_views_per_visit as double,\n\t\tbounce_rate as double,\n\t\tpage_views as integer,\n\t\tvisits as integer,\n\t\tdate as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> AllAnalyticsPages\nsource(output(\n\t\tid as long,\n\t\ttitle as string,\n\t\turl as string,\n\t\taverage_page_views_per_visit as double,\n\t\tbounce_rate as double,\n\t\tpage_views as integer,\n\t\tvisits as integer,\n\t\tdate as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> NewAnalyticsPages\nsource(output(\n\t\tanalytics_group_id as string,\n\t\tanalytics_page_id as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:[(\"analytics_groups_analytics_pages/raw/**/*.csv\")]) ~> RawAnalyticsGroupsAnalyticsPages\nAllAnalyticsPages, NewAnalyticsPages union(byName: true)~> Consolidate\nConsolidate aggregate(groupBy(id),\n\teach(match(name!='id'), $$ = last($$))) ~> RemoveDuplicates\nRawAnalyticsGroupsAnalyticsPages aggregate(groupBy(analytics_group_id,\n\t\tanalytics_page_id),\n\tcount = count()) ~> RemoveDuplicateAnalyticsGroupsAnalyticsPages\nRemoveDuplicateAnalyticsGroupsAnalyticsPages derive(outputFilePath = \"analytics_groups_analytics_pages/staging/{analytics_group_id}.csv\") ~> AddOutputFilePathColumn\nRemoveDuplicates sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['analytics_pages.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DedupedAnalyticsPages\nAddOutputFilePathColumn sink(input(\n\t\tanalytics_page_id as string,\n\t\tanalytics_group_id as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'outputFilePath',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DedupedAnalyticsGroupsAnalyticsPages"
 				}
 			},
 			"dependsOn": []
@@ -5610,6 +5438,47 @@
 						}
 					],
 					"script": "source(output(\n\t\tsessions as (duration as short, firstVisit as boolean, id as integer, pageViews as short, sessionStart as string, source as string, trackingPageIds as integer[], triggerIds as integer[], visitorId as integer)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\trowUrlColumn: 'fileName',\n\tdocumentForm: 'documentPerLine',\n\twildcardPaths:[(\"visitor_feed/**/*.json\")]) ~> VisitorFeed\nAddDateColumn foldDown(unroll(sessions),\n\tmapColumn(\n\t\tduration = sessions.duration,\n\t\tfirstVisit = sessions.firstVisit,\n\t\tvisitorSessionId = sessions.id,\n\t\tpageViews = sessions.pageViews,\n\t\tsessionStart = sessions.sessionStart,\n\t\tsource = sessions.source,\n\t\ttrackingPageIds = sessions.trackingPageIds,\n\t\ttriggerIds = sessions.triggerIds,\n\t\tvisitorId = sessions.visitorId,\n\t\tdate\n\t),\n\tpartitionBy('key',\n\t\t0,\n\t\tdate\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> FlattenVisitorSessions\nFlattenVisitorSessions foldDown(unroll(triggerIds),\n\tmapColumn(\n\t\ttriggerId = triggerIds,\n\t\tvisitorSessionId,\n\t\tdate\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> FlattenTriggerIds\nFlattenTriggerIds filter(not(isNull(triggerId))) ~> FilterNullTriggerId\nFilterNullTriggerId aggregate(groupBy(triggerId,\n\t\tvisitorSessionId,\n\t\tdate),\n\teach(match(!in(['date','triggerId','visitorSessionId'],name)), $$ = first($$))) ~> DedupTriggerIdVisitorSessionId\nDedupTriggerIdVisitorSessionId derive(outputFilePath = \"triggers_visitor_sessions/{date}.json\") ~> AddOutputFilePathColumn\nVisitorFeed derive(date = split(fileName, '/')[3]) ~> AddDateColumn\nAddOutputFilePathColumn sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'outputFilePath',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> TriggersVisitorSessions"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LegacyAllVisitorSessions')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "RootJsonFolderDataset",
+								"type": "DatasetReference"
+							},
+							"name": "VisitorFeed"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "RootJsonFolderDataset",
+								"type": "DatasetReference"
+							},
+							"name": "VisitorSessions"
+						}
+					],
+					"transformations": [
+						{
+							"name": "AddDateColumn"
+						},
+						{
+							"name": "FlattenVisitorSessions"
+						},
+						{
+							"name": "AddOutputFilePathColumn"
+						}
+					],
+					"script": "source(output(\n\t\tsessions as (duration as short, firstVisit as boolean, id as integer, pageViews as short, sessionStart as string, source as string, trackingPageIds as integer[], triggerIds as integer[], visitorId as integer)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\trowUrlColumn: 'sourceFilePath',\n\tdocumentForm: 'documentPerLine',\n\twildcardPaths:[(\"visitor_feed/**/*.json\")]) ~> VisitorFeed\nVisitorFeed derive(date = split(sourceFilePath, '/')[3]) ~> AddDateColumn\nAddDateColumn foldDown(unroll(sessions),\n\tmapColumn(\n\t\tduration = sessions.duration,\n\t\tfirstVisit = sessions.firstVisit,\n\t\tid = sessions.id,\n\t\tpageViews = sessions.pageViews,\n\t\tsessionStart = sessions.sessionStart,\n\t\tsource = sessions.source,\n\t\ttrackingPageIds = sessions.trackingPageIds,\n\t\ttriggerIds = sessions.triggerIds,\n\t\tvisitorId = sessions.visitorId,\n\t\tdate\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: false) ~> FlattenVisitorSessions\nFlattenVisitorSessions derive(outputFilePath = \"visitor_sessions/{date}.json\") ~> AddOutputFilePathColumn\nAddOutputFilePathColumn sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'outputFilePath',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> VisitorSessions"
 				}
 			},
 			"dependsOn": []

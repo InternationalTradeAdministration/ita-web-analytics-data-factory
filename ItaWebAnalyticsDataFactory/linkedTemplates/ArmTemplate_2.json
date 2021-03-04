@@ -85,7 +85,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsGroupsAnalyticsPagesByPeriodCsvDataset')]",
+			"name": "[concat(parameters('factoryName'), '/AnalyticsGroupsAnalyticsPagesByGroupIdPeriodCsvDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -94,7 +94,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"GroupId": {
+					"AnalyticsGroupId": {
 						"type": "string"
 					},
 					"Period": {
@@ -114,7 +114,7 @@
 							"type": "Expression"
 						},
 						"folderPath": {
-							"value": "analytics_groups_analytics_pages/raw/@{dataset().GroupId}",
+							"value": "analytics_groups_analytics_pages/raw/@{dataset().AnalyticsGroupId}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
@@ -125,41 +125,6 @@
 					"quoteChar": "\""
 				},
 				"schema": []
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsGroupsAnalyticsPagesConsolidatedFolderCsvDataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorageLinkedService",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": "analytics_groups_analytics_pages/consolidated",
-						"container": "ita-web-analytics"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "analytics_page_id",
-						"type": "String"
-					},
-					{
-						"name": "analytics_group_id",
-						"type": "String"
-					}
-				]
 			},
 			"dependsOn": []
 		},
@@ -231,41 +196,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsGroupsAnalyticsPagesRawFolderCsvDataset')]",
-			"type": "Microsoft.DataFactory/factories/datasets",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"linkedServiceName": {
-					"referenceName": "AzureBlobStorageLinkedService",
-					"type": "LinkedServiceReference"
-				},
-				"annotations": [],
-				"type": "DelimitedText",
-				"typeProperties": {
-					"location": {
-						"type": "AzureBlobStorageLocation",
-						"folderPath": "analytics_groups_analytics_pages/raw",
-						"container": "ita-web-analytics"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
-				},
-				"schema": [
-					{
-						"name": "analytics_page_id",
-						"type": "String"
-					},
-					{
-						"name": "analytics_group_id",
-						"type": "String"
-					}
-				]
-			},
-			"dependsOn": []
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/AnalyticsGroupsAnalyticsPagesRestDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -313,6 +243,105 @@
 					"schema": "web_analytics",
 					"table": "analytics_groups_analytics_pages"
 				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AnalyticsGroupsAnalyticsPagesStageCsvDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"AnalyticsGroupId": {
+						"type": "string"
+					},
+					"Stage": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@{dataset().AnalyticsGroupId}.csv",
+							"type": "Expression"
+						},
+						"folderPath": {
+							"value": "analytics_groups_analytics_pages/@{dataset().Stage}",
+							"type": "Expression"
+						},
+						"container": "ita-web-analytics"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "analytics_page_id",
+						"type": "String"
+					},
+					{
+						"name": "analytics_group_id",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "AzureBlobStorageLinkedService",
+					"type": "LinkedServiceReference"
+				},
+				"parameters": {
+					"Stage": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "analytics"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": {
+							"value": "analytics_groups_analytics_pages/@{dataset().Stage}",
+							"type": "Expression"
+						},
+						"container": "ita-web-analytics"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "analytics_page_id",
+						"type": "String"
+					},
+					{
+						"name": "analytics_group_id",
+						"type": "String"
+					}
+				]
 			},
 			"dependsOn": []
 		},

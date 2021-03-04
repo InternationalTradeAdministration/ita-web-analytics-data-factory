@@ -324,6 +324,9 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"SiteImproveDailyTrigger_properties_RefreshSiteImprove_parameters_Period": {
+						"value": "[parameters('SiteImproveDailyTrigger_properties_RefreshSiteImprove_parameters_Period')]"
 					}
 				}
 			},
@@ -344,9 +347,6 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
-					},
-					"SiteImproveDailyTrigger_properties_RefreshSiteImprove_parameters_Period": {
-						"value": "[parameters('SiteImproveDailyTrigger_properties_RefreshSiteImprove_parameters_Period')]"
 					}
 				}
 			},
