@@ -19,14 +19,14 @@
 						"type": "AzureSqlSource",
 						"sqlReaderStoredProcedureName": "[web_analytics].[generate_date_range_periods]",
 						"storedProcedureParameters": {
-							"endDate": {
+							"end_date": {
 								"type": "String",
 								"value": {
 									"value": "@pipeline().parameters.EndDate",
 									"type": "Expression"
 								}
 							},
-							"startDate": {
+							"start_date": {
 								"type": "String",
 								"value": {
 									"value": "@pipeline().parameters.StartDate",

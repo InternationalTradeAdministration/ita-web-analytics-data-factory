@@ -7,7 +7,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "LookupDateRangePeriods",
+						"activity": "GenerateDateRangePeriods",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -16,7 +16,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('LookupDateRangePeriods').output.value",
+						"value": "@activity('GenerateDateRangePeriods').output.value",
 						"type": "Expression"
 					},
 					"isSequential": true,
@@ -44,7 +44,7 @@
 				}
 			},
 			{
-				"name": "LookupDateRangePeriods",
+				"name": "GenerateDateRangePeriods",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -60,14 +60,14 @@
 						"type": "AzureSqlSource",
 						"sqlReaderStoredProcedureName": "[web_analytics].[generate_date_range_periods]",
 						"storedProcedureParameters": {
-							"endDate": {
+							"end_date": {
 								"type": "String",
 								"value": {
 									"value": "@pipeline().parameters.EndDate",
 									"type": "Expression"
 								}
 							},
-							"startDate": {
+							"start_date": {
 								"type": "String",
 								"value": {
 									"value": "@pipeline().parameters.StartDate",

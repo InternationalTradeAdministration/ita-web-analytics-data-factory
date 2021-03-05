@@ -85,11 +85,6 @@
 							"Token": {
 								"value": "@activity('GetWhoIsVisitingToken').output.value",
 								"type": "Expression"
-							},
-							"DateFrom": "2021-06-01",
-							"DateTo": {
-								"value": "@{convertFromUtc(addDays(utcNow(), -1), 'Eastern Standard Time', 'yyyy-MM-dd')}",
-								"type": "Expression"
 							}
 						}
 					}

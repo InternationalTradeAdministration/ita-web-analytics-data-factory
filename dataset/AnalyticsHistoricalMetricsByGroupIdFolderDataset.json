@@ -1,15 +1,12 @@
 {
-	"name": "AnalyticsHistoricalMetricsByPeriodCsvDataset",
+	"name": "AnalyticsHistoricalMetricsByGroupIdFolderDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"Period": {
-				"type": "string"
-			},
-			"FileName": {
+			"GroupId": {
 				"type": "string"
 			}
 		},
@@ -17,25 +14,17 @@
 			"name": "analytics"
 		},
 		"annotations": [],
-		"type": "DelimitedText",
+		"type": "Json",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
-				"fileName": {
-					"value": "@{dataset().FileName}",
-					"type": "Expression"
-				},
 				"folderPath": {
-					"value": "analytics_historical_metrics/@{dataset().Period}",
+					"value": "analytics_historical_metrics/analytics_group_@{dataset().GroupId}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"
-			},
-			"columnDelimiter": ",",
-			"escapeChar": "\\",
-			"firstRowAsHeader": true,
-			"quoteChar": "\""
+			}
 		},
-		"schema": []
+		"schema": {}
 	}
 }
