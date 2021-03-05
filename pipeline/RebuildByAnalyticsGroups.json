@@ -1,0 +1,27 @@
+{
+	"name": "RebuildByAnalyticsGroups",
+	"properties": {
+		"activities": [
+			{
+				"name": "AnalyticsGroup",
+				"type": "ForEach",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@pipeline().parameters.AnalyticsGroups",
+						"type": "Expression"
+					},
+					"isSequential": true
+				}
+			}
+		],
+		"concurrency": 1,
+		"parameters": {
+			"AnalyticsGroups": {
+				"type": "array"
+			}
+		},
+		"annotations": []
+	}
+}

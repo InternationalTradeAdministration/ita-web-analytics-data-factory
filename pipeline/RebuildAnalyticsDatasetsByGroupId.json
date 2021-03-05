@@ -1,0 +1,14 @@
+{
+	"name": "RebuildAnalyticsDatasetsByGroupId",
+	"properties": {
+		"parameters": {
+			"GroupId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}
