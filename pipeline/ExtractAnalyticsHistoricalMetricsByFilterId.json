@@ -180,7 +180,8 @@
 										"FileName": {
 											"value": "analytics_group_1_analytics_filter_@{item().id}.csv",
 											"type": "Expression"
-										}
+										},
+										"GroupId": "1"
 									}
 								}
 							]

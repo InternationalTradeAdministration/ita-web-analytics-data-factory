@@ -182,6 +182,10 @@
 										"FileName": {
 											"value": "analytics_group_@{pipeline().parameters.GroupId}_analytics_filter_@{item().id}.csv",
 											"type": "Expression"
+										},
+										"GroupId": {
+											"value": "@pipeline().parameters.GroupId",
+											"type": "Expression"
 										}
 									}
 								}

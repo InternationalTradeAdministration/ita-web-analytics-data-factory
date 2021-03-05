@@ -12,7 +12,32 @@
 						"value": "@pipeline().parameters.AnalyticsGroups",
 						"type": "Expression"
 					},
-					"isSequential": true
+					"isSequential": true,
+					"activities": [
+						{
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "RebuildAnalyticsDatasetsByGroupIdStartDate",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"GroupId": {
+										"value": "@item().id",
+										"type": "Expression"
+									},
+									"StartDate": {
+										"value": "@item().start_date",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
 				}
 			}
 		],

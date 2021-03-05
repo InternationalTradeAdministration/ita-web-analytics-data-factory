@@ -210,6 +210,10 @@
 										"FileName": {
 											"value": "analytics_group_@{item().id}.csv",
 											"type": "Expression"
+										},
+										"GroupId": {
+											"value": "@item().id",
+											"type": "Expression"
 										}
 									}
 								}
