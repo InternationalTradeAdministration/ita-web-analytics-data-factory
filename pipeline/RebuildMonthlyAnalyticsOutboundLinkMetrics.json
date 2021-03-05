@@ -1,50 +1,9 @@
 {
-	"name": "ExtractAnalyticsTrafficSourcesMetrics",
+	"name": "RebuildMonthlyAnalyticsOutboundLinkMetrics",
 	"properties": {
 		"activities": [
 			{
-				"name": "DateRangePeriod",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "LookupDateRangePeriods",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('LookupDateRangePeriods').output.value",
-						"type": "Expression"
-					},
-					"isSequential": true,
-					"activities": [
-						{
-							"name": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
-							"type": "ExecutePipeline",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"Period": {
-										"value": "@{item().date_range_period}",
-										"type": "Expression"
-									}
-								}
-							}
-						}
-					]
-				}
-			},
-			{
-				"name": "LookupDateRangePeriods",
+				"name": "GenerateDateRangePeriods",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -60,14 +19,14 @@
 						"type": "AzureSqlSource",
 						"sqlReaderStoredProcedureName": "[web_analytics].[generate_date_range_periods]",
 						"storedProcedureParameters": {
-							"endDate": {
+							"end_date": {
 								"type": "String",
 								"value": {
 									"value": "@pipeline().parameters.EndDate",
 									"type": "Expression"
 								}
 							},
-							"startDate": {
+							"start_date": {
 								"type": "String",
 								"value": {
 									"value": "@pipeline().parameters.StartDate",
@@ -83,6 +42,47 @@
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "DateRangePeriod",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GenerateDateRangePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GenerateDateRangePeriods').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@{item().date_range_period}",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
 				}
 			}
 		],

@@ -1,15 +1,18 @@
 {
-	"name": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
+	"name": "AnalyticsHistoricalMetricsDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
+			"GroupId": {
+				"type": "string"
+			},
 			"Period": {
 				"type": "string"
 			},
-			"FileName": {
+			"FilterId": {
 				"type": "string"
 			}
 		},
@@ -17,25 +20,21 @@
 			"name": "analytics"
 		},
 		"annotations": [],
-		"type": "DelimitedText",
+		"type": "Json",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "@{dataset().FileName}",
+					"value": "analytics_filter_@{dataset().FilterId}.json",
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "analytics_traffic_sources_metrics/@{dataset().Period}",
+					"value": "analytics_historical_metrics/analytics_group_@{dataset().GroupId}/@{dataset().Period}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"
-			},
-			"columnDelimiter": ",",
-			"escapeChar": "\\",
-			"firstRowAsHeader": true,
-			"quoteChar": "\""
+			}
 		},
-		"schema": []
+		"schema": {}
 	}
 }

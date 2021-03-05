@@ -17,7 +17,7 @@
 		"type": "RestResource",
 		"typeProperties": {
 			"relativeUrl": {
-				"value": "v2/sites/17536213616/analytics/content/outbound_links?@{dataset().QueryString}&filter_id=1717697832",
+				"value": "v2/sites/17536213616/analytics/content/outbound_links?page=1&page_size=1000&@{dataset().QueryString}&filter_id=1717697832",
 				"type": "Expression"
 			}
 		},

@@ -16,19 +16,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "JsonSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": {
-								"value": "analytics_traffic_sources_metrics",
-								"type": "Expression"
-							},
-							"wildcardFileName": "*.csv",
+							"wildcardFolderPath": "analytics_traffic_sources_metrics",
+							"wildcardFileName": "*.json",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "JsonReadSettings"
 						}
 					},
 					"sink": {
@@ -45,38 +42,7 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "analytics_group_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_group_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "analytics_filter_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_filter_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "timestamp",
-									"type": "String"
-								},
-								"sink": {
-									"name": "timestamp",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "direct_traffic",
-									"type": "String"
+									"path": "$['item']['direct_traffic']"
 								},
 								"sink": {
 									"name": "direct_traffic",
@@ -85,8 +51,7 @@
 							},
 							{
 								"source": {
-									"name": "external_referrer",
-									"type": "String"
+									"path": "$['item']['external_referrer']"
 								},
 								"sink": {
 									"name": "external_referrer",
@@ -95,8 +60,7 @@
 							},
 							{
 								"source": {
-									"name": "search_domain",
-									"type": "String"
+									"path": "$['item']['search_domain']"
 								},
 								"sink": {
 									"name": "search_domain",
@@ -105,11 +69,37 @@
 							},
 							{
 								"source": {
-									"name": "social_media",
-									"type": "String"
+									"path": "$['item']['social_media']"
 								},
 								"sink": {
 									"name": "social_media",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['item']['timestamp']"
+								},
+								"sink": {
+									"name": "timestamp",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_group_id']"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_filter_id']"
+								},
+								"sink": {
+									"name": "analytics_filter_id",
 									"type": "Int64"
 								}
 							}
@@ -118,7 +108,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "RootFolderDataset",
+						"referenceName": "RootJsonFolderDataset",
 						"type": "DatasetReference"
 					}
 				],
@@ -143,19 +133,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "JsonSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": {
-								"value": "analytics_historical_metrics",
-								"type": "Expression"
-							},
-							"wildcardFileName": "*.csv",
+							"wildcardFolderPath": "analytics_historical_metrics",
+							"wildcardFileName": "*.json",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "JsonReadSettings"
 						}
 					},
 					"sink": {
@@ -172,38 +159,7 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "analytics_group_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_group_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "analytics_filter_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_filter_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "timestamp",
-									"type": "String"
-								},
-								"sink": {
-									"name": "timestamp",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "bounce_rate",
-									"type": "String"
+									"path": "$['item']['bounce_rate']"
 								},
 								"sink": {
 									"name": "bounce_rate",
@@ -212,28 +168,7 @@
 							},
 							{
 								"source": {
-									"name": "page_views",
-									"type": "String"
-								},
-								"sink": {
-									"name": "page_views",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "visits",
-									"type": "String"
-								},
-								"sink": {
-									"name": "visits",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "new_visitors",
-									"type": "String"
+									"path": "$['item']['new_visitors']"
 								},
 								"sink": {
 									"name": "new_visitors",
@@ -242,8 +177,16 @@
 							},
 							{
 								"source": {
-									"name": "returning_visitors",
-									"type": "String"
+									"path": "$['item']['page_views']"
+								},
+								"sink": {
+									"name": "page_views",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['item']['returning_visitors']"
 								},
 								"sink": {
 									"name": "returning_visitors",
@@ -252,11 +195,46 @@
 							},
 							{
 								"source": {
-									"name": "unique_visitors",
+									"path": "$['item']['timestamp']"
+								},
+								"sink": {
+									"name": "timestamp",
 									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['item']['unique_visitors']"
 								},
 								"sink": {
 									"name": "unique_visitors",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['item']['visits']"
+								},
+								"sink": {
+									"name": "visits",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_group_id']"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_filter_id']"
+								},
+								"sink": {
+									"name": "analytics_filter_id",
 									"type": "Int64"
 								}
 							}
@@ -265,7 +243,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "RootFolderDataset",
+						"referenceName": "RootJsonFolderDataset",
 						"type": "DatasetReference"
 					}
 				],
@@ -290,19 +268,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "JsonSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
-							"wildcardFolderPath": {
-								"value": "monthly_analytics_outbound_link_metrics",
-								"type": "Expression"
-							},
-							"wildcardFileName": "*.csv",
+							"wildcardFolderPath": "monthly_analytics_outbound_link_metrics",
+							"wildcardFileName": "*.json",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "JsonReadSettings"
 						}
 					},
 					"sink": {
@@ -319,8 +294,7 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "id",
-									"type": "String"
+									"path": "$['item']['id']"
 								},
 								"sink": {
 									"name": "analytics_outbound_link_id",
@@ -329,28 +303,7 @@
 							},
 							{
 								"source": {
-									"name": "analytics_group_id",
-									"type": "String"
-								},
-								"sink": {
-									"name": "analytics_group_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"name": "date",
-									"type": "String"
-								},
-								"sink": {
-									"name": "date",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"name": "title",
-									"type": "String"
+									"path": "$['item']['title']"
 								},
 								"sink": {
 									"name": "title",
@@ -359,8 +312,7 @@
 							},
 							{
 								"source": {
-									"name": "url",
-									"type": "String"
+									"path": "$['item']['url']"
 								},
 								"sink": {
 									"name": "url",
@@ -369,8 +321,7 @@
 							},
 							{
 								"source": {
-									"name": "pages",
-									"type": "String"
+									"path": "$['item']['pages']"
 								},
 								"sink": {
 									"name": "pages",
@@ -379,11 +330,19 @@
 							},
 							{
 								"source": {
-									"name": "visits",
-									"type": "String"
+									"path": "$['item']['visits']"
 								},
 								"sink": {
 									"name": "visits",
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_group_id']"
+								},
+								"sink": {
+									"name": "analytics_group_id",
 									"type": "Int64"
 								}
 							}
@@ -392,7 +351,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "RootFolderDataset",
+						"referenceName": "RootJsonFolderDataset",
 						"type": "DatasetReference"
 					}
 				],
@@ -417,16 +376,16 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "JsonSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"wildcardFolderPath": "monthly_analytics_external_referring_domain_metrics",
-							"wildcardFileName": "*.csv",
+							"wildcardFileName": "*.json",
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "JsonReadSettings"
 						}
 					},
 					"sink": {
@@ -440,89 +399,55 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "id",
-									"type": "String",
-									"physicalType": "String"
+									"path": "$['item']['id']"
 								},
 								"sink": {
 									"name": "analytics_external_domain_id",
-									"type": "Int64",
-									"physicalType": "bigint"
+									"type": "Int64"
 								}
 							},
 							{
 								"source": {
-									"name": "analytics_group_id",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "analytics_group_id",
-									"type": "Int64",
-									"physicalType": "bigint"
-								}
-							},
-							{
-								"source": {
-									"name": "date",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "date",
-									"type": "String",
-									"physicalType": "char"
-								}
-							},
-							{
-								"source": {
-									"name": "external_referring_domain",
-									"type": "String",
-									"physicalType": "String"
-								},
-								"sink": {
-									"name": "external_referring_domain",
-									"type": "String",
-									"physicalType": "nvarchar"
-								}
-							},
-							{
-								"source": {
-									"name": "bounce_rate",
-									"type": "String",
-									"physicalType": "String"
+									"path": "$['item']['bounce_rate']"
 								},
 								"sink": {
 									"name": "bounce_rate",
-									"type": "Decimal",
-									"physicalType": "decimal",
-									"scale": 2,
-									"precision": 9
+									"type": "Decimal"
 								}
 							},
 							{
 								"source": {
-									"name": "visits",
-									"type": "String",
-									"physicalType": "String"
+									"path": "$['item']['external_referring_domain']"
+								},
+								"sink": {
+									"name": "external_referring_domain",
+									"type": "String"
+								}
+							},
+							{
+								"source": {
+									"path": "$['item']['visits']"
 								},
 								"sink": {
 									"name": "visits",
-									"type": "Int64",
-									"physicalType": "bigint"
+									"type": "Int64"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_group_id']"
+								},
+								"sink": {
+									"name": "analytics_group_id",
+									"type": "Int64"
 								}
 							}
-						],
-						"typeConversion": true,
-						"typeConversionSettings": {
-							"allowDataTruncation": true,
-							"treatBooleanAsNumber": false
-						}
+						]
 					}
 				},
 				"inputs": [
 					{
-						"referenceName": "RootFolderDataset",
+						"referenceName": "RootJsonFolderDataset",
 						"type": "DatasetReference"
 					}
 				],
