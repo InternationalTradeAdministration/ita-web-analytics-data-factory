@@ -1,87 +1,7 @@
 {
-	"name": "ExtractAnalyticsHistoricalMetricsByPeriod",
+	"name": "ExtractAnalyticsHistoricalMetricsByGroupIdPeriod",
 	"properties": {
 		"activities": [
-			{
-				"name": "LookupAnalyticsGroups",
-				"type": "Lookup",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
-						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
-					},
-					"dataset": {
-						"referenceName": "AnalyticsGroupsCsvDataset",
-						"type": "DatasetReference"
-					},
-					"firstRowOnly": false
-				}
-			},
-			{
-				"name": "AnalyticsGroup",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "LookupAnalyticsGroups",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
-						"activity": "ExtractByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('LookupAnalyticsGroups').output.value",
-						"type": "Expression"
-					},
-					"activities": [
-						{
-							"name": "ExtractByGroupIdPeriod",
-							"type": "ExecutePipeline",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "ExtractAnalyticsHistoricalMetricsByGroupIdPeriod",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"GroupId": {
-										"value": "@item().id",
-										"type": "Expression"
-									},
-									"Period": {
-										"value": "@pipeline().parameters.Period",
-										"type": "Expression"
-									}
-								}
-							}
-						}
-					]
-				}
-			},
 			{
 				"name": "LookupAnalyticsFilters",
 				"type": "Lookup",
@@ -117,12 +37,6 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "AnalyticsGroup",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					},
-					{
 						"activity": "LookupAnalyticsFilters",
 						"dependencyConditions": [
 							"Succeeded"
@@ -137,7 +51,7 @@
 					},
 					"activities": [
 						{
-							"name": "ExtractByFilterIdPeriod",
+							"name": "ExtractByGroupIdFilterIdPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
@@ -148,7 +62,10 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
-									"GroupId": "1",
+									"GroupId": {
+										"value": "@pipeline().parameters.GroupId",
+										"type": "Expression"
+									},
 									"FilterId": {
 										"value": "@item().id",
 										"type": "Expression"
@@ -158,7 +75,7 @@
 										"type": "Expression"
 									},
 									"QueryString": {
-										"value": "filter_id=@{item().id}&period=@{pipeline().parameters.Period}",
+										"value": "group_id=@{pipeline().parameters.GroupId}&filter_id=@{item().id}&period=@{pipeline().parameters.Period}",
 										"type": "Expression"
 									}
 								}
@@ -168,7 +85,7 @@
 				}
 			},
 			{
-				"name": "ExtractByPeriod",
+				"name": "ExtractByGroupIdPeriod",
 				"type": "ExecutePipeline",
 				"dependsOn": [],
 				"userProperties": [],
@@ -179,14 +96,17 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
-						"GroupId": "1",
+						"GroupId": {
+							"value": "@pipeline().parameters.GroupId",
+							"type": "Expression"
+						},
 						"FilterId": "1",
 						"Period": {
 							"value": "@pipeline().parameters.Period",
 							"type": "Expression"
 						},
 						"QueryString": {
-							"value": "period=@{pipeline().parameters.Period}",
+							"value": "group_id=@{pipeline().parameters.GroupId}&period=@{pipeline().parameters.Period}",
 							"type": "Expression"
 						}
 					}
@@ -194,6 +114,9 @@
 			}
 		],
 		"parameters": {
+			"GroupId": {
+				"type": "string"
+			},
 			"Period": {
 				"type": "string"
 			}
