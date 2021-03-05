@@ -170,7 +170,7 @@
 							],
 							"outputs": [
 								{
-									"referenceName": "AnalyticsHistoricalMetricsByPeriodCsvDataset",
+									"referenceName": "AnalyticsHistoricalMetricsByGroupIdPeriodCsvDataset",
 									"type": "DatasetReference",
 									"parameters": {
 										"Period": {
