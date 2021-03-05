@@ -1,5 +1,5 @@
 {
-	"name": "RebuildByAnalyticsGroups",
+	"name": "RebuildAnalyticsDatasetsByAnalyticsGroup",
 	"properties": {
 		"activities": [
 			{
