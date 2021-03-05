@@ -1,5 +1,5 @@
 {
-	"name": "ExtractAnalyticsHistoricalMetrics",
+	"name": "ResetAnalyticsHistoricalMetrics",
 	"properties": {
 		"activities": [
 			{

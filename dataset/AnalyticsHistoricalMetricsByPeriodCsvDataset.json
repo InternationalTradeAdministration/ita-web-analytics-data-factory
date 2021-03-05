@@ -11,6 +11,9 @@
 			},
 			"FileName": {
 				"type": "string"
+			},
+			"GroupId": {
+				"type": "string"
 			}
 		},
 		"folder": {
@@ -22,11 +25,11 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "@{dataset().FileName}",
+					"value": "@{dataset().FileName}.csv",
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "analytics_historical_metrics/@{dataset().Period}",
+					"value": "analytics_historical_metrics/@{dataset().GroupId}/@{dataset().Period}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"

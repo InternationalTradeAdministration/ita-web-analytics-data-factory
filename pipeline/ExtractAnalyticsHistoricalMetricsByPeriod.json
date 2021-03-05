@@ -159,10 +159,8 @@
 								"value": "@{pipeline().parameters.Period}",
 								"type": "Expression"
 							},
-							"FileName": {
-								"value": "analytics_group_1_analytics_filter_1.csv",
-								"type": "Expression"
-							}
+							"FileName": "analytics_group_1_analytics_filter_1.csv",
+							"GroupId": "1"
 						}
 					}
 				]
