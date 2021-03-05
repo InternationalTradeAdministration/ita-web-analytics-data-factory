@@ -1,15 +1,15 @@
 {
-	"name": "MonthlyAnalyticsOutboundLinkMetricsByPeriodCsvDataset",
+	"name": "MonthlyAnalyticsExternalReferringDomainMetricsDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"Period": {
+			"GroupId": {
 				"type": "string"
 			},
-			"FileName": {
+			"Period": {
 				"type": "string"
 			}
 		},
@@ -17,25 +17,21 @@
 			"name": "analytics"
 		},
 		"annotations": [],
-		"type": "DelimitedText",
+		"type": "Json",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "@{dataset().FileName}",
+					"value": "@{dataset().Period}.json",
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "monthly_analytics_outbound_link_metrics/@{dataset().Period}",
+					"value": "monthly_analytics_external_referring_domain_metrics/analytics_group_@{dataset().GroupId}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"
-			},
-			"columnDelimiter": ",",
-			"escapeChar": "\\",
-			"firstRowAsHeader": true,
-			"quoteChar": "\""
+			}
 		},
-		"schema": []
+		"schema": {}
 	}
 }

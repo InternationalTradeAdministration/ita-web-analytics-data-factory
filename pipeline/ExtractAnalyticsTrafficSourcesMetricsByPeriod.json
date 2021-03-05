@@ -3,207 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ExtractByPeriod",
-				"type": "Copy",
-				"dependsOn": [
-					{
-						"activity": "PeriodFolderExists",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 1,
-					"retryIntervalInSeconds": 60,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"source": {
-						"type": "RestSource",
-						"additionalColumns": [
-							{
-								"name": "analytics_group_id",
-								"value": "1"
-							},
-							{
-								"name": "analytics_filter_id",
-								"value": "1"
-							}
-						],
-						"httpRequestTimeout": "00:01:40",
-						"requestInterval": "00.00:00:00.010",
-						"requestMethod": "GET"
-					},
-					"sink": {
-						"type": "DelimitedTextSink",
-						"storeSettings": {
-							"type": "AzureBlobStorageWriteSettings"
-						},
-						"formatSettings": {
-							"type": "DelimitedTextWriteSettings",
-							"quoteAllText": true,
-							"fileExtension": ".txt"
-						}
-					},
-					"enableStaging": false,
-					"translator": {
-						"type": "TabularTranslator",
-						"mappings": [
-							{
-								"source": {
-									"path": "['direct_traffic']"
-								},
-								"sink": {
-									"name": "direct_traffic",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "['external_referrer']"
-								},
-								"sink": {
-									"name": "external_referrer",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "['search_domain']"
-								},
-								"sink": {
-									"name": "search_domain",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "['social_media']"
-								},
-								"sink": {
-									"name": "social_media",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "['timestamp']"
-								},
-								"sink": {
-									"name": "timestamp",
-									"type": "String"
-								}
-							},
-							{
-								"source": {
-									"path": "$['analytics_group_id']"
-								},
-								"sink": {
-									"name": "analytics_group_id",
-									"type": "Int64"
-								}
-							},
-							{
-								"source": {
-									"path": "$['analytics_filter_id']"
-								},
-								"sink": {
-									"name": "analytics_filter_id",
-									"type": "Int64"
-								}
-							}
-						],
-						"collectionReference": "$['items']"
-					}
-				},
-				"inputs": [
-					{
-						"referenceName": "AnalyticsTrafficSourcesMetricsRestDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"QueryString": {
-								"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}",
-								"type": "Expression"
-							}
-						}
-					}
-				],
-				"outputs": [
-					{
-						"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodCsvDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@{pipeline().parameters.Period}",
-								"type": "Expression"
-							},
-							"FileName": {
-								"value": "analytics_group_1_analytics_filter_1.csv",
-								"type": "Expression"
-							}
-						}
-					}
-				]
-			},
-			{
-				"name": "ExtractByPeriodGroupId",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExtractByPeriod",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByGroupId",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@{pipeline().parameters.Period}",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "ExtractByPeriodFilterId",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "ExtractByPeriodGroupId",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByFilterId",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@{pipeline().parameters.Period}",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "PeriodFolder",
-				"type": "GetMetadata",
+				"name": "LookupAnalyticsGroups",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -214,34 +15,35 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataset": {
-						"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodFolderDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@pipeline().parameters.Period",
-								"type": "Expression"
-							}
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
 						}
 					},
-					"fieldList": [
-						"exists"
-					],
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true
+					"dataset": {
+						"referenceName": "AnalyticsGroupsCsvDataset",
+						"type": "DatasetReference"
 					},
-					"formatSettings": {
-						"type": "DelimitedTextReadSettings"
-					}
+					"firstRowOnly": false
 				}
 			},
 			{
-				"name": "PeriodFolderExists",
-				"type": "IfCondition",
+				"name": "AnalyticsGroup",
+				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "PeriodFolder",
+						"activity": "LookupAnalyticsGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "ExtractByPeriod",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -249,42 +51,148 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"expression": {
-						"value": "@equals(activity('PeriodFolder').output.exists, true)",
+					"items": {
+						"value": "@activity('LookupAnalyticsGroups').output.value",
 						"type": "Expression"
 					},
-					"ifTrueActivities": [
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
 						{
-							"name": "DeletePeriodFolder",
-							"type": "Delete",
+							"name": "ExtractByGroupIdPeriod",
+							"type": "ExecutePipeline",
 							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
 							"userProperties": [],
 							"typeProperties": {
-								"dataset": {
-									"referenceName": "AnalyticsTrafficSourcesMetricsByPeriodFolderDataset",
-									"type": "DatasetReference",
-									"parameters": {
-										"Period": {
-											"value": "@pipeline().parameters.Period",
-											"type": "Expression"
-										}
-									}
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByGroupIdPeriod",
+									"type": "PipelineReference"
 								},
-								"enableLogging": false,
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"GroupId": {
+										"value": "@item().id",
+										"type": "Expression"
+									},
+									"Period": {
+										"value": "@pipeline().parameters.Period",
+										"type": "Expression"
+									}
 								}
 							}
 						}
 					]
+				}
+			},
+			{
+				"name": "LookupAnalyticsFilters",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "AnalyticsFiltersCsvDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "AnalyticsFilter",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "AnalyticsGroup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "LookupAnalyticsFilters",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupAnalyticsFilters').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExtractByFilterIdPeriod",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByParameters",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"GroupId": "1",
+									"FilterId": {
+										"value": "@item().id",
+										"type": "Expression"
+									},
+									"Period": {
+										"value": "@pipeline().parameters.Period",
+										"type": "Expression"
+									},
+									"QueryString": {
+										"value": "filter_id=@{item().id}&period=@{pipeline().parameters.Period}",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "ExtractByPeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByParameters",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"GroupId": "1",
+						"FilterId": "1",
+						"Period": {
+							"value": "@pipeline().parameters.Period",
+							"type": "Expression"
+						},
+						"QueryString": {
+							"value": "period=@{pipeline().parameters.Period}",
+							"type": "Expression"
+						}
+					}
 				}
 			}
 		],

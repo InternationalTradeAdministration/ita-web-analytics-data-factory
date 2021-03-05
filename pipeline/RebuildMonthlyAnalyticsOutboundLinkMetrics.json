@@ -1,9 +1,9 @@
 {
-	"name": "ExtractMonthlyAnalyticsOutboundLinkMetrics",
+	"name": "RebuildMonthlyAnalyticsOutboundLinkMetrics",
 	"properties": {
 		"activities": [
 			{
-				"name": "LookupDateRangePeriods",
+				"name": "GenerateDateRangePeriods",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -16,19 +16,29 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": false,
-							"wildcardFileName": "date_range_periods.csv",
-							"enablePartitionDiscovery": false
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[web_analytics].[generate_date_range_periods]",
+						"storedProcedureParameters": {
+							"end_date": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.EndDate",
+									"type": "Expression"
+								}
+							},
+							"start_date": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.StartDate",
+									"type": "Expression"
+								}
+							}
 						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"dataset": {
-						"referenceName": "RootFolderDataset",
+						"referenceName": "SqlDataset",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
@@ -39,7 +49,7 @@
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "LookupDateRangePeriods",
+						"activity": "GenerateDateRangePeriods",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -48,10 +58,10 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('LookupDateRangePeriods').output.value",
+						"value": "@activity('GenerateDateRangePeriods').output.value",
 						"type": "Expression"
 					},
-					"isSequential": true,
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
@@ -76,6 +86,14 @@
 				}
 			}
 		],
+		"parameters": {
+			"StartDate": {
+				"type": "string"
+			},
+			"EndDate": {
+				"type": "string"
+			}
+		},
 		"folder": {
 			"name": "analytics"
 		},

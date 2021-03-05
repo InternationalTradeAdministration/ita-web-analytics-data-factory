@@ -1,12 +1,12 @@
 {
-	"name": "AnalyticsTrafficSourcesMetricsByPeriodFolderDataset",
+	"name": "MonthlyAnalyticsOutboundLinkMetricsByGroupIdFolderDataset",
 	"properties": {
 		"linkedServiceName": {
 			"referenceName": "AzureBlobStorageLinkedService",
 			"type": "LinkedServiceReference"
 		},
 		"parameters": {
-			"Period": {
+			"GroupId": {
 				"type": "string"
 			}
 		},
@@ -14,21 +14,17 @@
 			"name": "analytics"
 		},
 		"annotations": [],
-		"type": "DelimitedText",
+		"type": "Json",
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"folderPath": {
-					"value": "analytics_traffic_sources_metrics/@{dataset().Period}",
+					"value": "monthly_analytics_outbound_link_metrics/analytics_group_@{dataset().GroupId}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"
-			},
-			"columnDelimiter": ",",
-			"escapeChar": "\\",
-			"firstRowAsHeader": true,
-			"quoteChar": "\""
+			}
 		},
-		"schema": []
+		"schema": {}
 	}
 }

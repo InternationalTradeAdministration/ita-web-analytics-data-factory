@@ -1,9 +1,9 @@
 {
-	"name": "ExtractMonthlyAnalyticsOutboundLinkMetricsByGroupId",
+	"name": "RebuildMonthlyAnalyticsExternalReferringDomainMetrics",
 	"properties": {
 		"activities": [
 			{
-				"name": "LookupAnalyticsGroups",
+				"name": "GenerateDateRangePeriods",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -16,28 +16,40 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
-						"storeSettings": {
-							"type": "AzureBlobStorageReadSettings",
-							"recursive": true
+						"type": "AzureSqlSource",
+						"sqlReaderStoredProcedureName": "[web_analytics].[generate_date_range_periods]",
+						"storedProcedureParameters": {
+							"end_date": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.EndDate",
+									"type": "Expression"
+								}
+							},
+							"start_date": {
+								"type": "String",
+								"value": {
+									"value": "@pipeline().parameters.StartDate",
+									"type": "Expression"
+								}
+							}
 						},
-						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
-						}
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
 					},
 					"dataset": {
-						"referenceName": "AnalyticsGroupsCsvDataset",
+						"referenceName": "SqlDataset",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
 				}
 			},
 			{
-				"name": "AnalyticsGroup",
+				"name": "DateRangePeriod",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "LookupAnalyticsGroups",
+						"activity": "GenerateDateRangePeriods",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -46,34 +58,25 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('LookupAnalyticsGroups').output.value",
+						"value": "@activity('GenerateDateRangePeriods').output.value",
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 30,
 					"activities": [
 						{
-							"name": "ExecuteExtractByGroupId",
+							"name": "ExtractByPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
 							"typeProperties": {
 								"pipeline": {
-									"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetricsByParameters",
+									"referenceName": "ExtractMonthlyAnalyticsExternalReferringDomainMetricsByPeriod",
 									"type": "PipelineReference"
 								},
 								"waitOnCompletion": true,
 								"parameters": {
 									"Period": {
-										"value": "@pipeline().parameters.Period",
-										"type": "Expression"
-									},
-									"AnalyticsGroupId": {
-										"value": "@{item().id}",
-										"type": "Expression"
-									},
-									"QueryString": {
-										"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&group_id=@{item().id}",
+										"value": "@{item().date_range_period}",
 										"type": "Expression"
 									}
 								}
@@ -84,7 +87,10 @@
 			}
 		],
 		"parameters": {
-			"Period": {
+			"StartDate": {
+				"type": "string"
+			},
+			"EndDate": {
 				"type": "string"
 			}
 		},
