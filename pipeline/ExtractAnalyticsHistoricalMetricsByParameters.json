@@ -55,10 +55,10 @@
 						"mappings": [
 							{
 								"source": {
-									"path": "[*]"
+									"path": "[$]"
 								},
 								"sink": {
-									"path": "[*]"
+									"path": "$"
 								}
 							},
 							{
