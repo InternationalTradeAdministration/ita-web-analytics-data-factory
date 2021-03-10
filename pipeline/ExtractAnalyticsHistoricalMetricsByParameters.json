@@ -58,7 +58,7 @@
 									"path": "$['items']"
 								},
 								"sink": {
-									"path": "$."
+									"path": "$[*]"
 								}
 							},
 							{
@@ -77,7 +77,8 @@
 									"path": "$['analytics_filter_id']"
 								}
 							}
-						]
+						],
+						"collectionReference": ""
 					}
 				},
 				"inputs": [
