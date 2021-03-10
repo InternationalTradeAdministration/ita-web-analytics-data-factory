@@ -1,0 +1,133 @@
+{
+	"name": "ExtractAnalyticsHistoricalMetricsByParameters",
+	"properties": {
+		"activities": [
+			{
+				"name": "ExtractAnalyticsHistoricalMetrics",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 1,
+					"retryIntervalInSeconds": 60,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"additionalColumns": [
+							{
+								"name": "analytics_group_id",
+								"value": {
+									"value": "@pipeline().parameters.GroupId",
+									"type": "Expression"
+								}
+							},
+							{
+								"name": "analytics_filter_id",
+								"value": {
+									"value": "@pipeline().parameters.FilterId",
+									"type": "Expression"
+								}
+							}
+						],
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"AbsoluteUrl": "$.links.next.href"
+						}
+					},
+					"sink": {
+						"type": "JsonSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "JsonWriteSettings"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"mappings": [
+							{
+								"source": {
+									"path": "$['analytics_group_id']"
+								},
+								"sink": {
+									"path": "$['analytics_group_id']"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_filter_id']"
+								},
+								"sink": {
+									"path": "$['analytics_filter_id']"
+								}
+							}
+						],
+						"collectionReference": "$['items']"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "AnalyticsHistoricalMetricsRestDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"QueryString": {
+								"value": "period=@{pipeline().parameters.Period}&@{pipeline().parameters.QueryString}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "AnalyticsHistoricalMetricsDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"GroupId": {
+								"value": "@pipeline().parameters.GroupId",
+								"type": "Expression"
+							},
+							"Period": {
+								"value": "@pipeline().parameters.Period",
+								"type": "Expression"
+							},
+							"FileName": {
+								"value": "@pipeline().parameters.FileName",
+								"type": "Expression"
+							}
+						}
+					}
+				]
+			}
+		],
+		"concurrency": 10,
+		"parameters": {
+			"GroupId": {
+				"type": "string"
+			},
+			"FilterId": {
+				"type": "string"
+			},
+			"Period": {
+				"type": "string"
+			},
+			"FileName": {
+				"type": "string"
+			},
+			"QueryString": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": []
+	}
+}
