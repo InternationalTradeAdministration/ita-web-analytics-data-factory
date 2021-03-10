@@ -99,7 +99,7 @@
 								"type": "Expression"
 							},
 							"FileName": {
-								"value": "@pipeline().parameters.FileName",
+								"value": "@{pipeline().parameters.GroupId}_@{pipeline().parameters.FilterId}_@{pipeline().parameters.Period}.json",
 								"type": "Expression"
 							}
 						}
@@ -116,9 +116,6 @@
 				"type": "string"
 			},
 			"Period": {
-				"type": "string"
-			},
-			"FileName": {
 				"type": "string"
 			},
 			"QueryString": {
