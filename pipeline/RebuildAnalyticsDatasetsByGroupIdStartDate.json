@@ -94,6 +94,10 @@
 						"GroupId": {
 							"value": "@pipeline().parameters.GroupId",
 							"type": "Expression"
+						},
+						"DateRangePeriods": {
+							"value": "@activity('GenerateDateRangePeriods').output.value",
+							"type": "Expression"
 						}
 					}
 				}
