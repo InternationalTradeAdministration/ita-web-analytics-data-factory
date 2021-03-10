@@ -1,5 +1,5 @@
 {
-	"name": "ExtractAnalyticsHistoricalMetricsByGroupIdDateRangePeriods",
+	"name": "RebuildAnalyticsHistoricalMetricsByGroupIdDateRangePeriods",
 	"properties": {
 		"activities": [
 			{

@@ -73,7 +73,7 @@
 				}
 			},
 			{
-				"name": "ExtractAnalyticsHistoricalMetricsByGroupIdPeriods",
+				"name": "RebuildAnalyticsHistoricalMetricsByGroupIdPeriods",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -86,7 +86,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "ExtractAnalyticsHistoricalMetricsByGroupIdDateRangePeriods",
+						"referenceName": "RebuildAnalyticsHistoricalMetricsByGroupIdDateRangePeriods",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,
