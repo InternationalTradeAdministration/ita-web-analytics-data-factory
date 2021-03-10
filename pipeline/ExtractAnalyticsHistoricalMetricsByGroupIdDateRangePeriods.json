@@ -1,15 +1,15 @@
 {
-	"name": "ExtractAnalyticsHistoricalMetricsByGroupIdPeriods",
+	"name": "ExtractAnalyticsHistoricalMetricsByGroupIdDateRangePeriods",
 	"properties": {
 		"activities": [
 			{
-				"name": "Period",
+				"name": "DateRangePeriod",
 				"type": "ForEach",
 				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@pipeline().parameters.Periods",
+						"value": "@pipeline().parameters.DateRangePeriods",
 						"type": "Expression"
 					},
 					"batchCount": 5,
@@ -31,7 +31,7 @@
 										"type": "Expression"
 									},
 									"Period": {
-										"value": "@item()",
+										"value": "@item().date_range_period",
 										"type": "Expression"
 									}
 								}
@@ -45,7 +45,7 @@
 			"GroupId": {
 				"type": "string"
 			},
-			"Periods": {
+			"DateRangePeriods": {
 				"type": "array"
 			}
 		},
