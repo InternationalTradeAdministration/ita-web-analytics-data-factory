@@ -55,26 +55,10 @@
 						"mappings": [
 							{
 								"source": {
-									"path": "[$]"
-								},
-								"sink": {
-									"path": "$"
-								}
-							},
-							{
-								"source": {
 									"path": "$['analytics_group_id']"
 								},
 								"sink": {
-									"path": "$['analytics_group_id']"
-								}
-							},
-							{
-								"source": {
-									"path": "$['analytics_filter_id']"
-								},
-								"sink": {
-									"path": "$['analytics_filter_id']"
+									"path": "analytics_group_id"
 								}
 							}
 						],
