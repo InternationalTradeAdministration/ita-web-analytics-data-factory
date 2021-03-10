@@ -55,10 +55,10 @@
 						"mappings": [
 							{
 								"source": {
-									"path": "$['items']"
+									"path": "[*]"
 								},
 								"sink": {
-									"path": "$[*]"
+									"path": "[*]"
 								}
 							},
 							{
@@ -78,7 +78,7 @@
 								}
 							}
 						],
-						"collectionReference": ""
+						"collectionReference": "$['items']"
 					}
 				},
 				"inputs": [
