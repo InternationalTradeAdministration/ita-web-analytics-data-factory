@@ -55,6 +55,14 @@
 						"mappings": [
 							{
 								"source": {
+									"path": "$"
+								},
+								"sink": {
+									"path": "$"
+								}
+							},
+							{
+								"source": {
 									"path": "$['analytics_group_id']"
 								},
 								"sink": {
@@ -98,7 +106,7 @@
 								"value": "@pipeline().parameters.Period",
 								"type": "Expression"
 							},
-							"FileName": {
+							"FilterId": {
 								"value": "@{pipeline().parameters.GroupId}_@{pipeline().parameters.FilterId}_@{pipeline().parameters.Period}.json",
 								"type": "Expression"
 							}

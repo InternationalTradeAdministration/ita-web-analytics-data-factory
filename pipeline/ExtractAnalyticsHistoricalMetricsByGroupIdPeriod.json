@@ -160,7 +160,7 @@
 								"value": "@pipeline().parameters.Period",
 								"type": "Expression"
 							},
-							"FileName": {
+							"FilterId": {
 								"value": "analytics_group_@{pipeline().parameters.GroupId}.json",
 								"type": "Expression"
 							}
@@ -377,7 +377,7 @@
 											"value": "@pipeline().parameters.Period",
 											"type": "Expression"
 										},
-										"FileName": {
+										"FilterId": {
 											"value": "analytics_group_@{pipeline().parameters.GroupId}_analytics_filter_@{item().id}.json",
 											"type": "Expression"
 										}

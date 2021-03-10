@@ -12,7 +12,7 @@
 			"Period": {
 				"type": "string"
 			},
-			"FileName": {
+			"FilterId": {
 				"type": "string"
 			}
 		},
@@ -22,11 +22,11 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "@dataset().FileName",
+					"value": "analytics_filter_@{dataset().FilterId}.json",
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "analytics_historical_metrics/@{dataset().GroupId}/@{dataset().Period}",
+					"value": "analytics_historical_metrics/analytics_group_@{dataset().GroupId}/@{dataset().Period}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"
