@@ -71,6 +71,36 @@
 					},
 					"firstRowOnly": false
 				}
+			},
+			{
+				"name": "ExtractAnalyticsHistoricalMetricsByGroupIdPeriods",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "GenerateDateRangePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractAnalyticsHistoricalMetricsByGroupIdPeriods",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"GroupId": {
+							"value": "@pipeline().parameters.GroupId",
+							"type": "Expression"
+						},
+						"Periods": {
+							"value": "@activity('GenerateDateRangePeriods').output.value",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
