@@ -61,14 +61,6 @@
 								"sink": {
 									"path": "analytics_group_id"
 								}
-							},
-							{
-								"source": {
-									"path": "$['analytics_filter_id']"
-								},
-								"sink": {
-									"path": "analytics_filter_id"
-								}
 							}
 						],
 						"collectionReference": "$['items']"
