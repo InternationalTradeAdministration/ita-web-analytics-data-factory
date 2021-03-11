@@ -64,7 +64,7 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "ExecuteExtractAnalyticsHistoricalMetricsByPeriod",
+							"name": "ExtractAnalyticsHistoricalMetricsByPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
