@@ -1,0 +1,30 @@
+{
+	"name": "MonthlyAnalyticsExternalReferringDomainMetricsByGroupIdFolderDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"GroupId": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": {
+					"value": "monthly_analytics_external_referring_domain_metrics/analytics_group_@{dataset().GroupId}",
+					"type": "Expression"
+				},
+				"container": "ita-web-analytics"
+			}
+		},
+		"schema": {}
+	}
+}
