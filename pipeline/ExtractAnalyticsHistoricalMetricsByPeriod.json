@@ -55,6 +55,8 @@
 						"value": "@activity('LookupAnalyticsGroups').output.value",
 						"type": "Expression"
 					},
+					"isSequential": false,
+					"batchCount": 5,
 					"activities": [
 						{
 							"name": "ExtractByGroupIdPeriod",
@@ -135,6 +137,7 @@
 						"value": "@activity('LookupAnalyticsFilters').output.value",
 						"type": "Expression"
 					},
+					"isSequential": false,
 					"activities": [
 						{
 							"name": "ExtractByFilterIdPeriod",
