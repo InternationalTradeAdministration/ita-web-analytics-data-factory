@@ -22,7 +22,7 @@
 					"batchCount": 3,
 					"activities": [
 						{
-							"name": "ExtractAnalyticsHistoricalMetricsByGroupIdPeriod",
+							"name": "ExtractByGroupIdPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
