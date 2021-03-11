@@ -64,7 +64,7 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "ExecuteExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
+							"name": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
