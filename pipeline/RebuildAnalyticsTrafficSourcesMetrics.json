@@ -1,48 +1,7 @@
 {
-	"name": "ExtractAnalyticsTrafficSourcesMetrics",
+	"name": "RebuildAnalyticsTrafficSourcesMetrics",
 	"properties": {
 		"activities": [
-			{
-				"name": "DateRangePeriod",
-				"type": "ForEach",
-				"dependsOn": [
-					{
-						"activity": "GenerateDateRangePeriods",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"items": {
-						"value": "@activity('GenerateDateRangePeriods').output.value",
-						"type": "Expression"
-					},
-					"isSequential": true,
-					"activities": [
-						{
-							"name": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
-							"type": "ExecutePipeline",
-							"dependsOn": [],
-							"userProperties": [],
-							"typeProperties": {
-								"pipeline": {
-									"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
-									"type": "PipelineReference"
-								},
-								"waitOnCompletion": true,
-								"parameters": {
-									"Period": {
-										"value": "@{item().date_range_period}",
-										"type": "Expression"
-									}
-								}
-							}
-						}
-					]
-				}
-			},
 			{
 				"name": "GenerateDateRangePeriods",
 				"type": "Lookup",
@@ -83,6 +42,47 @@
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "DateRangePeriod",
+				"type": "ForEach",
+				"dependsOn": [
+					{
+						"activity": "GenerateDateRangePeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('GenerateDateRangePeriods').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Period": {
+										"value": "@{item().date_range_period}",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
 				}
 			}
 		],
