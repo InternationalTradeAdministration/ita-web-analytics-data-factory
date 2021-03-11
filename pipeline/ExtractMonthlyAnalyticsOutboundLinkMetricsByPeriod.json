@@ -3,34 +3,8 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ExtractByPeriodGroupId",
-				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "If Period Folder exists",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"pipeline": {
-						"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetricsByGroupId",
-						"type": "PipelineReference"
-					},
-					"waitOnCompletion": true,
-					"parameters": {
-						"Period": {
-							"value": "@{pipeline().parameters.Period}",
-							"type": "Expression"
-						}
-					}
-				}
-			},
-			{
-				"name": "Period Folder",
-				"type": "GetMetadata",
+				"name": "LookupAnalyticsGroups",
+				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
 					"timeout": "7.00:00:00",
@@ -41,34 +15,35 @@
 				},
 				"userProperties": [],
 				"typeProperties": {
-					"dataset": {
-						"referenceName": "MonthlyAnalyticsOutboundLinkMetricsByPeriodFolderDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@pipeline().parameters.Period",
-								"type": "Expression"
-							}
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
 						}
 					},
-					"fieldList": [
-						"exists"
-					],
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true
+					"dataset": {
+						"referenceName": "AnalyticsGroupsCsvDataset",
+						"type": "DatasetReference"
 					},
-					"formatSettings": {
-						"type": "DelimitedTextReadSettings"
-					}
+					"firstRowOnly": false
 				}
 			},
 			{
-				"name": "If Period Folder exists",
-				"type": "IfCondition",
+				"name": "AnalyticsGroup",
+				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "Period Folder",
+						"activity": "LookupAnalyticsGroups",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "ExtractByPeriod",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -76,38 +51,33 @@
 				],
 				"userProperties": [],
 				"typeProperties": {
-					"expression": {
-						"value": "@equals(activity('Period Folder').output.exists, true)",
+					"items": {
+						"value": "@activity('LookupAnalyticsGroups').output.value",
 						"type": "Expression"
 					},
-					"ifTrueActivities": [
+					"isSequential": false,
+					"batchCount": 5,
+					"activities": [
 						{
-							"name": "Delete Period Folder",
-							"type": "Delete",
+							"name": "ExtractByGroupIdPeriod",
+							"type": "ExecutePipeline",
 							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
 							"userProperties": [],
 							"typeProperties": {
-								"dataset": {
-									"referenceName": "MonthlyAnalyticsOutboundLinkMetricsByPeriodFolderDataset",
-									"type": "DatasetReference",
-									"parameters": {
-										"Period": {
-											"value": "@{pipeline().parameters.Period}",
-											"type": "Expression"
-										}
-									}
+								"pipeline": {
+									"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetricsByGroupIdPeriod",
+									"type": "PipelineReference"
 								},
-								"enableLogging": false,
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true
+								"waitOnCompletion": true,
+								"parameters": {
+									"GroupId": {
+										"value": "@item().id",
+										"type": "Expression"
+									},
+									"Period": {
+										"value": "@pipeline().parameters.Period",
+										"type": "Expression"
+									}
 								}
 							}
 						}
@@ -115,16 +85,95 @@
 				}
 			},
 			{
-				"name": "ExecuteExtractByPeriod",
-				"type": "ExecutePipeline",
+				"name": "LookupAnalyticsFilters",
+				"type": "Lookup",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"dataset": {
+						"referenceName": "AnalyticsFiltersCsvDataset",
+						"type": "DatasetReference"
+					},
+					"firstRowOnly": false
+				}
+			},
+			{
+				"name": "AnalyticsFilter",
+				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "If Period Folder exists",
+						"activity": "AnalyticsGroup",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					},
+					{
+						"activity": "LookupAnalyticsFilters",
 						"dependencyConditions": [
 							"Succeeded"
 						]
 					}
 				],
+				"userProperties": [],
+				"typeProperties": {
+					"items": {
+						"value": "@activity('LookupAnalyticsFilters').output.value",
+						"type": "Expression"
+					},
+					"isSequential": false,
+					"activities": [
+						{
+							"name": "ExtractByFilterIdPeriod",
+							"type": "ExecutePipeline",
+							"dependsOn": [],
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetricsByParameters",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"GroupId": "1",
+									"FilterId": {
+										"value": "@item().id",
+										"type": "Expression"
+									},
+									"Period": {
+										"value": "@pipeline().parameters.Period",
+										"type": "Expression"
+									},
+									"QueryString": {
+										"value": "filter_id=@{item().id}&period=@{pipeline().parameters.Period}",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "ExtractByPeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
@@ -133,13 +182,14 @@
 					},
 					"waitOnCompletion": true,
 					"parameters": {
+						"GroupId": "1",
+						"FilterId": "1",
 						"Period": {
 							"value": "@pipeline().parameters.Period",
 							"type": "Expression"
 						},
-						"AnalyticsGroupId": "1",
 						"QueryString": {
-							"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}",
+							"value": "period=@{pipeline().parameters.Period}",
 							"type": "Expression"
 						}
 					}

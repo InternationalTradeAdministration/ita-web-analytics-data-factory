@@ -1,9 +1,9 @@
 {
-	"name": "ExtractMonthlyAnalyticsOutboundLinkMetricsByGroupId",
+	"name": "ExtractMonthlyAnalyticsOutboundLinkMetricsByGroupIdPeriod",
 	"properties": {
 		"activities": [
 			{
-				"name": "LookupAnalyticsGroups",
+				"name": "LookupAnalyticsFilters",
 				"type": "Lookup",
 				"dependsOn": [],
 				"policy": {
@@ -26,18 +26,18 @@
 						}
 					},
 					"dataset": {
-						"referenceName": "AnalyticsGroupsCsvDataset",
+						"referenceName": "AnalyticsFiltersCsvDataset",
 						"type": "DatasetReference"
 					},
 					"firstRowOnly": false
 				}
 			},
 			{
-				"name": "AnalyticsGroup",
+				"name": "AnalyticsFilter",
 				"type": "ForEach",
 				"dependsOn": [
 					{
-						"activity": "LookupAnalyticsGroups",
+						"activity": "LookupAnalyticsFilters",
 						"dependencyConditions": [
 							"Succeeded"
 						]
@@ -46,14 +46,12 @@
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
-						"value": "@activity('LookupAnalyticsGroups').output.value",
+						"value": "@activity('LookupAnalyticsFilters').output.value",
 						"type": "Expression"
 					},
-					"isSequential": false,
-					"batchCount": 30,
 					"activities": [
 						{
-							"name": "ExecuteExtractByGroupId",
+							"name": "ExtractByGroupIdFilterIdPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
@@ -64,16 +62,20 @@
 								},
 								"waitOnCompletion": true,
 								"parameters": {
+									"GroupId": {
+										"value": "@pipeline().parameters.GroupId",
+										"type": "Expression"
+									},
+									"FilterId": {
+										"value": "@item().id",
+										"type": "Expression"
+									},
 									"Period": {
 										"value": "@pipeline().parameters.Period",
 										"type": "Expression"
 									},
-									"AnalyticsGroupId": {
-										"value": "@{item().id}",
-										"type": "Expression"
-									},
 									"QueryString": {
-										"value": "page=1&page_size=1000&period=@{pipeline().parameters.Period}&group_id=@{item().id}",
+										"value": "group_id=@{pipeline().parameters.GroupId}&filter_id=@{item().id}&period=@{pipeline().parameters.Period}",
 										"type": "Expression"
 									}
 								}
@@ -81,9 +83,40 @@
 						}
 					]
 				}
+			},
+			{
+				"name": "ExtractByGroupIdPeriod",
+				"type": "ExecutePipeline",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "ExtractMonthlyAnalyticsOutboundLinkMetricsByParameters",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"GroupId": {
+							"value": "@pipeline().parameters.GroupId",
+							"type": "Expression"
+						},
+						"FilterId": "1",
+						"Period": {
+							"value": "@pipeline().parameters.Period",
+							"type": "Expression"
+						},
+						"QueryString": {
+							"value": "group_id=@{pipeline().parameters.GroupId}&period=@{pipeline().parameters.Period}",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
+			"GroupId": {
+				"type": "string"
+			},
 			"Period": {
 				"type": "string"
 			}
@@ -92,6 +125,5 @@
 			"name": "analytics"
 		},
 		"annotations": []
-	},
-	"type": "Microsoft.DataFactory/factories/pipelines"
+	}
 }
