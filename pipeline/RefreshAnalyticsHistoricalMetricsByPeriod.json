@@ -3,92 +3,6 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "PeriodFolder",
-				"type": "GetMetadata",
-				"dependsOn": [],
-				"policy": {
-					"timeout": "7.00:00:00",
-					"retry": 0,
-					"retryIntervalInSeconds": 30,
-					"secureOutput": false,
-					"secureInput": false
-				},
-				"userProperties": [],
-				"typeProperties": {
-					"dataset": {
-						"referenceName": "AnalyticsHistoricalMetricsByPeriodFolderDataset",
-						"type": "DatasetReference",
-						"parameters": {
-							"Period": {
-								"value": "@pipeline().parameters.Period",
-								"type": "Expression"
-							}
-						}
-					},
-					"fieldList": [
-						"exists"
-					],
-					"storeSettings": {
-						"type": "AzureBlobStorageReadSettings",
-						"recursive": true
-					},
-					"formatSettings": {
-						"type": "DelimitedTextReadSettings"
-					}
-				}
-			},
-			{
-				"name": "PeriodFolderExists",
-				"type": "IfCondition",
-				"dependsOn": [
-					{
-						"activity": "PeriodFolder",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
-				"userProperties": [],
-				"typeProperties": {
-					"expression": {
-						"value": "@equals(activity('PeriodFolder').output.exists, true)",
-						"type": "Expression"
-					},
-					"ifTrueActivities": [
-						{
-							"name": "DeletePeriodFolder",
-							"type": "Delete",
-							"dependsOn": [],
-							"policy": {
-								"timeout": "7.00:00:00",
-								"retry": 0,
-								"retryIntervalInSeconds": 30,
-								"secureOutput": false,
-								"secureInput": false
-							},
-							"userProperties": [],
-							"typeProperties": {
-								"dataset": {
-									"referenceName": "AnalyticsHistoricalMetricsByPeriodFolderDataset",
-									"type": "DatasetReference",
-									"parameters": {
-										"Period": {
-											"value": "@pipeline().parameters.Period",
-											"type": "Expression"
-										}
-									}
-								},
-								"enableLogging": false,
-								"storeSettings": {
-									"type": "AzureBlobStorageReadSettings",
-									"recursive": true
-								}
-							}
-						}
-					]
-				}
-			},
-			{
 				"name": "LookupAnalyticsGroups",
 				"type": "Lookup",
 				"dependsOn": [],
@@ -256,14 +170,7 @@
 			{
 				"name": "ExtractByPeriod",
 				"type": "ExecutePipeline",
-				"dependsOn": [
-					{
-						"activity": "PeriodFolderExists",
-						"dependencyConditions": [
-							"Succeeded"
-						]
-					}
-				],
+				"dependsOn": [],
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
