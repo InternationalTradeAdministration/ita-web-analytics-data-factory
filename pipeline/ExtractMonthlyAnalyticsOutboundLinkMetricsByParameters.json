@@ -3,7 +3,7 @@
 	"properties": {
 		"activities": [
 			{
-				"name": "ExtractByPeriod",
+				"name": "ExtractMonthlyAnalyticsOutboundLinkMetrics",
 				"type": "Copy",
 				"dependsOn": [],
 				"policy": {
