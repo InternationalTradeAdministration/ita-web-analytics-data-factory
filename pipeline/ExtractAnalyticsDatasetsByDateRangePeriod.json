@@ -61,7 +61,7 @@
 				"userProperties": [],
 				"typeProperties": {
 					"pipeline": {
-						"referenceName": "RefreshAnalyticsHistoricalMetricsByPeriod",
+						"referenceName": "ExtractAnalyticsHistoricalMetricsByPeriod",
 						"type": "PipelineReference"
 					},
 					"waitOnCompletion": true,

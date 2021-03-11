@@ -1,5 +1,5 @@
 {
-	"name": "RefreshAnalyticsHistoricalMetricsByPeriod",
+	"name": "ExtractAnalyticsHistoricalMetricsByPeriod",
 	"properties": {
 		"activities": [
 			{
