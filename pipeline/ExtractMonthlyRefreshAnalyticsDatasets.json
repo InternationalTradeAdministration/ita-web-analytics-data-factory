@@ -48,7 +48,7 @@
 				}
 			},
 			{
-				"name": "ExecuteExtractMonthlyAnalyticsOutboundLinkMetrics",
+				"name": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
@@ -78,7 +78,7 @@
 				"type": "ExecutePipeline",
 				"dependsOn": [
 					{
-						"activity": "ExecuteExtractMonthlyAnalyticsOutboundLinkMetrics",
+						"activity": "ExtractMonthlyAnalyticsOutboundLinkMetricsByPeriod",
 						"dependencyConditions": [
 							"Succeeded"
 						]
