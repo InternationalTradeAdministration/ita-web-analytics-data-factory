@@ -115,7 +115,7 @@
 				]
 			}
 		],
-		"concurrency": 10,
+		"concurrency": 20,
 		"parameters": {
 			"GroupId": {
 				"type": "string"
