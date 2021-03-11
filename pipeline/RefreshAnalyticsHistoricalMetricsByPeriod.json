@@ -162,7 +162,7 @@
 					},
 					"activities": [
 						{
-							"name": "ExtractByAnalyticsGroupIdPeriod",
+							"name": "ExtractByGroupIdPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
