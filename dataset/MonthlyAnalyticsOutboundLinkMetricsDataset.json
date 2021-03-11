@@ -25,11 +25,11 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"fileName": {
-					"value": "analytics_filter_@{dataset().FilterId}.json",
+					"value": "@{dataset().Period}.json",
 					"type": "Expression"
 				},
 				"folderPath": {
-					"value": "monthly_analytics_outbound_link_metrics/analytics_group_@{dataset().GroupId}/@{dataset().Period}",
+					"value": "monthly_analytics_outbound_link_metrics/analytics_group_@{dataset().GroupId}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"
