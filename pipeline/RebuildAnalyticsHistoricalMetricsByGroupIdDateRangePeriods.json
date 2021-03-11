@@ -5,7 +5,14 @@
 			{
 				"name": "DateRangePeriod",
 				"type": "ForEach",
-				"dependsOn": [],
+				"dependsOn": [
+					{
+						"activity": "GroupIdFolderExists",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
 				"userProperties": [],
 				"typeProperties": {
 					"items": {
@@ -34,6 +41,92 @@
 										"value": "@item().date_range_period",
 										"type": "Expression"
 									}
+								}
+							}
+						}
+					]
+				}
+			},
+			{
+				"name": "GroupIdFolder",
+				"type": "GetMetadata",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataset": {
+						"referenceName": "AnalyticsHistoricalMetricsByGroupIdFolderDataset",
+						"type": "DatasetReference",
+						"parameters": {
+							"GroupId": {
+								"value": "@pipeline().parameters.GroupId",
+								"type": "Expression"
+							}
+						}
+					},
+					"fieldList": [
+						"exists"
+					],
+					"storeSettings": {
+						"type": "AzureBlobStorageReadSettings",
+						"recursive": true
+					},
+					"formatSettings": {
+						"type": "JsonReadSettings"
+					}
+				}
+			},
+			{
+				"name": "GroupIdFolderExists",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "GroupIdFolder",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@equals(activity('GroupIdFolder').output.exists, true)",
+						"type": "Expression"
+					},
+					"ifTrueActivities": [
+						{
+							"name": "DeleteGroupIdFolder",
+							"type": "Delete",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "7.00:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"dataset": {
+									"referenceName": "AnalyticsHistoricalMetricsByGroupIdFolderDataset",
+									"type": "DatasetReference",
+									"parameters": {
+										"GroupId": {
+											"value": "@pipeline().parameters.GroupId",
+											"type": "Expression"
+										}
+									}
+								},
+								"enableLogging": false,
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true
 								}
 							}
 						}

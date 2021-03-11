@@ -19,7 +19,7 @@
 			"location": {
 				"type": "AzureBlobStorageLocation",
 				"folderPath": {
-					"value": "analytics_historical_metrics/@{dataset().GroupId}",
+					"value": "analytics_historical_metrics/analytics_group_@{dataset().GroupId}",
 					"type": "Expression"
 				},
 				"container": "ita-web-analytics"
