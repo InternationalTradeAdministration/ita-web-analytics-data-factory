@@ -11,9 +11,6 @@
 			},
 			"Period": {
 				"type": "string"
-			},
-			"FilterId": {
-				"type": "string"
 			}
 		},
 		"folder": {

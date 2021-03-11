@@ -105,10 +105,6 @@
 							"Period": {
 								"value": "@pipeline().parameters.Period",
 								"type": "Expression"
-							},
-							"FilterId": {
-								"value": "@pipeline().parameters.FilterId",
-								"type": "Expression"
 							}
 						}
 					}
