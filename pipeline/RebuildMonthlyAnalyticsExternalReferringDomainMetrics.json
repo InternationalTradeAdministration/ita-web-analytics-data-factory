@@ -64,7 +64,7 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "ExtractMonthlyAnalyticsExternalReferringDomainMetricsByPeriod",
+							"name": "ExtractByPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
