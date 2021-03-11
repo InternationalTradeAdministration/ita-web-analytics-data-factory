@@ -101,6 +101,96 @@
 						}
 					}
 				}
+			},
+			{
+				"name": "RebuildAnalyticsTrafficSourcesByGroupIdPeriods",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "RebuildAnalyticsHistoricalMetricsByGroupIdPeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "RebuildAnalyticsTrafficSourcesMetricsByGroupIdDateRangePeriods",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"GroupId": {
+							"value": "@pipeline().parameters.GroupId",
+							"type": "Expression"
+						},
+						"DateRangePeriods": {
+							"value": "@activity('GenerateDateRangePeriods').output.value",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "RebuildMonthlyAnalyticsOutboundLinkMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "RebuildAnalyticsTrafficSourcesByGroupIdPeriods",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "RebuildMonthlyAnalyticsOutboundLinkMetricsByGroupIdDateRangePeriods",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"GroupId": {
+							"value": "@pipeline().parameters.GroupId",
+							"type": "Expression"
+						},
+						"DateRangePeriods": {
+							"value": "@activity('GenerateDateRangePeriods').output.value",
+							"type": "Expression"
+						}
+					}
+				}
+			},
+			{
+				"name": "RebuildMonthlyExternalReferringDomainMetrics",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "RebuildMonthlyAnalyticsOutboundLinkMetrics",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "RebuildMonthlyAnalyticsExternalReferringDomainMetricsByGroupIdDateRangePeriods",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"GroupId": {
+							"value": "@pipeline().parameters.GroupId",
+							"type": "Expression"
+						},
+						"DateRangePeriods": {
+							"value": "@activity('GenerateDateRangePeriods').output.value",
+							"type": "Expression"
+						}
+					}
+				}
 			}
 		],
 		"parameters": {
