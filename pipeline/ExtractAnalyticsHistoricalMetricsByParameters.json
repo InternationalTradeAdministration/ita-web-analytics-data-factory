@@ -87,7 +87,7 @@
 						"type": "DatasetReference",
 						"parameters": {
 							"QueryString": {
-								"value": "period=@{pipeline().parameters.Period}&@{pipeline().parameters.QueryString}",
+								"value": "@pipeline().parameters.QueryString",
 								"type": "Expression"
 							}
 						}
