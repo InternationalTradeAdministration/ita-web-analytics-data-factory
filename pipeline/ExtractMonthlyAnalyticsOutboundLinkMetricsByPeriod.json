@@ -91,7 +91,6 @@
 					"waitOnCompletion": true,
 					"parameters": {
 						"GroupId": "1",
-						"FilterId": "1",
 						"Period": {
 							"value": "@pipeline().parameters.Period",
 							"type": "Expression"

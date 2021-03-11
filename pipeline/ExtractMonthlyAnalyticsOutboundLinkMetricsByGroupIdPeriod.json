@@ -18,7 +18,6 @@
 							"value": "@pipeline().parameters.GroupId",
 							"type": "Expression"
 						},
-						"FilterId": "1",
 						"Period": {
 							"value": "@pipeline().parameters.Period",
 							"type": "Expression"
