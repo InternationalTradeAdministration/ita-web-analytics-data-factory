@@ -55,10 +55,26 @@
 						"mappings": [
 							{
 								"source": {
+									"path": "$"
+								},
+								"sink": {
+									"path": "item"
+								}
+							},
+							{
+								"source": {
 									"path": "$['analytics_group_id']"
 								},
 								"sink": {
 									"path": "analytics_group_id"
+								}
+							},
+							{
+								"source": {
+									"path": "$['analytics_filter_id']"
+								},
+								"sink": {
+									"path": "analytics_filter_id"
 								}
 							}
 						],
@@ -91,7 +107,7 @@
 								"type": "Expression"
 							},
 							"FilterId": {
-								"value": "@{pipeline().parameters.GroupId}_@{pipeline().parameters.FilterId}_@{pipeline().parameters.Period}.json",
+								"value": "@pipeline().parameters.FilterId",
 								"type": "Expression"
 							}
 						}
