@@ -64,7 +64,7 @@
 					"isSequential": false,
 					"activities": [
 						{
-							"name": "ExecuteExtractAnalyticsTrafficSourcesMetricsByPeriod",
+							"name": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
 							"type": "ExecutePipeline",
 							"dependsOn": [],
 							"userProperties": [],
