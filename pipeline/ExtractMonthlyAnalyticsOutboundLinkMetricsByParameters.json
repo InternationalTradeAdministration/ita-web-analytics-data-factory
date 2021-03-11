@@ -101,9 +101,6 @@
 			"GroupId": {
 				"type": "string"
 			},
-			"FilterId": {
-				"type": "string"
-			},
 			"Period": {
 				"type": "string"
 			},
