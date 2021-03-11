@@ -24,13 +24,6 @@
 									"value": "@pipeline().parameters.GroupId",
 									"type": "Expression"
 								}
-							},
-							{
-								"name": "analytics_filter_id",
-								"value": {
-									"value": "@pipeline().parameters.FilterId",
-									"type": "Expression"
-								}
 							}
 						],
 						"httpRequestTimeout": "00:01:40",
