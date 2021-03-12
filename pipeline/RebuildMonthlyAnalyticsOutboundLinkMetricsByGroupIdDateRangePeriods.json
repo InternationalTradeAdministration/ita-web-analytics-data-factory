@@ -19,7 +19,7 @@
 						"value": "@pipeline().parameters.DateRangePeriods",
 						"type": "Expression"
 					},
-					"batchCount": 3,
+					"batchCount": 30,
 					"activities": [
 						{
 							"name": "ExtractByGroupIdPeriod",

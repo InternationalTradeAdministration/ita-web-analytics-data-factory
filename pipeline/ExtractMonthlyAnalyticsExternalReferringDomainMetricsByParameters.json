@@ -96,7 +96,6 @@
 				]
 			}
 		],
-		"concurrency": 20,
 		"parameters": {
 			"GroupId": {
 				"type": "string"
