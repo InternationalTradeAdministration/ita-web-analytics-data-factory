@@ -421,7 +421,7 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsHistoricalMetricsByPeriodCsvDataset')]",
+			"name": "[concat(parameters('factoryName'), '/AnalyticsHistoricalMetricsByGroupIdFolderDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -430,10 +430,7 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
-					"Period": {
-						"type": "string"
-					},
-					"FileName": {
+					"GroupId": {
 						"type": "string"
 					}
 				},
@@ -441,31 +438,23 @@
 					"name": "analytics"
 				},
 				"annotations": [],
-				"type": "DelimitedText",
+				"type": "Json",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
-						"fileName": {
-							"value": "@{dataset().FileName}",
-							"type": "Expression"
-						},
 						"folderPath": {
-							"value": "analytics_historical_metrics/@{dataset().Period}",
+							"value": "analytics_historical_metrics/analytics_group_@{dataset().GroupId}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
+					}
 				},
-				"schema": []
+				"schema": {}
 			},
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/AnalyticsHistoricalMetricsByPeriodFolderDataset')]",
+			"name": "[concat(parameters('factoryName'), '/AnalyticsHistoricalMetricsDataset')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
 			"properties": {
@@ -474,7 +463,13 @@
 					"type": "LinkedServiceReference"
 				},
 				"parameters": {
+					"GroupId": {
+						"type": "string"
+					},
 					"Period": {
+						"type": "string"
+					},
+					"FilterId": {
 						"type": "string"
 					}
 				},
@@ -482,22 +477,22 @@
 					"name": "analytics"
 				},
 				"annotations": [],
-				"type": "DelimitedText",
+				"type": "Json",
 				"typeProperties": {
 					"location": {
 						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "analytics_filter_@{dataset().FilterId}.json",
+							"type": "Expression"
+						},
 						"folderPath": {
-							"value": "analytics_historical_metrics/@{dataset().Period}",
+							"value": "analytics_historical_metrics/analytics_group_@{dataset().GroupId}/@{dataset().Period}",
 							"type": "Expression"
 						},
 						"container": "ita-web-analytics"
-					},
-					"columnDelimiter": ",",
-					"escapeChar": "\\",
-					"firstRowAsHeader": true,
-					"quoteChar": "\""
+					}
 				},
-				"schema": []
+				"schema": {}
 			},
 			"dependsOn": []
 		},
@@ -522,7 +517,7 @@
 				"type": "RestResource",
 				"typeProperties": {
 					"relativeUrl": {
-						"value": "v2/sites/17536213616/analytics/overview/history?@{dataset().QueryString}",
+						"value": "v2/sites/17536213616/analytics/overview/history?page=1&page_size=1000&@{dataset().QueryString}",
 						"type": "Expression"
 					}
 				},
