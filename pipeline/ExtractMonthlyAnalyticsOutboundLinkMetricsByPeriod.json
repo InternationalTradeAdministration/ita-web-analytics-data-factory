@@ -50,7 +50,6 @@
 						"type": "Expression"
 					},
 					"isSequential": false,
-					"batchCount": 5,
 					"activities": [
 						{
 							"name": "ExtractByGroupIdPeriod",
