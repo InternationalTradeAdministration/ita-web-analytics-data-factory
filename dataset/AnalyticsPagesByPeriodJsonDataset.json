@@ -1,0 +1,31 @@
+{
+	"name": "AnalyticsPagesByPeriodJsonDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"parameters": {
+			"Period": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@{dataset().Period}.json",
+					"type": "Expression"
+				},
+				"folderPath": "analytics_pages",
+				"container": "ita-web-analytics"
+			}
+		},
+		"schema": {}
+	}
+}

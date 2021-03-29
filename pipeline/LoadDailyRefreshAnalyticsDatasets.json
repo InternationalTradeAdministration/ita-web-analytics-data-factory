@@ -368,14 +368,14 @@
 				"userProperties": [],
 				"typeProperties": {
 					"source": {
-						"type": "DelimitedTextSource",
+						"type": "JsonSource",
 						"storeSettings": {
 							"type": "AzureBlobStorageReadSettings",
 							"recursive": true,
 							"enablePartitionDiscovery": false
 						},
 						"formatSettings": {
-							"type": "DelimitedTextReadSettings"
+							"type": "JsonReadSettings"
 						}
 					},
 					"sink": {
@@ -392,8 +392,7 @@
 						"mappings": [
 							{
 								"source": {
-									"name": "id",
-									"type": "String"
+									"path": "$['id']"
 								},
 								"sink": {
 									"name": "id",
@@ -402,8 +401,7 @@
 							},
 							{
 								"source": {
-									"name": "title",
-									"type": "String"
+									"path": "$['title']"
 								},
 								"sink": {
 									"name": "title",
@@ -412,8 +410,7 @@
 							},
 							{
 								"source": {
-									"name": "url",
-									"type": "String"
+									"path": "$['url']"
 								},
 								"sink": {
 									"name": "url",
@@ -425,7 +422,7 @@
 				},
 				"inputs": [
 					{
-						"referenceName": "AnalyticsPagesCsvDataset",
+						"referenceName": "AnalyticsPagesDataset",
 						"type": "DatasetReference"
 					}
 				],

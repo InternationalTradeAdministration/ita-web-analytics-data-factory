@@ -1,0 +1,32 @@
+{
+	"name": "DedupAnalyticsPages",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "AnalyticsPagesFolderDataset",
+						"type": "DatasetReference"
+					},
+					"name": "AnalyticsPages"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "RootJsonFolderDataset",
+						"type": "DatasetReference"
+					},
+					"name": "DedupedAnalyticsPages"
+				}
+			],
+			"transformations": [
+				{
+					"name": "RemoveDuplicates"
+				}
+			],
+			"script": "source(output(\n\t\tid as integer,\n\t\tperiod as string,\n\t\ttitle as string,\n\t\turl as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\tdocumentForm: 'documentPerLine') ~> AnalyticsPages\nAnalyticsPages aggregate(groupBy(id),\n\teach(match(name!='id'), $$ = last($$))) ~> RemoveDuplicates\nRemoveDuplicates sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['analytics_pages.json'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DedupedAnalyticsPages"
+		}
+	}
+}

@@ -6,20 +6,6 @@
 			"sources": [
 				{
 					"dataset": {
-						"referenceName": "AnalyticsPagesCsvDataset",
-						"type": "DatasetReference"
-					},
-					"name": "AllAnalyticsPages"
-				},
-				{
-					"dataset": {
-						"referenceName": "NewAnalyticsPagesCsvDataset",
-						"type": "DatasetReference"
-					},
-					"name": "NewAnalyticsPages"
-				},
-				{
-					"dataset": {
 						"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
 						"type": "DatasetReference"
 					},
@@ -27,13 +13,6 @@
 				}
 			],
 			"sinks": [
-				{
-					"dataset": {
-						"referenceName": "RootFolderDataset",
-						"type": "DatasetReference"
-					},
-					"name": "DedupedAnalyticsPages"
-				},
 				{
 					"dataset": {
 						"referenceName": "AnalyticsGroupsAnalyticsPagesStageFolderCsvDataset",
@@ -44,19 +23,13 @@
 			],
 			"transformations": [
 				{
-					"name": "Consolidate"
-				},
-				{
-					"name": "RemoveDuplicates"
-				},
-				{
 					"name": "RemoveDuplicateAnalyticsGroupsAnalyticsPages"
 				},
 				{
 					"name": "AddOutputFilePathColumn"
 				}
 			],
-			"script": "source(output(\n\t\tid as long,\n\t\ttitle as string,\n\t\turl as string,\n\t\taverage_page_views_per_visit as double,\n\t\tbounce_rate as double,\n\t\tpage_views as integer,\n\t\tvisits as integer,\n\t\tdate as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> AllAnalyticsPages\nsource(output(\n\t\tid as long,\n\t\ttitle as string,\n\t\turl as string,\n\t\taverage_page_views_per_visit as double,\n\t\tbounce_rate as double,\n\t\tpage_views as integer,\n\t\tvisits as integer,\n\t\tdate as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false) ~> NewAnalyticsPages\nsource(output(\n\t\tanalytics_group_id as string,\n\t\tanalytics_page_id as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:[(\"analytics_groups_analytics_pages/raw/**/*.csv\")]) ~> RawAnalyticsGroupsAnalyticsPages\nAllAnalyticsPages, NewAnalyticsPages union(byName: true)~> Consolidate\nConsolidate aggregate(groupBy(id),\n\teach(match(name!='id'), $$ = last($$))) ~> RemoveDuplicates\nRawAnalyticsGroupsAnalyticsPages aggregate(groupBy(analytics_group_id,\n\t\tanalytics_page_id),\n\tcount = count()) ~> RemoveDuplicateAnalyticsGroupsAnalyticsPages\nRemoveDuplicateAnalyticsGroupsAnalyticsPages derive(outputFilePath = \"analytics_groups_analytics_pages/staging/{analytics_group_id}.csv\") ~> AddOutputFilePathColumn\nRemoveDuplicates sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\tpartitionFileNames:['analytics_pages.csv'],\n\tpartitionBy('hash', 1),\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DedupedAnalyticsPages\nAddOutputFilePathColumn sink(input(\n\t\tanalytics_page_id as string,\n\t\tanalytics_group_id as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'outputFilePath',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DedupedAnalyticsGroupsAnalyticsPages"
+			"script": "source(output(\n\t\tanalytics_group_id as string,\n\t\tanalytics_page_id as string\n\t),\n\tallowSchemaDrift: false,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\twildcardPaths:[(\"analytics_groups_analytics_pages/raw/**/*.csv\")]) ~> RawAnalyticsGroupsAnalyticsPages\nRawAnalyticsGroupsAnalyticsPages aggregate(groupBy(analytics_group_id,\n\t\tanalytics_page_id),\n\tcount = count()) ~> RemoveDuplicateAnalyticsGroupsAnalyticsPages\nRemoveDuplicateAnalyticsGroupsAnalyticsPages derive(outputFilePath = \"analytics_groups_analytics_pages/staging/{analytics_group_id}.csv\") ~> AddOutputFilePathColumn\nAddOutputFilePathColumn sink(input(\n\t\tanalytics_page_id as string,\n\t\tanalytics_group_id as string\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'outputFilePath',\n\tskipDuplicateMapInputs: true,\n\tskipDuplicateMapOutputs: true) ~> DedupedAnalyticsGroupsAnalyticsPages"
 		}
 	}
 }

@@ -1,0 +1,22 @@
+{
+	"name": "AnalyticsPagesFolderDataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureBlobStorageLinkedService",
+			"type": "LinkedServiceReference"
+		},
+		"folder": {
+			"name": "analytics"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"folderPath": "analytics_pages",
+				"container": "ita-web-analytics"
+			}
+		},
+		"schema": {}
+	}
+}
