@@ -8571,6 +8571,13 @@
 											"value": "@pipeline().parameters.GroupId",
 											"type": "Expression"
 										}
+									},
+									{
+										"name": "date",
+										"value": {
+											"value": "@substring(pipeline().parameters.Period, 0, 8)",
+											"type": "Expression"
+										}
 									}
 								],
 								"httpRequestTimeout": "00:01:40",
@@ -8607,6 +8614,14 @@
 										},
 										"sink": {
 											"path": "analytics_group_id"
+										}
+									},
+									{
+										"source": {
+											"path": "$['date']"
+										},
+										"sink": {
+											"path": "date"
 										}
 									}
 								],
@@ -9272,6 +9287,13 @@
 											"value": "@pipeline().parameters.GroupId",
 											"type": "Expression"
 										}
+									},
+									{
+										"name": "date",
+										"value": {
+											"value": "@substring(pipeline().parameters.Period, 0, 8)",
+											"type": "Expression"
+										}
 									}
 								],
 								"httpRequestTimeout": "00:01:40",
@@ -9308,6 +9330,14 @@
 										},
 										"sink": {
 											"path": "analytics_group_id"
+										}
+									},
+									{
+										"source": {
+											"path": "$['date']"
+										},
+										"sink": {
+											"path": "date"
 										}
 									}
 								],
@@ -14950,6 +14980,15 @@
 											"name": "analytics_group_id",
 											"type": "Int64"
 										}
+									},
+									{
+										"source": {
+											"path": "$['date']"
+										},
+										"sink": {
+											"name": "date",
+											"type": "String"
+										}
 									}
 								]
 							}
@@ -15047,6 +15086,15 @@
 										"sink": {
 											"name": "analytics_group_id",
 											"type": "Int64"
+										}
+									},
+									{
+										"source": {
+											"path": "$['date']"
+										},
+										"sink": {
+											"name": "date",
+											"type": "String"
 										}
 									}
 								]
