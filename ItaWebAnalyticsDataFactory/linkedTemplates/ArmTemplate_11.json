@@ -3069,6 +3069,7 @@
 						}
 					}
 				],
+				"concurrency": 2,
 				"parameters": {
 					"Period": {
 						"type": "string"
@@ -3326,6 +3327,7 @@
 						}
 					}
 				],
+				"concurrency": 2,
 				"parameters": {
 					"Period": {
 						"type": "string"

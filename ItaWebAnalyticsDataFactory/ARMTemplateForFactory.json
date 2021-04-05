@@ -8786,6 +8786,7 @@
 						}
 					}
 				],
+				"concurrency": 2,
 				"parameters": {
 					"Period": {
 						"type": "string"
@@ -9502,6 +9503,7 @@
 						}
 					}
 				],
+				"concurrency": 2,
 				"parameters": {
 					"Period": {
 						"type": "string"
@@ -16781,7 +16783,7 @@
 								"value": "@activity('GenerateDateRangePeriods').output.value",
 								"type": "Expression"
 							},
-							"isSequential": false,
+							"isSequential": true,
 							"activities": [
 								{
 									"name": "ExtractAnalyticsTrafficSourcesMetricsByPeriod",
