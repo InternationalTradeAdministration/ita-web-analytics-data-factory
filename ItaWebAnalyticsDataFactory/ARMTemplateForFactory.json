@@ -18757,7 +18757,7 @@
 						],
 						"policy": {
 							"timeout": "7.00:00:00",
-							"retry": 0,
+							"retry": 1,
 							"retryIntervalInSeconds": 30,
 							"secureOutput": false,
 							"secureInput": true
@@ -18802,6 +18802,14 @@
 								"parameters": {
 									"Token": {
 										"value": "@activity('GetWhoIsVisitingToken').output.value",
+										"type": "Expression"
+									},
+									"dateFrom": {
+										"value": "@convertTimeZone(utcNow(), 'UTC', 'Eastern Standard Time', 'yyyy-MM-dd')",
+										"type": "Expression"
+									},
+									"dateTo": {
+										"value": "@convertTimeZone(utcNow(), 'UTC', 'Eastern Standard Time', 'yyyy-MM-dd')",
 										"type": "Expression"
 									}
 								}
@@ -24657,6 +24665,12 @@
 				"parameters": {
 					"Token": {
 						"type": "string"
+					},
+					"dateFrom": {
+						"type": "string"
+					},
+					"dateTo": {
+						"type": "string"
 					}
 				},
 				"folder": {
@@ -24666,7 +24680,7 @@
 				"type": "RestResource",
 				"typeProperties": {
 					"relativeUrl": {
-						"value": "api/v1/accounts/25508/triggers?token=@{dataset().Token}",
+						"value": "api/v1/accounts/25508/triggers?token=@{dataset().Token}&dateFrom=@{dataset().dateFrom}&dateTo=@{dataset().dateTo}",
 						"type": "Expression"
 					}
 				},
@@ -25564,7 +25578,7 @@
 							"name": "Unpivot1"
 						}
 					],
-					"script": "source(output(\n\t\tcontent_group_id as long,\n\t\titems as (css_files as integer, documents as integer, emails as integer, links as integer, media_files as integer, meta_tags as integer, national_identity_numbers as integer, pages as integer, phone_numbers as integer, script_files as integer, timestamp as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\trowUrlColumn: 'file_path',\n\tdocumentForm: 'documentPerLine') ~> JsonSource\nJsonSource foldDown(unroll(items),\n\tmapColumn(\n\t\tfile_path,\n\t\tcontent_group_id,\n\t\teach(items, match(true()))\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: true) ~> Flatten1\nUnpivot1 derive(file_path = replace(replace(file_path, 'raw', 'transformed'), 'json', 'csv')) ~> DerivedColumn1\nFlatten1 unpivot(output(\n\t\tdata_category as string,\n\t\tcount as integer\n\t),\n\tungroupBy(file_path,\n\t\tcontent_group_id,\n\t\ttimestamp),\n\tlateral: false,\n\tignoreNullPivots: true) ~> Unpivot1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'file_path',\n\ttruncate: true) ~> sink1"
+					"script": "source(output(\n\t\tcontent_group_id as long,\n\t\titems as (css_files as integer, documents as integer, emails as integer, links as integer, media_files as integer, meta_tags as integer, national_identity_numbers as integer, pages as integer, phone_numbers as integer, script_files as integer, timestamp as string)[]\n\t),\n\tallowSchemaDrift: true,\n\tvalidateSchema: false,\n\tignoreNoFilesFound: false,\n\trowUrlColumn: 'file_path',\n\tdocumentForm: 'documentPerLine') ~> JsonSource\nJsonSource foldDown(unroll(items),\n\tmapColumn(\n\t\tfile_path,\n\t\tcontent_group_id,\n\t\teach(items,match(true()))\n\t),\n\tskipDuplicateMapInputs: false,\n\tskipDuplicateMapOutputs: true) ~> Flatten1\nUnpivot1 derive(file_path = replace(replace(file_path, 'raw', 'transformed'), 'json', 'csv')) ~> DerivedColumn1\nFlatten1 unpivot(output(\n\t\tdata_category as string,\n\t\tcount as integer\n\t),\n\tungroupBy(file_path,\n\t\tcontent_group_id,\n\t\ttimestamp),\n\tlateral: false,\n\tignoreNullPivots: true) ~> Unpivot1\nDerivedColumn1 sink(allowSchemaDrift: true,\n\tvalidateSchema: false,\n\trowUrlColumn:'file_path',\n\ttruncate: true) ~> sink1"
 				}
 			},
 			"dependsOn": [
