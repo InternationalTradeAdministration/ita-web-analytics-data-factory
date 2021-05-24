@@ -39,7 +39,7 @@
 				],
 				"policy": {
 					"timeout": "7.00:00:00",
-					"retry": 0,
+					"retry": 1,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
 					"secureInput": true
@@ -84,6 +84,14 @@
 						"parameters": {
 							"Token": {
 								"value": "@activity('GetWhoIsVisitingToken').output.value",
+								"type": "Expression"
+							},
+							"dateFrom": {
+								"value": "@convertTimeZone(utcNow(), 'UTC', 'Eastern Standard Time', 'yyyy-MM-dd')",
+								"type": "Expression"
+							},
+							"dateTo": {
+								"value": "@convertTimeZone(utcNow(), 'UTC', 'Eastern Standard Time', 'yyyy-MM-dd')",
 								"type": "Expression"
 							}
 						}

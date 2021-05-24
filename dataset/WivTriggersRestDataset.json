@@ -8,6 +8,12 @@
 		"parameters": {
 			"Token": {
 				"type": "string"
+			},
+			"dateFrom": {
+				"type": "string"
+			},
+			"dateTo": {
+				"type": "string"
 			}
 		},
 		"folder": {
@@ -17,7 +23,7 @@
 		"type": "RestResource",
 		"typeProperties": {
 			"relativeUrl": {
-				"value": "api/v1/accounts/25508/triggers?token=@{dataset().Token}",
+				"value": "api/v1/accounts/25508/triggers?token=@{dataset().Token}&dateFrom=@{dataset().dateFrom}&dateTo=@{dataset().dateTo}",
 				"type": "Expression"
 			}
 		},
