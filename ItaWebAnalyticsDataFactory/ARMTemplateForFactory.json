@@ -18753,6 +18753,12 @@
 								"dependencyConditions": [
 									"Succeeded"
 								]
+							},
+							{
+								"activity": "Set period",
+								"dependencyConditions": [
+									"Succeeded"
+								]
 							}
 						],
 						"policy": {
@@ -18805,11 +18811,11 @@
 										"type": "Expression"
 									},
 									"dateFrom": {
-										"value": "@convertTimeZone(utcNow(), 'UTC', 'Eastern Standard Time', 'yyyy-MM-dd')",
+										"value": "@variables('period')",
 										"type": "Expression"
 									},
 									"dateTo": {
-										"value": "@convertTimeZone(utcNow(), 'UTC', 'Eastern Standard Time', 'yyyy-MM-dd')",
+										"value": "@variables('period')",
 										"type": "Expression"
 									}
 								}
@@ -18902,8 +18908,26 @@
 								}
 							}
 						]
+					},
+					{
+						"name": "Set period",
+						"type": "SetVariable",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"variableName": "period",
+							"value": {
+								"value": "@convertTimeZone(addDays(utcNow(), -1), 'UTC', 'Eastern Standard Time', 'yyyy-MM-dd')",
+								"type": "Expression"
+							}
+						}
 					}
 				],
+				"variables": {
+					"period": {
+						"type": "String"
+					}
+				},
 				"folder": {
 					"name": "wiv"
 				},
